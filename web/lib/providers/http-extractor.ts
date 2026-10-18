@@ -94,8 +94,13 @@ export function extractImageUrls(html: string, base: URL): PageImage[] {
 export class HttpUrlImageExtractor implements UrlImageExtractor {
   readonly name = "http";
   async listImages(pageUrl: string, signal: AbortSignal): Promise<PageImage[]> {
-    const { res, finalUrl } = await guardedGet(pageUrl, signal, "text/html");
-    const type = res.headers.get("content-type") ?? "";
+    const { res, finalUrl } = await guardedGet(pageUrl, signal, "text/html,image/*");
+    const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+    // A direct image address: offer that image itself (the user pasted a media URL, not a page).
+    if (type.startsWith("image/")) {
+      await res.body?.cancel();
+      return [{ url: finalUrl.toString(), alt: "붙여 넣은 주소의 이미지" }];
+    }
     if (!type.includes("html")) throw new ProviderError("url_no_image", "not an HTML page");
     const html = new TextDecoder().decode(await readCapped(res.body, MAX_PAGE_BYTES, "url_blocked"));
     const images = extractImageUrls(html, finalUrl);

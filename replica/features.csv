@@ -1,15 +1,15 @@
 feature,area,priority,original,clone,notes
-Evidence-card verdict: checked / original found / differences / conclusion; three states real-evidence / manipulation-evidence / inconclusive,results,must,no,no,F1 fixes.md: hate #8 #3 #4
-Original tracing: reverse image search for earliest copy + side-by-side diff of what changed,analysis,must,no,no,F2 fixes.md: hate #4 #6; unsolved #1
-Provenance signal bundle: C2PA signature + EXIF + public watermark detectors + pixel AI detector shown as separate evidence,analysis,must,no,no,F3 fixes.md: hate #3 #4; unsolved #1
-URL/article input: extract claims and images; match public fact-check records and trusted outlets with source links,analysis,should,no,no,F4 fixes.md: hate #5; unsolved #3
-Honest inconclusive state + false-positive notice on every result,results,must,no,no,F5 fixes.md: hate #4
-Deterministic results per file hash (same input same verdict),analysis,must,no,no,F6 fixes.md: hate #3
-Free daily checks without signup; failed scans not charged; no rating prompt on first run; one-tap cancel,billing,must,no,no,F7 fixes.md: hate #1 #2 #9 -> replica-launch
+Evidence-card verdict: checked / original found / differences / conclusion; three states real-evidence / manipulation-evidence / inconclusive,results,must,no,yes,F1 fixes.md: hate #8 #3 #4 | build: 5 verdicts per glossary.md (was 3); S03 built; mock data
+Original tracing: reverse image search for earliest copy + side-by-side diff of what changed,analysis,must,no,partial,F2 fixes.md: hate #4 #6; unsolved #1 | build: UI + ReverseSearchProvider interface + mock; no real provider yet (TinEye terms pending); diff regions come from the provider
+Provenance signal bundle: C2PA signature + EXIF + public watermark detectors + pixel AI detector shown as separate evidence,analysis,must,no,partial,F3 fixes.md: hate #3 #4; unsolved #1 | build: UI + SignalProvider interface + mock; no real C2PA/watermark/detector yet
+URL/article input: extract claims and images; match public fact-check records and trusted outlets with source links,analysis,should,no,partial,F4 fixes.md: hate #5; unsolved #3 | build: page URL or direct image URL -> pick image (SSRF-guarded); article claim fact-checking is out of MVP scope
+Honest inconclusive state + false-positive notice on every result,results,must,no,yes,F5 fixes.md: hate #4 | build: 판단 불가 four-block screen + 원본 없음 block + disclaimer on every result
+Deterministic results per file hash (same input same verdict),analysis,must,no,partial,F6 fixes.md: hate #3 | build: same sha256 reuses the analysis in the memory store; verdict computed per check (claimed date); 재검사 forces a fresh run
+Free daily checks without signup; failed scans not charged; no rating prompt on first run; one-tap cancel,billing,must,no,partial,F7 fixes.md: hate #1 #2 #9 -> replica-launch | build: failed analyses refunded; no rating prompt; daily quota UI in stage 3; billing out of scope
 Video keyframe extraction into the same pipeline (phase 2),analysis,could,no,no,F8 fixes.md: hate #5
-Upload an image file (JPG/PNG/WebP; size limit shown),input,must,yes,no,recon S01; TruthScan 10MB; Hive Detect upload
-Paste a media URL to check,input,must,yes,no,recon S01; Hive Detect URL box; TruthScan Paste URL tab
-Async processing with visible progress steps,analysis,must,yes,no,recon S02; TruthScan API status pending->done
+Upload an image file (JPG/PNG/WebP; size limit shown),input,must,yes,yes,recon S01; TruthScan 10MB; Hive Detect upload | build: S01 dropzone + keyboard focus ring
+Paste a media URL to check,input,must,yes,yes,recon S01; Hive Detect URL box; TruthScan Paste URL tab | build: page or direct image URL; demo URLs in mock mode
+Async processing with visible progress steps,analysis,must,yes,yes,recon S02; TruthScan API status pending->done | build: S02 shows real pipeline steps
 Delete account and all stored checks,account,must,no,no,recon F06; complaint #2 cannot cancel; GDPR
 Check history for signed-in users,history,should,yes,no,recon S06; TruthScan dashboard history
 Sign in with email magic link or Google,account,should,yes,no,recon S07

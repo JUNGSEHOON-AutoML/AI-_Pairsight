@@ -69,6 +69,15 @@ export function CheckForm() {
         <h2 id={`${ids.file}-h`} className="text-lg">
           이미지 올리기
         </h2>
+        <input
+          ref={fileInput}
+          id={ids.file}
+          type="file"
+          accept={ACCEPTED_MIME.join(",")}
+          className="peer sr-only"
+          aria-describedby={error ? ids.err : undefined}
+          onChange={(e) => choose(e.target.files?.[0])}
+        />
         <label
           htmlFor={ids.file}
           onDragOver={(e) => {
@@ -82,7 +91,7 @@ export function CheckForm() {
             choose(e.dataTransfer.files[0]);
           }}
           className={cx(
-            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-10 text-center",
+            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-10 text-center peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus",
             dragging ? "border-accent bg-surface" : "border-border-input bg-bg",
           )}
         >
@@ -90,15 +99,6 @@ export function CheckForm() {
           <span className="font-semibold">{picked ? picked.file.name : "이미지를 끌어다 놓거나 눌러서 고르세요"}</span>
           <span className="text-sm text-text-muted">JPG, PNG, WebP, HEIC · 10MB까지</span>
         </label>
-        <input
-          ref={fileInput}
-          id={ids.file}
-          type="file"
-          accept={ACCEPTED_MIME.join(",")}
-          className="sr-only"
-          aria-describedby={error ? ids.err : undefined}
-          onChange={(e) => choose(e.target.files?.[0])}
-        />
         <Button
           size="lg"
           disabled={!picked}
