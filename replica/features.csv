@@ -1,0 +1,24 @@
+feature,area,priority,original,clone,notes
+Evidence-card verdict: checked / original found / differences / conclusion; three states real-evidence / manipulation-evidence / inconclusive,results,must,no,no,F1 fixes.md: hate #8 #3 #4
+Original tracing: reverse image search for earliest copy + side-by-side diff of what changed,analysis,must,no,no,F2 fixes.md: hate #4 #6; unsolved #1
+Provenance signal bundle: C2PA signature + EXIF + public watermark detectors + pixel AI detector shown as separate evidence,analysis,must,no,no,F3 fixes.md: hate #3 #4; unsolved #1
+URL/article input: extract claims and images; match public fact-check records and trusted outlets with source links,analysis,should,no,no,F4 fixes.md: hate #5; unsolved #3
+Honest inconclusive state + false-positive notice on every result,results,must,no,no,F5 fixes.md: hate #4
+Deterministic results per file hash (same input same verdict),analysis,must,no,no,F6 fixes.md: hate #3
+Free daily checks without signup; failed scans not charged; no rating prompt on first run; one-tap cancel,billing,must,no,no,F7 fixes.md: hate #1 #2 #9 -> replica-launch
+Video keyframe extraction into the same pipeline (phase 2),analysis,could,no,no,F8 fixes.md: hate #5
+Upload an image file (JPG/PNG/WebP; size limit shown),input,must,yes,no,recon S01; TruthScan 10MB; Hive Detect upload
+Paste a media URL to check,input,must,yes,no,recon S01; Hive Detect URL box; TruthScan Paste URL tab
+Async processing with visible progress steps,analysis,must,yes,no,recon S02; TruthScan API status pending->done
+Delete account and all stored checks,account,must,no,no,recon F06; complaint #2 cannot cancel; GDPR
+Check history for signed-in users,history,should,yes,no,recon S06; TruthScan dashboard history
+Sign in with email magic link or Google,account,should,yes,no,recon S07
+Share a result via read-only public link,results,should,no,no,recon S10 F04; angle C family scam checks
+Download a result report,results,should,yes,no,recon S03; TruthScan audit-ready reports; Hive download icon
+Pricing page with a free tier and no card required,billing,should,yes,no,recon S08; TruthScan free 25/month -> replica-launch
+Likely generator attribution (which AI model),analysis,could,yes,no,recon S03; Hive Generation Sources; TruthScan source field
+Heatmap of suspicious regions,results,could,yes,no,recon S03; TruthScan heatmap slider
+Bulk ZIP upload,input,skip,yes,no,enterprise workflow; out of consumer scope
+Browser extension,input,skip,yes,no,both competitors have one; revisit after launch
+Teams / seats / SSO / on-prem,account,skip,yes,no,enterprise only
+Text / audio / PDF detection,analysis,skip,yes,no,outside the image+article slice

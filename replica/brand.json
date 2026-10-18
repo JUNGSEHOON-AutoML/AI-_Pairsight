@@ -1,0 +1,7 @@
+{
+  "name": "Pairsight",
+  "name_checked": "2026-10-18 (domains .app/.ai, App Store US/KR, Google Play, GitHub, web only; trademarks USPTO/EUIPO/CIPO/WIPO/KIPRIS and social handles to run)",
+  "avoid": ["AI or Not", "AI or Real", "Slop Or Not", "TruthScan", "TruthLens", "Verifi", "Veriq", "The Fact Check", "Hive Moderation", "Illuminarty", "Sightengine", "Detecty"],
+  "domains": ["aiornot.com", "truthscan.com", "hivemoderation.com", "thehive.ai", "sightengine.com", "illuminarty.ai"],
+  "colors": ["#0b62ef", "#206cfd", "#3235ba", "#12849a", "#96e071"]
+}

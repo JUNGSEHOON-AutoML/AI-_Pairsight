@@ -1,0 +1,982 @@
+{
+  "reviews": 445,
+  "sources": [
+    "app-store",
+    "google-play",
+    "hacker-news"
+  ],
+  "rated": 292,
+  "themes": [
+    {
+      "id": "watermark-limits",
+      "label": "Watermarks / C2PA easy to strip or vendor-only",
+      "kind": "request",
+      "score": 32.1,
+      "count": 57,
+      "share_pct": 12.8,
+      "avg_rating": null,
+      "sources": [
+        "hacker-news"
+      ],
+      "thin": true,
+      "quotes": [
+        {
+          "quote": "Why does SynthID make it worthless?",
+          "url": "https://news.ycombinator.com/item?id=47168307",
+          "source": "hacker-news",
+          "rating": null
+        },
+        {
+          "quote": "SynthID also watermarks text, right?",
+          "url": "https://news.ycombinator.com/item?id=49993652",
+          "source": "hacker-news",
+          "rating": null
+        },
+        {
+          "quote": "It doesn't test against Gemini's SynthID app.",
+          "url": "https://news.ycombinator.com/item?id=47710900",
+          "source": "hacker-news",
+          "rating": null
+        }
+      ]
+    },
+    {
+      "id": "paywall",
+      "label": "Hard paywall, no free trial",
+      "kind": "complaint",
+      "score": 31.4,
+      "count": 40,
+      "share_pct": 9.0,
+      "avg_rating": 1.15,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "not free",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "Not free.",
+          "url": "https://apps.apple.com/us/app/id6503948280?see-all=reviews#review-11725711554",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "costs money",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "dark-patterns",
+      "label": "Forced 5-star prompts, can't close offers, can't cancel",
+      "kind": "complaint",
+      "score": 27.8,
+      "count": 39,
+      "share_pct": 8.8,
+      "avg_rating": 1.19,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "Scam.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-13573202788",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Scam.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11065677121",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Scam.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-10902354660",
+          "source": "app-store",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "unreliable",
+      "label": "Inaccurate or inconsistent verdicts",
+      "kind": "complaint",
+      "score": 20.9,
+      "count": 32,
+      "share_pct": 7.2,
+      "avg_rating": 1.5,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "Not accurate.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-14298348949",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "not accurate lol",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "they are misleading with pricing pay attention",
+          "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "false-positive",
+      "label": "Real content flagged as AI / fake",
+      "kind": "complaint",
+      "score": 16.3,
+      "count": 24,
+      "share_pct": 5.4,
+      "avg_rating": 1.58,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "False positives.",
+          "url": "https://apps.apple.com/us/app/id6744578596?see-all=reviews#review-13706834924",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "even the original image tagged as Ai",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "I opened one of my own images shot in my home studio to test the app and it told me the image was cloned.",
+          "url": "https://play.google.com/store/apps/details?id=com.yella.picmatcher&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "media-coverage",
+      "label": "Video, links, social posts not supported",
+      "kind": "complaint",
+      "score": 12.6,
+      "count": 20,
+      "share_pct": 4.5,
+      "avg_rating": 2.0,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "pasted a Facebook link into it, failed to extract",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "they don't offer a trial for video analysis - it's a shame, really.",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "Every obvious AI video I tried to analyze it gave an error but took the credits anyway.",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "false-negative",
+      "label": "Obvious AI marked as real",
+      "kind": "complaint",
+      "score": 9.1,
+      "count": 10,
+      "share_pct": 2.2,
+      "avg_rating": 1.0,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "failed to detect and wasted credits",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "I tested over 50 ai & deemed as real.",
+          "url": "https://apps.apple.com/us/app/id6747714279?see-all=reviews#review-13658031015",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "i can see its Ai generated video with my eyes, this app doesn't.",
+          "url": "https://play.google.com/store/apps/details?id=com.aiguardian.yumshu&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "broken",
+      "label": "Doesn't run: spins, errors, crashes",
+      "kind": "complaint",
+      "score": 8.9,
+      "count": 10,
+      "share_pct": 2.2,
+      "avg_rating": 1.11,
+      "sources": [
+        "app-store",
+        "google-play",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "doesn't work",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "doesn't work I'm afraid.",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "I load an image, I press the check button and it does nothing",
+          "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "fact-scope",
+      "label": "Fact-check misses local / everyday news and claims",
+      "kind": "request",
+      "score": 3.8,
+      "count": 6,
+      "share_pct": 1.3,
+      "avg_rating": 1.0,
+      "sources": [
+        "app-store",
+        "hacker-news"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "Community local and state news.",
+          "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-13732952769",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Cost money makes you take a 3 hour long survey and also fails to give correct information",
+          "url": "https://apps.apple.com/us/app/id6754683146?see-all=reviews#review-13934654858",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Fact-checking a document is a difficult skill!",
+          "url": "https://news.ycombinator.com/item?id=48427651",
+          "source": "hacker-news",
+          "rating": null
+        }
+      ]
+    },
+    {
+      "id": "no-explanation",
+      "label": "Just a percentage, no reason or evidence",
+      "kind": "complaint",
+      "score": 3.4,
+      "count": 4,
+      "share_pct": 0.9,
+      "avg_rating": 1.75,
+      "sources": [
+        "app-store",
+        "google-play"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "This doesn\u2019t actually check if an image is ai generated, it only checks how flat an image is If I feed it any of my artwork prior to shading (so it has a lot of spaces that are just a solid colour) it will say my artwork...",
+          "url": "https://apps.apple.com/us/app/id6744578596?see-all=reviews#review-13209856761",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Confidence was very low for the first AI image I tested.",
+          "url": "https://apps.apple.com/us/app/id6744578596?see-all=reviews#review-14002348716",
+          "source": "app-store",
+          "rating": 2.0
+        },
+        {
+          "quote": "Simply giving a % without any explanation or elaboration isn't useful, especially as you're charging for this.",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 2.0
+        }
+      ]
+    },
+    {
+      "id": "credits",
+      "label": "Credits eaten by failed scans",
+      "kind": "complaint",
+      "score": 3.0,
+      "count": 3,
+      "share_pct": 0.7,
+      "avg_rating": 1.0,
+      "sources": [
+        "google-play"
+      ],
+      "thin": true,
+      "quotes": [
+        {
+          "quote": "failed to detect and wasted credits",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "This is the worst app ever it uses tokens and steals them without generating anythjng",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        },
+        {
+          "quote": "Every obvious AI video I tried to analyze it gave an error but took the credits anyway.",
+          "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+          "source": "google-play",
+          "rating": 1.0
+        }
+      ]
+    },
+    {
+      "id": "scam-protection",
+      "label": "Using it to catch scammers and catfish",
+      "kind": "request",
+      "score": 2.9,
+      "count": 6,
+      "share_pct": 1.3,
+      "avg_rating": 2.33,
+      "sources": [
+        "app-store",
+        "google-play"
+      ],
+      "thin": false,
+      "quotes": [
+        {
+          "quote": "The image search is site social catfish that charges $6 to see results.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8947932086",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "Click the wrong part of the screen and LOL F U, pay Social Catfish and me.",
+          "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9425324871",
+          "source": "app-store",
+          "rating": 1.0
+        },
+        {
+          "quote": "There\u2019s an image I know for sure is AI and wanted to prove to my dad he\u2019s talking to a scammer but this app said it was 97% real.",
+          "url": "https://apps.apple.com/us/app/id6503948280?see-all=reviews#review-12933189238",
+          "source": "app-store",
+          "rating": 1.0
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "quote": "need to use it first",
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0
+    },
+    {
+      "quote": "can you please add font identification ie if take a pic of a logo, would be nice if the app can tell you what font has been used",
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 3.0
+    },
+    {
+      "quote": "need more time for a good review.",
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 4.0
+    },
+    {
+      "quote": "This app would be great if it worked.",
+      "url": "https://apps.apple.com/us/app/id6747714279?see-all=reviews#review-14346208670",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "You need to spend 30 dollars a month to use Ts",
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-14447710339",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "I don\u2019t need to do Google search now because it already does everything for me and I think it\u2019s so good.",
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-14039055133",
+      "source": "app-store",
+      "rating": 5.0
+    },
+    {
+      "quote": "i need a FREE fact checker app.",
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-13065461742",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "Paid 9.99 for lifetime Pro before, Now they tell me I need to buy a monthly?",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11791766974",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "Should have at least honored the old users.",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11780779013",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "They most likely make plenty money from the ads and the in-app purchase they have, so they do not need to worry about better user experience.",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11057491505",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "...is app now and we go to search the google results doesn\u2019t show anything why do you guys have to change things why not just leave things alone you just messed up your own app put it back to the way things were....",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9276863301",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "I might take a look at the results and using SocialCatFish but there is no need to use this to get to their website.",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9245258520",
+      "source": "app-store",
+      "rating": 1.0
+    },
+    {
+      "quote": "I wish it would be more accurate in finding photos similar to what I add.",
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-7836106564",
+      "source": "app-store",
+      "rating": 3.0
+    },
+    {
+      "quote": "This is fantastic but now you need to train a model to detect AI generated images from actual photos.",
+      "url": "https://news.ycombinator.com/item?id=42889537",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "It's only a matter of time before we'll need to have software for detecting and removing real-time watermarks from display output at OS level.",
+      "url": "https://news.ycombinator.com/item?id=49430147",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "That's insufficient to detect the artifacts the models need to train on.",
+      "url": "https://news.ycombinator.com/item?id=24904013",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "And, this would also mean that Google's AI detection software needs to be ran by every human for every image that they view, in order to determine if it's valid.",
+      "url": "https://news.ycombinator.com/item?id=49129021",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "They need to disclose that its AI and lose their power or lie and get criminally prosecuted.",
+      "url": "https://news.ycombinator.com/item?id=49445060",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "Code lives somewhere in the middle: it generally has less entropy-per-token than prose, so would need more tokens to reach a given level of detectability.",
+      "url": "https://news.ycombinator.com/item?id=49526655",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "Something, Youtube should have done earlier.",
+      "url": "https://news.ycombinator.com/item?id=48306402",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "Any reform effort needs to ensure that early education isn't overlooked.",
+      "url": "https://news.ycombinator.com/item?id=45193812",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "They're useful, but right now they need a lot of handholding and I don't have time for that.",
+      "url": "https://news.ycombinator.com/item?id=44525186",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "...hat pretty much every other company did this before (automating the obvious support cases.) The real question should have been: why did Klarna not do it before?...",
+      "url": "https://news.ycombinator.com/item?id=43955917",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "It would be nice if there were a toggle, or slider for: truthfulness, and reliability.",
+      "url": "https://news.ycombinator.com/item?id=34056489",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "I agree, I think schools and universities need to adapt, just like calculators, these things aren't going away.",
+      "url": "https://news.ycombinator.com/item?id=46038192",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "...not include AI writing tools such as AI outlining, or AI assisted fact, spelling, or grammar checkers > Do I need to disclose the use of AI-assistance such as grammar or spell checkers, outline assistance, or fact verif...",
+      "url": "https://news.ycombinator.com/item?id=40040545",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "You need to give the facts to the AI (either as a tool or as part of the prompt) and instruct it to form the answer only from there.",
+      "url": "https://news.ycombinator.com/item?id=36657565",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "I don't ask AI to vet their decisions, because at some level there are judgement calls, and I WANT to trust them because it makes my life easier.",
+      "url": "https://news.ycombinator.com/item?id=49659510",
+      "source": "hacker-news",
+      "rating": null
+    },
+    {
+      "quote": "You can make this as complicated as you need to.",
+      "url": "https://news.ycombinator.com/item?id=47639785",
+      "source": "hacker-news",
+      "rating": null
+    }
+  ],
+  "unthemed_negative": [
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "I hate how it asked to be rated when I just downloaded and opened the app for the first time. At least let me use the app first... \ud83d\ude44 it has a credit system which is a big no for me too."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Trial access? Piffel! Credit system ridiculous. 5 credits to try. Wanted too many credits to even try."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "I tested this app out on pics that already know for a fact were already verified as AI photos. It claims that the photos are real."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "need to use it first"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "bad app"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "bad"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=io.zyur.forgespy&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "sucked"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=com.aiguardian.yumshu&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Useless"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "you suck how can we determine if we like the app if we can't use it!"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "needed to scan a photo in my phone, not take a new one."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "google lens used to be free... now you want money. ha ha. ha. so screw you google. you already take all our info now you want to pick EVERYONES POCKET. kiss your company goodbye. they make other os sys for your phones ev"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "not very useful"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "It doesn't even let you unscript, either. It's frustrating"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Won't let you try it for free before paying so i'm uninstalling."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 2.0,
+      "text": "not nearly as goods as Google lens and that is free don't waist your money"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "just use lens on google"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "this app is horrible it makes you give it 5 Stars before you even open the app then it demands that you pay them before you even open the app so this is a very poor app and I don't think that anyone should download it"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Useless apk. Only ads and regularly ask to taking discrimination."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "couldn't get past the screen to pay, to be able to use it"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Doesn't do what it says. It just tries to get you to give it money through goggle."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "limited free trial or on-going payments only. no thanks."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 2.0,
+      "text": "deleting can't use at all unless you pay money to use it"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "Not searching on free"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "it makes me buy it"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "RUBBISH, WHOLE LOTTA RUBBISH."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "how dare you waste my time like this."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 2.0,
+      "text": "peace and happiness"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "make u think it's free but when you start Scanning it asks u to pay"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "GARBAGE"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "You have to sign up for their free trial before you can even try it. No thanks."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=co.appnation.reverseimagesearch&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "i thought it's free si bad"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=com.yella.picmatcher&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "useless app every image it shows real image"
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?id=com.yella.picmatcher&hl=en&gl=US",
+      "source": "google-play",
+      "rating": 1.0,
+      "text": "added real photo it said it wasn't real.. so there u go.."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id6747714279?see-all=reviews#review-13455592486",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Fake. Me and my friend are doing a research on an AI \u201cartist\u201d and it is saying the images are real, so I decided to put in an image of Art that has been proven that it\u2019s AI and it\u2019s saying it\u2019s real too. I do not think t"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-14455794434",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Can\u2019t get to the menu. Menu is blocked by purchases that won\u2019t let me exit out of them. This is highly annoying."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-14141410160",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Fake Trial. Signed up for a trial and it says I don\u2019t have any searches left. Never even used any."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-13891115527",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Same day into trial will not look up anything.. Tried using this a few times. First time I was able to share a Tiktok video and it returned a result. 2nd use of the app les than four hours later. Nothing comes up from an"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id6741088235?see-all=reviews#review-13065461742",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "it wouldn't actually let me use the fact checker?. listen. i'm a minor, i don't have the money to pay for something you shouldn't have to pay for. i need a FREE fact checker app. thought this one looked good, but it won'"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-13717364188",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Used to be good but sucks now.. Went full Gung-Ho on the AI bandwagon. Can\u2019t preform proper searches now"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-13543750173",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "X rated ads. I really hate that I have to look at x rated ads"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-13111116400",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Never works. Never works except on yandex. It\u2019s only good for identifying scammers who use onlyfans profile pics."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-12719495715",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Fake app. Instead of my picture an add popped up immediately and nothing else happened"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-12151665065",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Really. Making a previously free feature paid is CRAZY \ud83d\ude02 I\u2019m taking my money somewhere else ladies and you should too"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11855176160",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "!!!ITS A HACKER!!!. Like an idiot, I scrolled to the negative views to see what was really wrong about the app. Nothing crazy, but nobody said it takes you to safari and searches up a realtor or real estate web page enti"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11746805446",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Just a bunch of ads. No real Image search"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11670164509",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "annoying. There are way too many ads, and it takes too long to complete the task with these game ads, can you bring back the original version, please? I use it on Instagram accounts to filter out Fake accounts."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11378247463",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Scammers!!!. They lie when you register and state they won\u2019t try to charge your card but as soon as you put your card information in for a \u201cfree\u201d membership, they send a charge to your card!! Thieves!!"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11194148888",
+      "source": "app-store",
+      "rating": 2.0,
+      "text": "Better than Google \u2026.not any more. Better than Google. Oh wait, it has Google too.  Downgraded it to two stars because although it\u2019s a great search engine for images, they have really maximized the ads annoying enough to"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-11057491505",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Ad-Infested. Get something else.. I really wanted to like this app but it is ad infested. You will see full screen ad at your first launch then every time you tap on any button within the app, it displays a new ad. All t"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-10583549329",
+      "source": "app-store",
+      "rating": 2.0,
+      "text": "The ads became about abortion. I really like this app, but lately all the ads on it are promoting abortion. I don\u2019t like that and I don\u2019t think it\u2019s appropriate for an app like this. I\u2019m surprised they would pick ads lik"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-10430291947",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Really frustrating advertisements. Constantly displays really frustrating advertisements, impossible to remove them."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9949968477",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Fake and didn\u2019t work. Don\u2019t waste you time I tried my picture and i have alot of pictures on internet but shows me everyone except my self \ud83d\ude02"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9908841544",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "I do not trust this app. Too many pop up ads, phishing sites, virus scams and malware in return for poor results. I\u2019m pretty sure this is at best a data mining tool being used against the \u201cuser\u201d"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9276863301",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Stop changing things. these guys really messed up this app now and we go to search the google results doesn\u2019t show anything why do you guys have to change things why not just leave things alone you just messed up your ow"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-9245258520",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Worthless. There are so many websites that you can use for free that are far better. All it really tries to do is to send you to SocialCatFish that then wants 7 dollars a month and while it looks like that site might be "
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8910321940",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Annoying ads. The ads are out of control. Every step of the way something would pop up that was difficult to close. It made me concerned about the legitimacy of the app and if I was being scammed. Eventually the search f"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8734524915",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "FAKE APP!!!. Do not download!!!!"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8615741314",
+      "source": "app-store",
+      "rating": 2.0,
+      "text": "Really?. Easy to use but, I searched for two items I\u2019d photographed. It quickly showed ridiculous results of nothing even similar enough  to click on. Not even close. Thanks for nothing."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8474462486",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Just bad. Really not very advanced. Unable to determine what something is unless very rudimentary. Do not recommend."
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8274922407",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Failed me. I just bought this app hoping it would help in my business. I bought this based on the reviews I saw. I tried to look up 5 different things, 4 I was really needing info on and 1 I already knew about. The only "
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-8124022993",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Can\u2019t Close Ads. I don\u2019t mind the ads in the free version\u2026 As the developer is trying to make his money so I get it. I\u2019m fine to sit through them and watch them to use the app but\u2026 Often times you can\u2019t close the ad. I\u2019l"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-7452694795",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "They are watching you. Closed app realized when FaceTiming someone my camera was green blue like interference with radio waves few moments later app was using my camera deleted app"
+    },
+    {
+      "url": "https://apps.apple.com/us/app/id1003144513?see-all=reviews#review-7430129961",
+      "source": "app-store",
+      "rating": 1.0,
+      "text": "Doesn\u2019t work with real photos. I have a small shop and someone has been stealing my pictures. I wanted to see everywhere it was posted, but each picture I used, it said wasn\u2019t found ANYWHERE online. I even picked photos "
+    }
+  ],
+  "dropped": 0,
+  "duplicates": 58
+}

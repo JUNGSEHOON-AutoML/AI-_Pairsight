@@ -1,0 +1,182 @@
+{
+ "_about": "Themes for AI-content / fake-image detectors and fact-check apps. Edited from the replica-entrepreneur default.",
+ "request_patterns": [
+  "\\bwish (it|they|there)\\b",
+  "\\bplease add\\b",
+  "\\bwould be (nice|great|better)\\b",
+  "\\bneeds? (to|an?|more)\\b",
+  "\\bshould (add|have|let)\\b",
+  "\\bif only\\b",
+  "\\bwhy (can't|not|doesn't)\\b",
+  "\\b(I|we) want\\b",
+  "\\bcan you (please )?add\\b"
+ ],
+ "themes": [
+  {
+   "id": "false-positive",
+   "label": "Real content flagged as AI / fake",
+   "patterns": [
+    "\\b(real|my own|original|actual|my) (photo|image|picture|selfie|drawing|art|artwork|logo)s?\\b.{0,80}\\b(ai|fake|cloned|slop)\\b",
+    "\\bfalse positive",
+    "\\bflag(ged|s)? (my|real)\\b",
+    "\\beverything is ai\\b",
+    "\\boriginal image tagged\\b",
+    "\\bharass",
+    "\\baccuse"
+   ]
+  },
+  {
+   "id": "false-negative",
+   "label": "Obvious AI marked as real",
+   "patterns": [
+    "\\b(ai|fake)\\b.{0,60}\\b(said|says|marked|came back|told me|deemed).{0,30}\\breal\\b",
+    "\\ball (marked|came back) as\\b",
+    "\\b\\d+% real\\b",
+    "\\bthispersondoesntexist\\b",
+    "\\bdoesn't detect\\b",
+    "\\bfailed to detect\\b",
+    "\\bmy eyes, this app doesn't\\b"
+   ]
+  },
+  {
+   "id": "unreliable",
+   "label": "Inaccurate or inconsistent verdicts",
+   "patterns": [
+    "\\bnot (very )?accurate\\b",
+    "\\binaccura",
+    "\\bunreliable\\b",
+    "\\bnot reliable\\b",
+    "\\binconsisten",
+    "\\bwasn't consistent\\b",
+    "\\bsame image\\b.{0,40}\\b(real|fake)\\b",
+    "\\b\\d+ out of \\d+ wrong\\b",
+    "\\bonly got one\\b",
+    "\\bcoin.?flip\\b",
+    "\\bimpossible\\b.{0,40}\\b(detect|accura)",
+    "\\bfakes? results\\b",
+    "\\bmisleading\\b"
+   ]
+  },
+  {
+   "id": "no-explanation",
+   "label": "Just a percentage, no reason or evidence",
+   "patterns": [
+    "\\bwithout any explanation\\b",
+    "\\bno explanation\\b",
+    "\\b(a|giving|just) %",
+    "\\bconfidence (was|score)",
+    "\\bpercent(age)? ai\\b",
+    "\\bwhy it (thinks|says)\\b",
+    "\\bonly checks how\\b",
+    "\\bblack box\\b"
+   ]
+  },
+  {
+   "id": "paywall",
+   "label": "Hard paywall, no free trial",
+   "patterns": [
+    "\\bpaywall\\b",
+    "\\bnot free\\b",
+    "\\b(no|without|even a) (free )?trial\\b",
+    "\\bpay (to|before)\\b",
+    "\\bmust pay\\b",
+    "\\bcosts? money\\b",
+    "\\bcredit card\\b",
+    "\\bpaid app\\b",
+    "\\bsubscription\\b",
+    "\\bbait",
+    "\\bmoney hungry\\b",
+    "\\bbefore (you|even) (using|try|open)"
+   ]
+  },
+  {
+   "id": "credits",
+   "label": "Credits eaten by failed scans",
+   "patterns": [
+    "\\bcredits?\\b.{0,60}\\b(anyway|wasted|steal|took|taking|fail)",
+    "\\b(wasted|steals?|took) (my |the )?(credits|tokens)\\b",
+    "\\btokens and steals\\b",
+    "\\bno searches left\\b"
+   ]
+  },
+  {
+   "id": "broken",
+   "label": "Doesn't run: spins, errors, crashes",
+   "patterns": [
+    "\\bspin(s|ning)?\\b",
+    "\\bloads? endlessly\\b",
+    "\\bloading (took|signal)\\b",
+    "\\bnever (moved|actually)\\b",
+    "\\bgave an error\\b",
+    "\\bfails? immediately\\b",
+    "\\bcrash",
+    "\\bclosing itself\\b",
+    "\\bdoes nothing\\b",
+    "\\bdoesn't (even )?work\\b",
+    "\\bfailed to extract\\b"
+   ]
+  },
+  {
+   "id": "dark-patterns",
+   "label": "Forced 5-star prompts, can't close offers, can't cancel",
+   "patterns": [
+    "\\b(rate|rated|review|rating)\\b.{0,40}\\bbefore\\b",
+    "\\bforc(e|es|ed|ing)\\b",
+    "\\bcan't (get out|exit|figure out how to cancel)\\b",
+    "\\bno (x|option to unsubscribe)\\b",
+    "\\bimpossible to cancel\\b",
+    "\\bunsubscribe\\b",
+    "\\bcancel\\b",
+    "\\bdecepti",
+    "\\bscam\\b",
+    "\\btricked\\b",
+    "\\bsurvey\\b"
+   ]
+  },
+  {
+   "id": "media-coverage",
+   "label": "Video, links, social posts not supported",
+   "patterns": [
+    "\\b(videos?|links?|url|facebook|tiktok|youtube)\\b.{0,80}\\b(analy[sz]|detect|test|extract|support|trial|work|AI generated|only)",
+    "\\b(analy[sz]|detect|test|extract|trial|check)\\w*\\b.{0,60}\\b(videos?|links?|url|facebook|tiktok)\\b"
+   ]
+  },
+  {
+   "id": "watermark-limits",
+   "label": "Watermarks / C2PA easy to strip or vendor-only",
+   "kind": "request",
+   "patterns": [
+    "\\bsynthid\\b",
+    "\\bc2pa\\b",
+    "\\bwatermark",
+    "\\bmetadata\\b.{0,40}\\b(strip|remov)",
+    "\\bprovenance\\b",
+    "\\bcontent credentials\\b"
+   ]
+  },
+  {
+   "id": "fact-scope",
+   "label": "Fact-check misses local / everyday news and claims",
+   "kind": "request",
+   "patterns": [
+    "\\blocal\\b.{0,40}\\bnews\\b",
+    "\\beveryday (news|people)\\b",
+    "\\bfact.?check(ing|er)?\\b.{0,80}\\b(wrong|bias|difficult|hard|match)",
+    "\\bfails to give correct information\\b",
+    "\\bsource(s|d)?\\b.{0,40}\\b(cite|link|wrong|made up|hallucinat)"
+   ]
+  },
+  {
+   "id": "scam-protection",
+   "label": "Using it to catch scammers and catfish",
+   "kind": "request",
+   "patterns": [
+    "\\bscammer\\b",
+    "\\bcatfish",
+    "\\bromance scam\\b",
+    "\\bdating\\b",
+    "\\bmy (dad|mom|grandma|grandpa|parents)\\b"
+   ]
+  }
+ ]
+}
