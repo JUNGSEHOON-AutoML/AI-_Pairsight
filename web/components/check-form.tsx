@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { ACCEPTED_MIME, COPY, ERROR_COPY, type ErrorCode, MAX_IMAGE_BYTES } from "@/lib/domain";
 import type { PageImage } from "@/lib/providers/types";
+import { UsageMeter, useMe } from "./me";
 import { QuotaExhausted } from "./status-panels";
 import { Button, cx } from "./ui";
 
@@ -22,6 +23,7 @@ export function CheckForm() {
   const [busy, setBusy] = useState<null | "file" | "url" | string>(null);
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState(false);
+  const me = useMe(quota ? 1 : 0);
 
   function choose(file: File | undefined) {
     setError(null);
@@ -63,6 +65,7 @@ export function CheckForm() {
 
   return (
     <div className="grid gap-6">
+      <UsageMeter me={me} />
       {quota && <QuotaExhausted />}
 
       <section aria-labelledby={`${ids.file}-h`} className="grid gap-3">
@@ -131,7 +134,7 @@ export function CheckForm() {
             placeholder="https://..."
             value={pageUrl}
             onChange={(e) => setPageUrl(e.target.value)}
-            className="h-10 flex-1 rounded-md border border-border-input bg-bg px-3"
+            className="h-10 w-full rounded-md border border-border-input bg-bg px-3 md:flex-1"
           />
           <Button type="submit" variant="secondary" loading={busy === "url"}>
             <LinkIcon aria-hidden="true" className="size-4" />

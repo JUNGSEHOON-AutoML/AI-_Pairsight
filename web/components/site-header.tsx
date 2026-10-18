@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderAccountLink } from "./me";
 
 export function SiteHeader() {
   return (
@@ -23,9 +24,7 @@ export function SiteHeader() {
             </Link>
           </li>
           <li>
-            <Link href="/account" className="rounded-md px-3 py-2 text-text no-underline hover:bg-surface">
-              내 계정
-            </Link>
+            <HeaderAccountLink />
           </li>
         </ul>
       </nav>

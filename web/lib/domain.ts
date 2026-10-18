@@ -150,3 +150,6 @@ export interface Check {
 
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const ACCEPTED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+
+// Typed by the user to confirm account deletion (S09).
+export const ACCOUNT_DELETE_PHRASE = "삭제합니다";

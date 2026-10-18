@@ -5,17 +5,17 @@ Provenance signal bundle: C2PA signature + EXIF + public watermark detectors + p
 URL/article input: extract claims and images; match public fact-check records and trusted outlets with source links,analysis,should,no,partial,F4 fixes.md: hate #5; unsolved #3 | build: page URL or direct image URL -> pick image (SSRF-guarded); article claim fact-checking is out of MVP scope
 Honest inconclusive state + false-positive notice on every result,results,must,no,yes,F5 fixes.md: hate #4 | build: 판단 불가 four-block screen + 원본 없음 block + disclaimer on every result
 Deterministic results per file hash (same input same verdict),analysis,must,no,partial,F6 fixes.md: hate #3 | build: same sha256 reuses the analysis in the memory store; verdict computed per check (claimed date); 재검사 forces a fresh run
-Free daily checks without signup; failed scans not charged; no rating prompt on first run; one-tap cancel,billing,must,no,partial,F7 fixes.md: hate #1 #2 #9 -> replica-launch | build: failed analyses refunded; no rating prompt; daily quota UI in stage 3; billing out of scope
+Free daily checks without signup; failed scans not charged; no rating prompt on first run; one-tap cancel,billing,must,no,partial,F7 fixes.md: hate #1 #2 #9 -> replica-launch | build: daily quota with meter + 한도 소진 screen + refunds done; billing/cancel out of scope (no payments this round)
 Video keyframe extraction into the same pipeline (phase 2),analysis,could,no,no,F8 fixes.md: hate #5
 Upload an image file (JPG/PNG/WebP; size limit shown),input,must,yes,yes,recon S01; TruthScan 10MB; Hive Detect upload | build: S01 dropzone + keyboard focus ring
 Paste a media URL to check,input,must,yes,yes,recon S01; Hive Detect URL box; TruthScan Paste URL tab | build: page or direct image URL; demo URLs in mock mode
 Async processing with visible progress steps,analysis,must,yes,yes,recon S02; TruthScan API status pending->done | build: S02 shows real pipeline steps
-Delete account and all stored checks,account,must,no,no,recon F06; complaint #2 cannot cancel; GDPR
-Check history for signed-in users,history,should,yes,no,recon S06; TruthScan dashboard history
-Sign in with email magic link or Google,account,should,yes,no,recon S07
+Delete account and all stored checks,account,must,no,yes,"recon F06; complaint #2 cannot cancel; GDPR | build: S09: typed confirmation, deletes checks/uploads/usage; shared analyses stay"
+Check history for signed-in users,history,should,yes,yes,recon S06; TruthScan dashboard history | build: S06 for anonymous and signed-in users; history kept when an anonymous user signs in
+Sign in with email magic link or Google,account,should,yes,partial,recon S07 | build: DEV magic link shown on screen in mock mode; no email provider and no Google sign-in yet
 Share a result via read-only public link,results,should,no,no,recon S10 F04; angle C family scam checks
 Download a result report,results,should,yes,no,recon S03; TruthScan audit-ready reports; Hive download icon
-Pricing page with a free tier and no card required,billing,should,yes,no,recon S08; TruthScan free 25/month -> replica-launch
+Pricing page with a free tier and no card required,billing,should,yes,no,recon S08; TruthScan free 25/month -> replica-launch | build: S08 is a placeholder; payments excluded this round
 Likely generator attribution (which AI model),analysis,could,yes,no,recon S03; Hive Generation Sources; TruthScan source field
 Heatmap of suspicious regions,results,could,yes,no,recon S03; TruthScan heatmap slider
 Bulk ZIP upload,input,skip,yes,no,enterprise workflow; out of consumer scope

@@ -1,5 +1,10 @@
-import { Stub } from "@/components/stub";
+import { AccountPanel } from "@/components/account-panel";
 
 export default function AccountPage() {
-  return <Stub title="내 계정" body="계정과 데이터 삭제는 다음 단계에서 만들어요." />;
+  return (
+    <div className="mx-auto grid max-w-reading gap-4">
+      <h1 className="text-xl">내 계정</h1>
+      <AccountPanel />
+    </div>
+  );
 }

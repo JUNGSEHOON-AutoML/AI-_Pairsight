@@ -1,5 +1,13 @@
-import { Stub } from "@/components/stub";
+import { Suspense } from "react";
+import { HistoryList } from "@/components/history-list";
 
 export default function HistoryPage() {
-  return <Stub title="검사 기록" body="검사 기록은 다음 단계에서 만들어요." />;
+  return (
+    <div className="mx-auto grid max-w-reading gap-4">
+      <h1 className="text-xl">검사 기록</h1>
+      <Suspense fallback={<div aria-hidden="true" className="h-40 animate-pulse rounded-lg bg-surface" />}>
+        <HistoryList />
+      </Suspense>
+    </div>
+  );
 }
