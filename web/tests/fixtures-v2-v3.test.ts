@@ -38,7 +38,7 @@ describe("v2 vs v3 on every fixture", () => {
     }
     if (process.env.FIXTURE_TABLE_OUT) writeFileSync(process.env.FIXTURE_TABLE_OUT, rows.join("\n") + "\n");
     expect(changed).toEqual({ trusted_edited: "inconclusive → edited", trusted_context: "inconclusive → miscontextualized" });
-  });
+  }, 30000); // nine real DINO/pixel comparisons can exceed Vitest's 5s default under parallel load
 
   it("trusted_edited: real comparison finds a local difference on the trusted page", async () => {
     const { c, v3mock } = await judge("trusted_edited");

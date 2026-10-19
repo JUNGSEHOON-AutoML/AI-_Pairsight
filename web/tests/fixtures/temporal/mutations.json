@@ -1,0 +1,62 @@
+{
+  "description": "Disposable source mutations; baseline must pass, each mutation must fail assertions, not infrastructure.",
+  "rows": [
+    {
+      "mutation": "baseline",
+      "result": "pass",
+      "failedTests": []
+    },
+    {
+      "mutation": "all guards disabled",
+      "result": "killed",
+      "failedTests": [
+        "local edit guard v2 and v3 reject when only residual exceeds its budget",
+        "local edit guard v2 and v3 reject when only area exceeds its budget",
+        "local edit guard v2 and v3 reject when only count exceeds its budget",
+        "local edit guard missing or invalid measurements fail closed: { outsideResidual: undefined }",
+        "local edit guard missing or invalid measurements fail closed: { outsideResidual: null }",
+        "local edit guard missing or invalid measurements fail closed: { outsideResidual: NaN }",
+        "local edit guard missing or invalid measurements fail closed: { outsideResidual: Infinity }",
+        "local edit guard missing or invalid measurements fail closed: { outsideResidual: -0.1 }",
+        "local edit guard missing or invalid measurements fail closed: { diffAreaFraction: NaN }",
+        "local edit guard missing or invalid measurements fail closed: { diffRegionCount: 1.5 }",
+        "local edit guard uses total count, not the eight displayed boxes",
+        "local edit guard does not call a diffuse change with no boxes the same picture for v2 date rules",
+        "actual pixel counterexample same place at different times stays inconclusive despite passing the scene gate and old edit conditions"
+      ]
+    },
+    {
+      "mutation": "residual guard disabled",
+      "result": "killed",
+      "failedTests": [
+        "local edit guard v2 and v3 reject when only residual exceeds its budget",
+        "local edit guard does not call a diffuse change with no boxes the same picture for v2 date rules"
+      ]
+    },
+    {
+      "mutation": "area guard disabled",
+      "result": "killed",
+      "failedTests": [
+        "local edit guard v2 and v3 reject when only area exceeds its budget"
+      ]
+    },
+    {
+      "mutation": "count guard disabled",
+      "result": "killed",
+      "failedTests": [
+        "local edit guard v2 and v3 reject when only count exceeds its budget",
+        "local edit guard uses total count, not the eight displayed boxes"
+      ]
+    },
+    {
+      "mutation": "v2 ambiguity veto removed",
+      "result": "killed",
+      "failedTests": [
+        "local edit guard v2 and v3 reject when only residual exceeds its budget",
+        "local edit guard v2 and v3 reject when only area exceeds its budget",
+        "local edit guard v2 and v3 reject when only count exceeds its budget",
+        "actual pixel counterexample same place at different times stays inconclusive despite passing the scene gate and old edit conditions"
+      ]
+    }
+  ]
+}

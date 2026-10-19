@@ -11,9 +11,11 @@ import {
   STRENGTH_RANK,
   type Verdict,
 } from "./domain";
+import { passesLocalEditGuard } from "./verification/edit-locality";
 import { EMPTY_TRUSTED_LIST, findTrustedSource, type TrustedSource, type TrustedSourceList } from "./verification/trusted-sources";
 
-export const PIPELINE_VERSION = 3;
+// Cache schema version: old comparisons have no outside-residual/area/count measurements.
+export const PIPELINE_VERSION = 4;
 
 /**
  * v3 thresholds. Experimental, not calibrated on real news photos (replica/eval/ is where they get measured).
@@ -36,7 +38,7 @@ export interface VerdictInput {
   trustedSources?: TrustedSourceList; // omitted = empty = v2 behaviour
 }
 
-export type HeadlineKind = "fact_check" | "trusted_difference" | "trusted_same" | "difference" | "same" | "provenance";
+export type HeadlineKind = "fact_check" | "trusted_difference" | "trusted_same" | "difference" | "same" | "provenance" | "possible_different_photo";
 
 /** The single strongest observation, shown even when the verdict is 판단 불가. Never a verdict in disguise. */
 export interface HeadlineFinding {
@@ -79,9 +81,14 @@ const aligned = (m: SourceMatch) =>
 // leave a region (the sign/person fixture changes 1.8%), so the fraction alone must not decide sameness.
 // Benign transforms (JPEG, crop, flip, colour) produce no regions (measured in tests/image-comparison.test.ts).
 const sameImage = (m: SourceMatch) =>
-  aligned(m) && m.comparison!.diffRegions.length === 0 && m.comparison!.changedFraction < TRUSTED_RULES.sameImageMaxChange;
+  aligned(m) && passesLocalEditGuard(m.comparison!) && m.comparison!.diffRegions.length === 0 && m.comparison!.changedFraction < TRUSTED_RULES.sameImageMaxChange;
 const localDifference = (m: SourceMatch) =>
-  aligned(m) && m.comparison!.diffRegions.length > 0 && m.comparison!.changedFraction <= TRUSTED_RULES.maxLocalChange;
+  aligned(m) && passesLocalEditGuard(m.comparison!) && m.comparison!.diffRegions.length > 0 && m.comparison!.changedFraction <= TRUSTED_RULES.maxLocalChange;
+
+// Keep these candidates visible as ambiguity; do not silently discard them as "no source".
+const possibleDifferentPhoto = (m: SourceMatch) => aligned(m) && !passesLocalEditGuard(m.comparison!);
+const ambiguousComparison = (matches: SourceMatch[]) =>
+  !matches.some(m => sameImage(m) || localDifference(m)) && matches.some(possibleDifferentPhoto);
 
 /** A page publication date or an archive capture, never a search engine's discovery date on its own. */
 function pageDate(m: SourceMatch): { value: string; source: DateSource; imageBound: boolean } | null {
@@ -118,6 +125,12 @@ const DATE_WORD: Record<DateSource, string> = {
 };
 
 export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], trusted: TrustedSourceList): HeadlineFinding | null {
+  if (ambiguousComparison(matches)) {
+    const m = matches.filter(possibleDifferentPhoto).sort(closestFirst)[0];
+    const t = findTrustedSource(m.url, trusted);
+    return { kind: "possible_different_photo", text: "같은 장소의 다른 사진일 수 있어요", sourceUrl: m.url,
+      sourceName: t?.name ?? hostOf(m.url), trusted: !!t, date: day(m.firstSeenAt), dateSource: m.firstSeenSource };
+  }
   const fact = evidence.find((e) => e.kind === "fact_check" && strong(e) && manip(e));
   if (fact) {
     return { kind: "fact_check", text: `팩트체크 기관이 같은 이미지·같은 주장을 이미 검증했어요 (${hostOf(fact.sourceUrl ?? "")}).`,
@@ -209,7 +222,7 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
   const done = (verdict: Verdict, reason: string, rule: string, strength: Strength | null, missing: string[] = []): VerdictResult =>
     ({ verdict, reason, missing, rule, strength, headlineFinding: headline });
 
-  // ---- v2 rules, unchanged in order and wording ----
+  // ---- v2 rules with the shared comparison ambiguity guard ----
   const provenance = evidence.filter(e => e.kind === "c2pa" && strong(e) && e.details.signatureValid === true);
   const capture = provenance.some(e => real(e) && e.details.action === "camera_capture" && e.details.noEdits === true);
   const generated = provenance.some(e => manip(e) && e.details.action === "ai_generated") || evidence.some(e =>
@@ -220,9 +233,13 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
     return done("inconclusive", "강한 출처 기록들이 서로 충돌해요. 추가 검증이 필요해요.", "v2.provenance_conflict", null, ["출처 기록 간 모순이 해결되지 않았어요"]);
   }
   if (generated) return done("ai_generated", "검증된 출처 기록이나 워터마크가 AI 생성을 가리켜요.", "v2.ai_generated", "strong");
+  // Shared by v2 and v3: a scene match is not proof that the file is derived from that photo.
+  // A separately qualifying candidate can still establish the edit; a rejected candidate cannot.
+  if (ambiguousComparison(matches)) return done("inconclusive", "차이 영역 밖의 잔차·영역 면적·개수 조건을 충족하지 못해 편집으로 단정할 수 없어요.",
+    "comparison.possible_different_photo", null, ["같은 사진을 편집한 것인지, 같은 장소에서 따로 찍은 사진인지 확인하지 못했어요"]);
   if (edited) return done("edited", "검증된 출처 기록에 AI 편집 이력이 있어요. 차이 영역은 보조 근거예요.", "v2.ai_edited", "strong");
   // Same picture = under 2% changed AND no differing region (a small edit can stay under 2%; see sameImage above).
-  const checked = matches.filter(m => m.verified && m.comparison?.matched && m.comparison.changedFraction < .02 && m.comparison.diffRegions.length === 0);
+  const checked = matches.filter(sameImage);
   const fact = evidence.find(e => e.kind === "fact_check" && strong(e) && manip(e) &&
     e.details.claimMatched === true && e.details.imageMatched === true && e.details.pageVerified === true && e.details.assessment === "miscontextualized");
   if (fact) return done("miscontextualized", "같은 이미지·같은 주장에 대해, 확인한 팩트체크 원문이 맥락 불일치를 설명해요.", "v2.fact_check", "strong");

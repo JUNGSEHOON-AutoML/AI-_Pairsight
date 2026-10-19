@@ -96,6 +96,11 @@ export interface ComparisonResult {
   alignedDistance: number;
   alignmentScore: number;
   changedFraction: number;
+  /** Mean absolute RGB residual (0..1) outside ALL difference boxes; null if no samples remain. */
+  outsideResidual: number | null;
+  /** Sum of all region bounding-box areas, before the UI's eight-region display limit. */
+  diffAreaFraction: number;
+  diffRegionCount: number;
   crop: { x: number; y: number; w: number; h: number } | null;
   flip: "horizontal" | "vertical" | null;
   colorAdjusted: boolean;

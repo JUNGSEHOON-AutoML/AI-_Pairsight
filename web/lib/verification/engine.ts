@@ -2,6 +2,7 @@ import type { Evidence, SourceMatch } from "../domain";
 import type { Providers } from "../providers";
 import { ProviderError } from "../providers/types";
 import type { Candidate, ClaimContext, NormalizedInput, Progress, VerificationFacts } from "./types";
+import { passesLocalEditGuard } from "./edit-locality";
 import { selectDate } from "./dates";
 import { excerpt, publicUrl, thumbnail } from "./retention";
 
@@ -72,13 +73,13 @@ export async function collectEvidence(input: NormalizedInput, p: Providers, sign
         excerpt: excerpt(v.article.excerpt), comparison,
       };
       matches.push(match);
-      evidence.push({ kind: "image_comparison", outcome: comparison.diffRegions.length ? "supports_manipulated" : "neutral",
+      evidence.push({ kind: "image_comparison", outcome: comparison.diffRegions.length && passesLocalEditGuard(comparison) ? "supports_manipulated" : "neutral",
         strength: "medium", score: null, sourceUrl: match.url, provider: p.images.name,
-        summary: comparison.diffRegions.length ? "정렬 후에도 차이 영역이 남아요. 이것만으로 조작을 확정하지 않아요." : "같은 이미지 후보를 확인했어요. 잘라내기·반전·색보정은 조작 판정과 구분해요.",
-        details: { pHashDistance: comparison.pHashDistance, alignedDistance: comparison.alignedDistance, crop: comparison.crop, flip: comparison.flip, colorAdjusted: comparison.colorAdjusted } });
+        summary: !passesLocalEditGuard(comparison) ? "같은 장소의 다른 사진일 수 있어요. 차이를 편집 근거로 사용하지 않아요." : comparison.diffRegions.length ? "정렬 후에도 차이 영역이 남아요. 이것만으로 조작을 확정하지 않아요." : "같은 이미지 후보를 확인했어요. 잘라내기·반전·색보정은 조작 판정과 구분해요.",
+        details: { outsideResidual: comparison.outsideResidual, diffAreaFraction: comparison.diffAreaFraction, diffRegionCount: comparison.diffRegionCount, pHashDistance: comparison.pHashDistance, alignedDistance: comparison.alignedDistance, crop: comparison.crop, flip: comparison.flip, colorAdjusted: comparison.colorAdjusted } });
       for (const f of factChecks) {
         const review = v.article.review;
-        f.verified ||= f.url === v.article.url && comparison.changedFraction < .02 && comparison.diffRegions.length === 0 && !!review && review.claimComplete && f.claimComplete &&
+        f.verified ||= passesLocalEditGuard(comparison) && f.url === v.article.url && comparison.changedFraction < .02 && comparison.diffRegions.length === 0 && !!review && review.claimComplete && f.claimComplete &&
           sameText(f.claim, review.claim) && sameText(f.rating, review.rating) && sameText(f.publisher, review.publisher);
       }
       break; // at most one retained match/thumbnail per candidate page

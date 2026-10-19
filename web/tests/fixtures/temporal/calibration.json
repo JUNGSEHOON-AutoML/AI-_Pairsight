@@ -1,0 +1,496 @@
+{
+  "version": 1,
+  "description": "Synthetic drawings only; RGB residual normalized to 0..1, DINOv2-small q8 at scene gate 0.76.",
+  "rows": [
+    {
+      "name": "jpeg-comparison-q60",
+      "sceneSimilarity": 0.9726575114806956,
+      "matched": true,
+      "alignment": 0.999656288197427,
+      "changedFraction": 0,
+      "outsideResidual": 0.00503855187908495,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-comparison-q70",
+      "sceneSimilarity": 0.9759920122326377,
+      "matched": true,
+      "alignment": 0.9997741497831288,
+      "changedFraction": 0,
+      "outsideResidual": 0.002954899407679729,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-comparison-q82",
+      "sceneSimilarity": 0.9676446521853166,
+      "matched": true,
+      "alignment": 0.9998290967218154,
+      "changedFraction": 0,
+      "outsideResidual": 0.0025179993872548943,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-comparison-q90",
+      "sceneSimilarity": 0.9861174082818793,
+      "matched": true,
+      "alignment": 0.9998136709759489,
+      "changedFraction": 0,
+      "outsideResidual": 0.0023721532883986857,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-aerial_fields.png-q60",
+      "sceneSimilarity": 0.9931438345393196,
+      "matched": true,
+      "alignment": 0.9994075799944543,
+      "changedFraction": 0,
+      "outsideResidual": 0.00507269965277776,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-aerial_fields.png-q70",
+      "sceneSimilarity": 0.9952057463920041,
+      "matched": true,
+      "alignment": 0.9994786546010119,
+      "changedFraction": 0,
+      "outsideResidual": 0.006069367851307169,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-aerial_fields.png-q82",
+      "sceneSimilarity": 0.9964832560838807,
+      "matched": true,
+      "alignment": 0.9995261477993957,
+      "changedFraction": 0,
+      "outsideResidual": 0.003982843137254889,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-aerial_fields.png-q90",
+      "sceneSimilarity": 0.9958201624341162,
+      "matched": true,
+      "alignment": 0.9995441549556898,
+      "changedFraction": 0,
+      "outsideResidual": 0.003800296160130706,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-beach.png-q60",
+      "sceneSimilarity": 0.9862712605871182,
+      "matched": true,
+      "alignment": 0.9995883936870384,
+      "changedFraction": 0,
+      "outsideResidual": 0.004352724162581685,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-beach.png-q70",
+      "sceneSimilarity": 0.9872507346569573,
+      "matched": true,
+      "alignment": 0.9996479046650686,
+      "changedFraction": 0,
+      "outsideResidual": 0.003931781045751621,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-beach.png-q82",
+      "sceneSimilarity": 0.9882144972235503,
+      "matched": true,
+      "alignment": 0.9996676242144317,
+      "changedFraction": 0,
+      "outsideResidual": 0.0029478783700980296,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-beach.png-q90",
+      "sceneSimilarity": 0.9910423309642277,
+      "matched": true,
+      "alignment": 0.9996745265678666,
+      "changedFraction": 0,
+      "outsideResidual": 0.0026162939133986844,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-forest.png-q60",
+      "sceneSimilarity": 0.9639216537410202,
+      "matched": true,
+      "alignment": 0.9993672842163014,
+      "changedFraction": 0,
+      "outsideResidual": 0.004256982741013058,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-forest.png-q70",
+      "sceneSimilarity": 0.9870785129507109,
+      "matched": true,
+      "alignment": 0.9994600626868284,
+      "changedFraction": 0,
+      "outsideResidual": 0.0033675449346405113,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-forest.png-q82",
+      "sceneSimilarity": 0.989392300390104,
+      "matched": true,
+      "alignment": 0.9994825288950578,
+      "changedFraction": 0,
+      "outsideResidual": 0.0027101205065359385,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-forest.png-q90",
+      "sceneSimilarity": 0.9914187948308829,
+      "matched": true,
+      "alignment": 0.9995025285296388,
+      "changedFraction": 0,
+      "outsideResidual": 0.0024631076388888806,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-fruit_table.png-q60",
+      "sceneSimilarity": 0.9928538237702478,
+      "matched": true,
+      "alignment": 0.9998642102562293,
+      "changedFraction": 0,
+      "outsideResidual": 0.0034620098039215568,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-fruit_table.png-q70",
+      "sceneSimilarity": 0.9906580347637943,
+      "matched": true,
+      "alignment": 0.9998846630650813,
+      "changedFraction": 0,
+      "outsideResidual": 0.003620302287581687,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-fruit_table.png-q82",
+      "sceneSimilarity": 0.9952621003286374,
+      "matched": true,
+      "alignment": 0.9998929413145949,
+      "changedFraction": 0,
+      "outsideResidual": 0.002670866523692801,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-fruit_table.png-q90",
+      "sceneSimilarity": 0.9926393712196209,
+      "matched": true,
+      "alignment": 0.9999079001331614,
+      "changedFraction": 0,
+      "outsideResidual": 0.0024337469362745016,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-mountain_lake.png-q60",
+      "sceneSimilarity": 0.9952871683790019,
+      "matched": true,
+      "alignment": 0.9998181399974536,
+      "changedFraction": 0,
+      "outsideResidual": 0.003670087826797373,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-mountain_lake.png-q70",
+      "sceneSimilarity": 0.9948802487461179,
+      "matched": true,
+      "alignment": 0.9998532163548431,
+      "changedFraction": 0,
+      "outsideResidual": 0.0030225566789215583,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-mountain_lake.png-q82",
+      "sceneSimilarity": 0.9938642630474472,
+      "matched": true,
+      "alignment": 0.999848997209875,
+      "changedFraction": 0,
+      "outsideResidual": 0.002617570465686266,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-mountain_lake.png-q90",
+      "sceneSimilarity": 0.9966117638914864,
+      "matched": true,
+      "alignment": 0.9998548412997093,
+      "changedFraction": 0,
+      "outsideResidual": 0.0024812985089869197,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-night_city.png-q60",
+      "sceneSimilarity": 0.969233637093493,
+      "matched": true,
+      "alignment": 0.9994654717531319,
+      "changedFraction": 0,
+      "outsideResidual": 0.00472962622549018,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-night_city.png-q70",
+      "sceneSimilarity": 0.9684771946166053,
+      "matched": true,
+      "alignment": 0.9995396927026285,
+      "changedFraction": 0,
+      "outsideResidual": 0.0037910411560457386,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-night_city.png-q82",
+      "sceneSimilarity": 0.9734094358620612,
+      "matched": true,
+      "alignment": 0.9995190655721833,
+      "changedFraction": 0,
+      "outsideResidual": 0.003000536151960774,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-night_city.png-q90",
+      "sceneSimilarity": 0.9901236067351243,
+      "matched": true,
+      "alignment": 0.9995736835946819,
+      "changedFraction": 0,
+      "outsideResidual": 0.0026995889501633895,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_bicycle.png-q60",
+      "sceneSimilarity": 0.991406484565169,
+      "matched": true,
+      "alignment": 0.9999100801654547,
+      "changedFraction": 0,
+      "outsideResidual": 0.00375402113970587,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_bicycle.png-q70",
+      "sceneSimilarity": 0.9859781715170777,
+      "matched": true,
+      "alignment": 0.9999190562311747,
+      "changedFraction": 0,
+      "outsideResidual": 0.00288788041258169,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_bicycle.png-q82",
+      "sceneSimilarity": 0.9962086468695611,
+      "matched": true,
+      "alignment": 0.999932727740652,
+      "changedFraction": 0,
+      "outsideResidual": 0.0027088439542483573,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_bicycle.png-q90",
+      "sceneSimilarity": 0.995975730206379,
+      "matched": true,
+      "alignment": 0.9999327108916551,
+      "changedFraction": 0,
+      "outsideResidual": 0.0027640548406862656,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_plant.png-q60",
+      "sceneSimilarity": 0.9844040298649577,
+      "matched": true,
+      "alignment": 0.9998482390235304,
+      "changedFraction": 0,
+      "outsideResidual": 0.003678066278594759,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_plant.png-q70",
+      "sceneSimilarity": 0.978989761524551,
+      "matched": true,
+      "alignment": 0.9998688372396253,
+      "changedFraction": 0,
+      "outsideResidual": 0.0028996885212418206,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_plant.png-q82",
+      "sceneSimilarity": 0.988382619777011,
+      "matched": true,
+      "alignment": 0.9998808266142785,
+      "changedFraction": 0,
+      "outsideResidual": 0.0026118259803921485,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_plant.png-q90",
+      "sceneSimilarity": 0.9898738731595352,
+      "matched": true,
+      "alignment": 0.999881430495286,
+      "changedFraction": 0,
+      "outsideResidual": 0.0026654411764705796,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_teapot.png-q60",
+      "sceneSimilarity": 0.991399047170952,
+      "matched": true,
+      "alignment": 0.9998801090696391,
+      "changedFraction": 0,
+      "outsideResidual": 0.0037393407883986804,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_teapot.png-q70",
+      "sceneSimilarity": 0.9903584972202752,
+      "matched": true,
+      "alignment": 0.9998805263760457,
+      "changedFraction": 0,
+      "outsideResidual": 0.0028470307393790757,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_teapot.png-q82",
+      "sceneSimilarity": 0.9914842888167722,
+      "matched": true,
+      "alignment": 0.9998858899666522,
+      "changedFraction": 0,
+      "outsideResidual": 0.0025907628676470505,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_teapot.png-q90",
+      "sceneSimilarity": 0.9936780862161879,
+      "matched": true,
+      "alignment": 0.9998936285891387,
+      "changedFraction": 0,
+      "outsideResidual": 0.002626506331699338,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_vase.png-q60",
+      "sceneSimilarity": 0.9878456058798337,
+      "matched": true,
+      "alignment": 0.9999040537838498,
+      "changedFraction": 0,
+      "outsideResidual": 0.0035957286560457397,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_vase.png-q70",
+      "sceneSimilarity": 0.9931090917648773,
+      "matched": true,
+      "alignment": 0.9999228245385229,
+      "changedFraction": 0,
+      "outsideResidual": 0.0027059717116012984,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_vase.png-q82",
+      "sceneSimilarity": 0.9901425022629622,
+      "matched": true,
+      "alignment": 0.9999313414075347,
+      "changedFraction": 0,
+      "outsideResidual": 0.002486723856209142,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "jpeg-studio_vase.png-q90",
+      "sceneSimilarity": 0.9907168494833576,
+      "matched": true,
+      "alignment": 0.9999339913123817,
+      "changedFraction": 0,
+      "outsideResidual": 0.002563316993464044,
+      "diffAreaFraction": 0,
+      "diffRegionCount": 0
+    },
+    {
+      "name": "edited",
+      "sceneSimilarity": 0.8996156753748551,
+      "matched": true,
+      "alignment": 0.9810199275857835,
+      "changedFraction": 0.018310546875,
+      "outsideResidual": 0.0021974530552961924,
+      "diffAreaFraction": 0.015625,
+      "diffRegionCount": 1
+    },
+    {
+      "name": "trusted_edited",
+      "sceneSimilarity": 0.9670273715503915,
+      "matched": true,
+      "alignment": 0.9978758602297471,
+      "changedFraction": 0.0283203125,
+      "outsideResidual": 0.004223227752639503,
+      "diffAreaFraction": 0.03515625,
+      "diffRegionCount": 1
+    },
+    {
+      "name": "rectangle-edit",
+      "sceneSimilarity": 0.9559893652822322,
+      "matched": true,
+      "alignment": 0.972613532939736,
+      "changedFraction": 0.0234375,
+      "outsideResidual": 0.0010568627450980384,
+      "diffAreaFraction": 0.0234375,
+      "diffRegionCount": 1
+    },
+    {
+      "name": "same-place-later",
+      "sceneSimilarity": 0.8993644693441529,
+      "matched": true,
+      "alignment": 0.9139185911942533,
+      "changedFraction": 0.043212890625,
+      "outsideResidual": 0.03332469844306535,
+      "diffAreaFraction": 0.0390625,
+      "diffRegionCount": 3
+    },
+    {
+      "name": "same-place-earlier",
+      "sceneSimilarity": 0.8993644693441529,
+      "matched": true,
+      "alignment": 0.9139185911942533,
+      "changedFraction": 0.043212890625,
+      "outsideResidual": 0.03332469844306535,
+      "diffAreaFraction": 0.0390625,
+      "diffRegionCount": 3
+    }
+  ]
+}

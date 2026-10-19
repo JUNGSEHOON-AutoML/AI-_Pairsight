@@ -107,6 +107,7 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
     const colorAdjusted = matched && score > .98 && rawError / 12288 > .025 && correctedError < rawError * .45;
     const grid = Array<number>(256).fill(0);
     let changed = 0;
+    const residuals: number[] = [];
     for (let i = 0; i < 4096; i++) {
       const x = (i % 64) / 63, y = Math.floor(i / 64) / 63;
       let error = 0;
@@ -115,6 +116,7 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
         if (colorAdjusted) av = av * channels[c].gain + channels[c].offset;
         error += Math.abs(av - sample(b, best, x, y, c)) / 3;
       }
+      residuals.push(error);
       if (error > .16) changed++;
       grid[Math.floor(Math.floor(i / 64) / 4) * 16 + Math.floor((i % 64) / 4)] += error / 16;
     }
@@ -140,11 +142,20 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
         w: (Math.max(...xs) - Math.min(...xs) + 1) / 16, h: (Math.max(...ys) - Math.min(...ys) + 1) / 16,
         note: "정렬 후에도 픽셀 차이가 남는 영역 (편집 의도는 확인하지 못함)" });
     }
+    // Measure against every detected region, BEFORE truncating boxes for display. The outside
+    // uses their union; the area budget conservatively sums boxes (overlap is counted twice).
+    const outside = residuals.filter((_, i) => {
+      const x = ((i % 64) + .5) / 64, y = (Math.floor(i / 64) + .5) / 64;
+      return !diffRegions.some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+    });
+    const outsideResidual = outside.length ? outside.reduce((sum, v) => sum + v, 0) / outside.length : null;
+    const diffAreaFraction = diffRegions.reduce((sum, r) => sum + r.w * r.h, 0);
+    const diffRegionCount = diffRegions.length;
     const rgba = Buffer.from(grid.flatMap(v => [230, 40, 30, Math.round(Math.min(1, v * 4) * 255)]));
     const heatmap = "data:image/png;base64," + (await sharp(rgba, { raw: { width: 16, height: 16, channels: 4 } })
       .resize(128, 128, { kernel: "nearest" }).png().toBuffer()).toString("base64");
     return { matched, sceneSimilarity, sceneRejected, pHashDistance, alignedDistance, alignmentScore: score,
-      changedFraction: changed / 4096, crop: best.w < .99 || best.h < .99 ? { x: best.x, y: best.y, w: best.w, h: best.h } : null,
+      changedFraction: changed / 4096, outsideResidual, diffAreaFraction, diffRegionCount, crop: best.w < .99 || best.h < .99 ? { x: best.x, y: best.y, w: best.w, h: best.h } : null,
       flip: best.flip, colorAdjusted, diffRegions: diffRegions.slice(0, 8), heatmap, referenceHash: hash(reference) };
   }
 }

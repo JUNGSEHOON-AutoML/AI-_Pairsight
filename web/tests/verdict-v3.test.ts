@@ -25,6 +25,7 @@ const OTHER = "https://blog.example.test/post";
 
 const cmp = (o: Partial<ComparisonResult> = {}): ComparisonResult => ({
   matched: true, sceneSimilarity: 0.9, sceneRejected: false, pHashDistance: 4, alignedDistance: 4, alignmentScore: 0.97, changedFraction: 0.06,
+  outsideResidual: .004, diffAreaFraction: .04, diffRegionCount: 1,
   crop: null, flip: null, colorAdjusted: false, heatmap: "", referenceHash: "ref",
   diffRegions: [{ x: 0.7, y: 0.7, w: 0.2, h: 0.2, note: "" }], ...o,
 });
