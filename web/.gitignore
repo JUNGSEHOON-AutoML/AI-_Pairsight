@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local model weights (scene gate)
 /.cache/
+
+# Private case database, local operator credentials, runtime events
+/.newsroom/
