@@ -1,5 +1,7 @@
 -- 003: non-profit pilot (payments removed from the design) and the public dashboard. 2026-10-19.
--- Apply after 002. Rollback is not provided: the payment tables never held data (payments were never built).
+-- Apply once, after 002 and after backing up. Fresh installations use schema.sql and must NOT also apply this.
+-- No rollback: the payment tables never held data (payments were never built).
+begin;
 
 drop table if exists stripe_events;
 alter table profiles drop column if exists plan, drop column if exists stripe_customer_id;
@@ -55,3 +57,5 @@ alter table public_cases enable row level security;
 -- The public dashboard: anyone may read approved cases, nothing else. Drafts, pending, rejected and withdrawn
 -- cases stay invisible to every browser role, including their author.
 create policy approved_cases_are_public on public_cases for select to anon, authenticated using (approval_status = 'approved');
+
+commit;
