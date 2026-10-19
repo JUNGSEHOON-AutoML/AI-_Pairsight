@@ -442,3 +442,12 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 - Central `tuning/thresholds.json` preserves current values. Dev-only guarded ratchet scaffold with protected-file hashes, branch restriction, per-experiment budget/count, strict zero-wrong adoption and guarded rollback. New dev/holdout manifests intentionally empty; fewer than 30 independent real-photo dev cases refuses start. Actual tuning loop NOT run.
 - Whole suite 259 tests passed; targeted follow-up regression and safety tests passed. Typecheck/lint/production build verified. Root tuning JSON required Turbopack root = repository; profile hash now separates analysis caches.
 - Local work-unit commits, no push. Handoff: `handoff-gemini-tuning.md`. Existing 32 untracked control-room captures preserved.
+
+
+## 2026-10-19 공개 대시보드 첫 화면·관제실 재확인
+
+- 사용자에게 기존 검사 폼을 열어 요청한 화면이 보이지 않았던 진입 문제를 수정: `/` → `/cases`, 검사 폼 `/check`. 새 정책 안내 `/how-it-works`. 코드 `f333d74`.
+- 주제·필터·승인 제한·2D 재판을 1280/390 Chrome에서 확인. 가로 넘침 및 pageerror 0. 관련 테스트 26개, 타입·린트·프로덕션 빌드 통과.
+- Claw3D 20개 이벤트/7명/7개 발언, 최종 0 working/7 idle 및 토큰 비노출 재확인. 사용자용 3440 포트에서 mock 반복 재생 중.
+- 라이선스·최신 저장소 및 카테고리 정책 공식 출처 재확인. Supabase·승인 UI·실시간 Gemini 웹 연결은 미완료로 유지.
+- 인수인계: [handoff-public-entry.md](handoff-public-entry.md). 작업 단위 로컬 커밋, push 없음.

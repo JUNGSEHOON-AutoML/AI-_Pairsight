@@ -1,0 +1,13 @@
+{
+  "courtEvents": 20,
+  "seatsStarted": 7,
+  "finalSpeeches": 7,
+  "finalWorking": 0,
+  "finalIdle": 7,
+  "pageErrors": [],
+  "evidenceIdsSeen": [
+    "E1",
+    "S1"
+  ],
+  "publicSettingsRedacted": true
+}

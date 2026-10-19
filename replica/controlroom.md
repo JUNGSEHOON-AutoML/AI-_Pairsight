@@ -7,8 +7,8 @@ Pairsight 법정 이벤트를 별도 Claw3D의 3D 사무실에 보내는 **보�
 | 항목 | 값 |
 | --- | --- |
 | 저장소 | [github.com/iamlukethedev/Claw3D](https://github.com/iamlukethedev/Claw3D) |
-| 라이선스 | **MIT** (GitHub API, 저장소 LICENSE) |
-| 상태 | 보관(archived) 아님. 별 약 2,340개, 포크 640개, 열린 이슈 51개 |
+| 라이선스 | **MIT** ([공식 LICENSE](https://github.com/iamlukethedev/Claw3D/blob/main/LICENSE), GitHub API 재확인) |
+| 상태 | 2026-10-19 공식 GitHub API 재확인: archived=false, disabled=false. 별 2,342개, 포크 641개. open_issues_count=51(이슈와 PR 합산) |
 | 최근 활동 | 마지막 push 2026-08-21(CI 설정만). 마지막 코드 변경은 2026-05-30(Hermes 어댑터, OpenClaw 프로토콜 v4) |
 | 최신 릴리스 | v0.1.4 (2026-04-23). 확인한 커밋은 main `0565b78` |
 | 구조 | Next.js 앱 + 자체 Node 서버. 백엔드 런타임(OpenClaw, Hermes, 데모, custom HTTP)에 붙는 UI·프록시 층 |
@@ -92,3 +92,9 @@ PAIRSIGHT_CLAW3D_PORT=3440 PAIRSIGHT_CONTROLROOM_PORT=3450 PAIRSIGHT_CONTROLROOM
 - Claw3D 전체 기능을 지원하는 런타임이 아닙니다. 작업 생성·모델 변경 등 쓰기 UI는 어댑터에서 거부됩니다.
 - 과거 HTTP 데모의 설정·캡처는 보존했습니다. 새 실행기는 과거 `~/.openclaw` 설정을 사용하지 않습니다. 과거 설정의 토큰을 새 토큰으로 재사용하지 마세요.
 - 초기 upstream 조사(1장)는 인수받은 기록입니다. 이번에는 로컬 기준 커밋과 동작을 검증했으며 새 릴리스 조사는 하지 않았습니다.
+
+## 2026-10-19 브라우저 진입 보완
+
+- 공개 사이트의 첫 화면은 `/cases`이며 3D 관제실은 계속 별도 Claw3D 앱입니다. 공개 사이트 메뉴에 localhost 관리 링크를 넣지 않습니다.
+- 기존 3400/3410/3411 프로세스를 보존하고, 이번 사용자 확인용은 UI **3440**, HTTP **3450**, WS **3451**에서 실행합니다. `npm run controlroom -- --loop`로 mock 재판을 반복 재생하며 외부 LLM을 호출하지 않습니다.
+- 연결은 기존에 승인된 WS 데모 프로토콜 어댑터를 사용합니다. 요청하신 custom HTTP 어댑터도 유지합니다. Claw3D의 HTTP 계약에는 상태 애니메이션 이벤트가 없으므로 HTTP만으로 3D 재생이 된다고 보고하지 않습니다.

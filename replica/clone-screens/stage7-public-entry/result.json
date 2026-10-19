@@ -1,0 +1,30 @@
+[
+  {
+    "width": 1280,
+    "home": "/cases",
+    "approvedCards": 5,
+    "topicFilters": true,
+    "combinedFilters": true,
+    "blurredImages": true,
+    "timeline": true,
+    "checkNavigation": true,
+    "policy": true,
+    "blockedCasesHidden": 3,
+    "horizontalOverflow": false,
+    "pageErrors": 0
+  },
+  {
+    "width": 390,
+    "home": "/cases",
+    "approvedCards": 5,
+    "topicFilters": true,
+    "combinedFilters": true,
+    "blurredImages": true,
+    "timeline": true,
+    "checkNavigation": true,
+    "policy": true,
+    "blockedCasesHidden": 3,
+    "horizontalOverflow": false,
+    "pageErrors": 0
+  }
+]
