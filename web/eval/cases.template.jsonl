@@ -1,0 +1,39 @@
+// 파일럿 30건 템플릿. 이 파일을 eval/cases.jsonl로 복사한 뒤, 사례를 채운 줄만 앞의 // 를 지우세요.
+// 구성: 편집 조작 10 (pilot-e01~e10) · 맥락 조작 10 (pilot-c01~c10) · 진짜 확인 5 (pilot-a01~a05) · AI 생성 5 (pilot-g01~g05)
+// 이미지는 eval/images/<id>.jpg 로 저장하세요 (png/webp/heic도 가능, 확장자만 맞추면 됨). 채운 뒤: npm run eval -- --cases eval/cases.jsonl --validate
+// label 은 사실만: authentic · ai_generated · edited · miscontextualized (판단 불가는 라벨이 아님)
+// claim: 게시물이 주장하는 내용(200자 이내) · claimedDate: 게시물이 주장하는 촬영 날짜 YYYY-MM-DD (맥락 조작은 필수) · source: 정답 근거 URL·메모
+// --- 편집 조작: 퍼진 편집본 이미지 / source = 편집 전 원본 사진이 있는 기사 URL
+// {"id":"pilot-e01","image":"images/pilot-e01.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e02","image":"images/pilot-e02.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e03","image":"images/pilot-e03.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e04","image":"images/pilot-e04.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e05","image":"images/pilot-e05.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e06","image":"images/pilot-e06.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e07","image":"images/pilot-e07.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e08","image":"images/pilot-e08.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e09","image":"images/pilot-e09.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// {"id":"pilot-e10","image":"images/pilot-e10.jpg","claim":"","claimedDate":null,"label":"edited","source":"원본 기사 URL + 무엇이 바뀌었는지"}
+// --- 맥락 조작: 퍼진 이미지 그대로 / claim·claimedDate = 게시물의 주장 / source = 실제 촬영 시점·장소를 보여주는 기사 URL
+// {"id":"pilot-c01","image":"images/pilot-c01.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c02","image":"images/pilot-c02.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c03","image":"images/pilot-c03.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c04","image":"images/pilot-c04.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c05","image":"images/pilot-c05.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c06","image":"images/pilot-c06.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c07","image":"images/pilot-c07.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c08","image":"images/pilot-c08.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c09","image":"images/pilot-c09.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// {"id":"pilot-c10","image":"images/pilot-c10.jpg","claim":"","claimedDate":"YYYY-MM-DD","label":"miscontextualized","source":"실제 맥락 기사 URL (날짜 포함)"}
+// --- 진짜 확인: 언론 보도사진을 바꾸지 않고 공유한 이미지 / claim = 사실과 맞는 설명(없으면 빈칸) / source = 보도 원문 URL
+// {"id":"pilot-a01","image":"images/pilot-a01.jpg","claim":"","claimedDate":null,"label":"authentic","source":"보도 원문 URL"}
+// {"id":"pilot-a02","image":"images/pilot-a02.jpg","claim":"","claimedDate":null,"label":"authentic","source":"보도 원문 URL"}
+// {"id":"pilot-a03","image":"images/pilot-a03.jpg","claim":"","claimedDate":null,"label":"authentic","source":"보도 원문 URL"}
+// {"id":"pilot-a04","image":"images/pilot-a04.jpg","claim":"","claimedDate":null,"label":"authentic","source":"보도 원문 URL"}
+// {"id":"pilot-a05","image":"images/pilot-a05.jpg","claim":"","claimedDate":null,"label":"authentic","source":"보도 원문 URL"}
+// --- AI 생성: 생성 이미지로 확인된 사례 / source = 생성 사실을 확인한 근거(제작자 공개, 팩트체크 등)
+// {"id":"pilot-g01","image":"images/pilot-g01.jpg","claim":"","claimedDate":null,"label":"ai_generated","source":"생성 확인 근거 URL"}
+// {"id":"pilot-g02","image":"images/pilot-g02.jpg","claim":"","claimedDate":null,"label":"ai_generated","source":"생성 확인 근거 URL"}
+// {"id":"pilot-g03","image":"images/pilot-g03.jpg","claim":"","claimedDate":null,"label":"ai_generated","source":"생성 확인 근거 URL"}
+// {"id":"pilot-g04","image":"images/pilot-g04.jpg","claim":"","claimedDate":null,"label":"ai_generated","source":"생성 확인 근거 URL"}
+// {"id":"pilot-g05","image":"images/pilot-g05.jpg","claim":"","claimedDate":null,"label":"ai_generated","source":"생성 확인 근거 URL"}
