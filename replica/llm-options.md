@@ -1,5 +1,7 @@
 # LLM 선택지: 로컬 Ollama 측정과 무료 API 조사 (2026-10-19)
 
+업데이트: 아래는 초기 조사 기록이다. 사용자 요청에 따라 텍스트 최소화 경계를 둔 Gemini 선택 제공자를 추가했다. 현재 설정·약관은 [Gemini 제공자](gemini-provider.md), 동일 사건 재측정은 [최신 벤치마크](llm-benchmark-2026-10-19.md)를 참조한다.
+
 법정 레이어([newsroom-court.md](newsroom-court.md))의 에이전트가 쓸 LLM입니다.
 
 **원칙**

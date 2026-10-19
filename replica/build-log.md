@@ -433,3 +433,12 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 - Pairsight 241개 테스트·타입·린트·빌드, Claw3D 관련 17개 테스트·빌드 통과.
 - 실행: web에서 `npm run controlroom`, 화면에 7명이 보이면 터미널 Enter. 토큰은 환경 전용, 임시 설정 사용, localhost·읽기 전용.
 - 상세 실행/검증/남은 범위: [handoff-controlroom.md](handoff-controlroom.md), [controlroom.md](controlroom.md).
+
+
+## 2026-10-19 Gemini / threshold ratchet handoff
+
+- Gemini LLMProvider added with text-only evidence projection, key masking, and no-retry 429 termination. Existing Ollama/mock retained. See `gemini-provider.md`.
+- Same trusted_edited hearing remeasured on CPU Ollama: 1.5B 141.895s, 3B 232.655s, 7B 439.265s; each six calls, edited maintained. Gemini timing awaits secure local runtime key configuration; no mock time presented as real.
+- Central `tuning/thresholds.json` preserves current values. Dev-only guarded ratchet scaffold with protected-file hashes, branch restriction, per-experiment budget/count, strict zero-wrong adoption and guarded rollback. New dev/holdout manifests intentionally empty; fewer than 30 independent real-photo dev cases refuses start. Actual tuning loop NOT run.
+- Whole suite 259 tests passed; targeted follow-up regression and safety tests passed. Typecheck/lint/production build verified. Root tuning JSON required Turbopack root = repository; profile hash now separates analysis caches.
+- Local work-unit commits, no push. Handoff: `handoff-gemini-tuning.md`. Existing 32 untracked control-room captures preserved.

@@ -31,7 +31,7 @@ export function geminiCaseSummary(prompt: string): string {
     for (const [k, v] of Object.entries(object(o.facts))) {
       if (FACTS.has(k) && (typeof v === "boolean" || (typeof v === "number" && Number.isFinite(v)))) facts[k] = v;
       if (k === "dateSource" && ["page_meta", "wayback_first_capture", "search_discovered", "tineye_crawl"].includes(String(v))) facts[k] = v;
-      if (k === "flip" && [null, "horizontal", "vertical"].includes(v as null)) facts[k] = v;
+      if (k === "flip" && (v === null || v === "horizontal" || v === "vertical")) facts[k] = v;
     }
     return { id: text(o.id, 20), kind: text(o.kind, 40), outcome: text(o.outcome, 40), strength: text(o.strength, 20),
       summary: text(o.summary), date: typeof o.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.date) ? o.date : null, facts };
@@ -56,7 +56,9 @@ export class GeminiProvider implements LLMProvider {
     if (Object.keys(req).some((k) => !["role", "system", "prompt", "schema", "maxTokens"].includes(k))) throw new LLMUnavailable("privacy", false);
     const prompt = geminiCaseSummary(req.prompt);
     const system = text(req.system, 8000);
-    const schema = JSON.parse(text(JSON.stringify(req.schema), 20000)); // scan and redact at the boundary
+    let schema: unknown;
+    try { schema = JSON.parse(text(JSON.stringify(req.schema), 20000)); }
+    catch { throw new LLMUnavailable("privacy", false); }
     const key = process.env.GEMINI_API_KEY;
     if (!key) throw new LLMUnavailable("configuration", false);
     const started = performance.now();

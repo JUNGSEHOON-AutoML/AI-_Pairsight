@@ -21,7 +21,7 @@ create table profiles (
 );
 
 -- The work itself, shared by everyone who submits the same input (fix-F6).
--- input_key = sha256 of the file bytes, or of the normalised URL plus its fetched content.
+-- input_key = normalised image sha256 + ':' + threshold profile sha256 (runtime v5+).
 -- A new pipeline_version re-analyses instead of serving an old verdict.
 -- A recheck allocates a new run_number. The verdict is computed in verdictForCheck from
 -- shared evidence plus checks.claimed_date; it is never stored on the shared analysis.

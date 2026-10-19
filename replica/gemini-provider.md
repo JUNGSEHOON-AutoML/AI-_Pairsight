@@ -35,6 +35,8 @@
 
 Node 24 기준, `web/`에서 실행한다. 비밀 값은 명령에 넣지 않는다. `npm run court`는 Node 런타임의 환경 파일 로더를 사용한다.
 
+키 파일이 없는 경우 사람이 터미널에서 `python3 scripts/set-gemini-key.py`를 실행해 숨김 입력할 수 있다. 파일 권한 0600으로 새 파일만 만들며 기존 `.env.local`은 덮어쓰거나 읽지 않는다. 비대화형 실행은 거부한다. 채팅에 보낸 키를 도구 호출 인자로 복사하지 않는다.
+
 ```sh
 PAIRSIGHT_LLM=mock npm run court
 PAIRSIGHT_LLM=gemini npm run court -- --json /tmp/pairsight-gemini-court.json

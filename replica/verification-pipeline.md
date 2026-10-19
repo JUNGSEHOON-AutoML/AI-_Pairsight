@@ -325,3 +325,14 @@ PATH=$HOME/.local/node/bin:$PATH npm run dev
 4. 실제 C2PA 검증기·신뢰 루트 정책 및 평가셋 구축. LLM은 인용 스키마와 회귀 평가를 갖춘 어댑터로 교체.
 5. 영속 DB에는 이번 `Analysis.verification`, `SourceMatch.dates/comparison`, 검사별 `claimText/contextStatus/contextEvidence`, 새 evidence kind를 반영한 **별도 스키마 변경과 RLS 검증** 필요. 이번에는 DB 연결이나 기존 SQL에 대한 새 마이그레이션 적용을 하지 않았다.
 6. 실서비스 작업 큐·멱등성·입력 요청 제한·일시 파일/임시 버킷 정리·사용자 삭제 및 공유 근거 보관 기간·출처 삭제 요청 처리. 현재 memory store/프로세스 내 작업은 개발용이다.
+
+
+## 2026-10-19: Gemini 법정과 기준값 튜닝 틀
+
+Gemini는 별도의 `LLMProvider`로 추가했다. `PAIRSIGHT_LLM=gemini|ollama|mock`으로 선택하며 기본값은 mock이다. Gemini에는 근거 카드의 제한된 텍스트 요약·측정값만 보내고, 업로드 이미지·썸네일·히트맵·이미지/서명 URL·기사 발췌는 보내지 않는다. 429에서는 재시도 없이 해당 재판을 “맥락·법정 확인 못 함”으로 종료하고 최종 판단을 보류한다. 원래 코드 판정과 실제 호출 시도 수는 별도 보존한다. 키·오류 처리와 공식 무료 조건은 [Gemini 문서](gemini-provider.md)를 따른다.
+
+장면 관문 0.76, 영역 밖 잔차 0.020, 면적 0.08, 영역 수 2, 정렬 상관도 0.9, 해밍 거리 18은 이제 `tuning/thresholds.json`에서 읽는다. 값 자체는 이번에 바꾸지 않았다. 합성 그림으로 시작하고 제한된 SkyFinder 실제 사진으로 보정한 값이며, 뉴스·일반 사진 전체에 통용되는 값으로 검증된 것은 아니다. 사진 분포가 달라지면 독립 자료로 다시 맞춰야 한다.
+
+새 루프는 dev 실제 사진 독립 사례 30건 이상과 별도 holdout이 준비되어야 시작할 수 있다. 현재 신규 자료는 각각 0건이므로 실행 거부 상태다. 과거 공개된 calibration/validation은 회귀 검사 자료로 유지하며 새 holdout으로 쓰지 않는다. 보호 파일 해시·변경 감시, 전체 테스트 통과, dev 오판 0건, 맞힘 증가/동률 시 판단 불가 감소, tuning/* 전용 브랜치에서 후보 커밋과 거부 후보 reset 절차를 구현했다. threshold 내용 해시는 생산 분석 캐시 키에도 포함한다.
+
+실험은 실행하지 않았다. 이번 검증은 모의 Gemini 응답과 임시 저장소의 안전장치 단위 테스트, 기존 회귀 검사뿐이다. 사람 지침은 [tuning/program.md](../tuning/program.md).

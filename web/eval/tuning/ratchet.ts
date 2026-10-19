@@ -36,13 +36,12 @@ export async function command(root: string, executable: string, args: string[], 
   if (Date.now() >= deadline) throw new Error("Experiment time budget exceeded");
   return new Promise<string>((done, fail) => {
     let output = "", reason: Error | null = null;
-    let child: ReturnType<typeof spawn> | undefined;
     const stop = (message: string) => {
       reason ??= new Error(message);
       if (child?.pid) { try { process.kill(-child.pid, "SIGKILL"); } catch { /* already exited */ } }
     };
     const watchers = Object.keys(locked).map((p) => watch(resolve(root, p), () => stop("Protected file changed; tuning stopped")));
-    child = spawn(executable, args, { cwd: resolve(root, "web"), detached: true,
+    const child = spawn(executable, args, { cwd: resolve(root, "web"), detached: true,
       env: { ...process.env, GEMINI_API_KEY: "", PAIRSIGHT_LLM: "mock" }, stdio: ["ignore", "pipe", "pipe"] });
     const timer = setTimeout(() => stop("Experiment time budget exceeded"), Math.max(1, deadline - Date.now()));
     const cleanup = () => { clearTimeout(timer); watchers.forEach((w) => w.close()); };

@@ -1,0 +1,76 @@
+{
+  "measuredAt": "2026-10-19",
+  "case": "trusted_edited",
+  "groundTruth": "edited",
+  "transport": "mock candidate pages; real local image comparison",
+  "ollama": {
+    "version": "0.11.2",
+    "cpuOnly": true,
+    "threads": 8,
+    "trialsPerModel": 1
+  },
+  "results": [
+    {
+      "llm": "ollama:qwen2.5:1.5b",
+      "judge": "edited (v3.trusted_edited)",
+      "final": "edited",
+      "downgraded": false,
+      "calls": 6,
+      "wallMs": 141895,
+      "perCallMs": 23649,
+      "kept": {
+        "prosecution": 1,
+        "defense": 0,
+        "jurorDoubts": 0
+      },
+      "rejected": 5,
+      "incomplete": [],
+      "clerkWritten": true,
+      "reviewStatus": "complete",
+      "failureCode": null
+    },
+    {
+      "llm": "ollama:qwen2.5:3b",
+      "judge": "edited (v3.trusted_edited)",
+      "final": "edited",
+      "downgraded": false,
+      "calls": 6,
+      "wallMs": 232655,
+      "perCallMs": 38776,
+      "kept": {
+        "prosecution": 1,
+        "defense": 0,
+        "jurorDoubts": 0
+      },
+      "rejected": 3,
+      "incomplete": [],
+      "clerkWritten": true,
+      "reviewStatus": "complete",
+      "failureCode": null
+    },
+    {
+      "llm": "ollama:qwen2.5:7b",
+      "judge": "edited (v3.trusted_edited)",
+      "final": "edited",
+      "downgraded": false,
+      "calls": 6,
+      "wallMs": 439265,
+      "perCallMs": 73211,
+      "kept": {
+        "prosecution": 2,
+        "defense": 0,
+        "jurorDoubts": 0
+      },
+      "rejected": 3,
+      "incomplete": [],
+      "clerkWritten": true,
+      "reviewStatus": "complete",
+      "failureCode": null
+    }
+  ],
+  "gemini": {
+    "model": "gemini-3.8-flash",
+    "measured": false,
+    "reason": "GEMINI_API_KEY not configured in local runtime; no key copied into tool arguments"
+  }
+}
