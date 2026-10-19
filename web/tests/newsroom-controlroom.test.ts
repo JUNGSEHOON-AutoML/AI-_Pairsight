@@ -5,10 +5,10 @@ import { createNewsroomAdapter,newsroomSnapshot } from "../lib/newsroom/controlr
 import type { CaseInput } from "../lib/newsroom/model";
 const input:CaseInput={origin:"manual",claim:"private claim",claimedDate:null,pageUrl:null,imageUrl:null,thumbnail:null,imageHash:null,provenance:[],candidateUrls:[],channels:[],topic:null,contentFlags:[],rightsConfirmed:false,reportedBy:"private-operator"};
 describe("real case control room",()=>{
-  it("projects nine departments, stops on failure and excludes fixtures and private input",()=>{
+  it("projects five desks, editor and operator, stops on failure and excludes fixtures and private input",()=>{
     const r=new CaseRepository(":memory:");const c=r.create(input);r.create({...input,origin:"fixture"});
     r.mutate(c.id,(x,emit)=>{x.stage="osint";x.status="running";emit({department:"osint",state:"running",summary:"OSINT 처리 시작",cite:[]});});
-    let s=newsroomSnapshot(r);expect(s.departments).toHaveLength(9);expect(s.cases).toHaveLength(1);expect(s.departments[1].state).toBe("working");
+    let s=newsroomSnapshot(r);expect(s.departments).toHaveLength(7);expect(s.cases).toHaveLength(1);expect(s.departments[1].state).toBe("working");
     expect(JSON.stringify(s)).not.toContain("private");
     r.mutate(c.id,x=>{x.status="failed";});s=newsroomSnapshot(r);expect(s.departments[1].state).toBe("blocked");expect(s.metrics.failed).toBe(1);r.close();
   });
