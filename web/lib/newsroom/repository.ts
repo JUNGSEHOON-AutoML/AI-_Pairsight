@@ -14,6 +14,11 @@ export class CaseRepository {
     if (path !== ":memory:") chmodSync(path, 0o600);
   }
   close() { this.db.close(); }
+  /** Includes changes made by the separate worker, including reviews without a new stage. */
+  version(): string {
+    const row = this.db.prepare("SELECT count(*) AS n, coalesce(sum(json_extract(record,'$.revision')),0) AS revisions, (SELECT coalesce(max(seq),0) FROM case_events) AS seq FROM cases").get();
+    return JSON.stringify(row);
+  }
   get(id: string): CaseRecord | null {
     const row = this.db.prepare("SELECT record FROM cases WHERE id=?").get(id) as { record: string } | undefined;
     return row ? JSON.parse(row.record) : null;
