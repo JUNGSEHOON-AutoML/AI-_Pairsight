@@ -90,6 +90,6 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 - `VerdictResult` now carries `rule`, `strength`, `headlineFinding`; the banner shows 핵심 발견 ("단, …" first on 판단 불가) and the deciding strength.
 - v2 vs v3 on fixtures (same evidence, real pipeline): only `trusted_edited` (판단 불가 → 편집 조작, 중) and `trusted_context` (판단 불가 → 맥락 조작, 중) change, and only under the mock list; the production list changes no fixture (they use .test domains).
 - Found while measuring: the `edited` fixture changes 1.8% of the grid but leaves a region, so "same picture" now needs **no regions** as well as <2% change. Benign transforms (JPEG, crop, flip, colour) measured with 0 regions.
-- **Not fixed (v2 kept as instructed):** v2's image-bound-date rule still treats <2% change as the same picture, so a lightly edited copy with a bound archive date could be called 맥락 조작 instead of 편집 조작.
+- **Fixed 2026-10-19 (follow-up):** v2's image-bound-date rule and the fact-check image match also required only <2% change; both now also require no diff region, so a lightly edited copy is no longer called 맥락 조작 or matched to a fact-check. Counterexample tests added.
 - Eval harness: `web/eval/` (README there). Mock smoke run on the example cases: 9/9 as expected, 판단 불가 55.6% → 33.3%, 반대 판정 0. No real-case run yet (needs a Vision key and cases).
 - Tests: 148 (adds v3 rules + counterexamples 41, fixtures v2/v3 3, eval + Vision adapter 7). Screens: `clone-screens/stage3-v3/`, 1280 and 390, 0 console errors.

@@ -76,7 +76,7 @@ export async function collectEvidence(input: NormalizedInput, p: Providers, sign
         details: { pHashDistance: comparison.pHashDistance, alignedDistance: comparison.alignedDistance, crop: comparison.crop, flip: comparison.flip, colorAdjusted: comparison.colorAdjusted } });
       for (const f of factChecks) {
         const review = v.article.review;
-        f.verified ||= f.url === v.article.url && comparison.changedFraction < .02 && !!review && review.claimComplete && f.claimComplete &&
+        f.verified ||= f.url === v.article.url && comparison.changedFraction < .02 && comparison.diffRegions.length === 0 && !!review && review.claimComplete && f.claimComplete &&
           sameText(f.claim, review.claim) && sameText(f.rating, review.rating) && sameText(f.publisher, review.publisher);
       }
       break; // at most one retained match/thumbnail per candidate page

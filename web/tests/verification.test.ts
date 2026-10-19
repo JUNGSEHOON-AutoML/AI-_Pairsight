@@ -35,6 +35,18 @@ describe("verification pipeline using mock APIs and actual page extraction/pixel
   it("rejects failure as failure, not no source", async () => {
     await expect(fixture("provider_timeout")).rejects.toMatchObject({ code: "provider_timeout" });
   });
+  it("does not accept a fact-check's image match when the candidate differs in a region (edited copy)", async () => {
+    for (const [regions, expected] of [[[], true], [[{ x: 0.6, y: 0.1, w: 0.3, h: 0.2, note: "" }], false]] as const) {
+      const p = createMockProviders();
+      const real = p.images.compare.bind(p.images);
+      // Same real comparison, but force "under 2% changed" and either no region or one region.
+      p.images.compare = async (a, b, s) => ({ ...(await real(a, b, s)), changedFraction: 0.015, diffRegions: [...regions] });
+      const input = await p.input.normalize({ bytes: await readFile("public/fixtures/inputs/fact_check_found.png"), mime: "image/png", pageUrl: null, publicImageUrl: null }, signal());
+      const c = await collectEvidence(input, p, signal());
+      expect(c.verification.factChecks[0].verified, `regions=${regions.length}`).toBe(expected);
+    }
+  });
+
   it("revokes temporary access even when fact search rejects and degrades explicitly", async () => {
     const { p, input } = await fixture("authentic");
     p.factCheck.search = async () => { throw new Error("API unavailable"); };

@@ -157,6 +157,29 @@ describe("v3 맥락 조작: the same picture on a trusted page, ≥30 days befor
   });
 });
 
+describe("v2 image-bound date rule: an edited copy is not 'the same picture'", () => {
+  // An archive capture that verified the compared image was present on 2019-03-02.
+  const bound = (c: Partial<ComparisonResult>) => match(OTHER, { firstSeenSource: "wayback_first_capture",
+    dates: [{ value: "2019-03-02", source: "wayback_first_capture", sourceUrl: OTHER, confidence: "medium", meaning: "page_capture", imageBound: true, imageHash: "ref" }] }, c);
+  const smallEdit = { changedFraction: 0.018, diffRegions: [{ x: 0.6, y: 0.1, w: 0.3, h: 0.2, note: "" }] };
+
+  it("control: the same picture with a bound earlier date is still 맥락 조작 (v2)", () => {
+    expect(run([bound(same)], "2026-10-01", [], EMPTY_TRUSTED_LIST)).toMatchObject({ verdict: "miscontextualized", rule: "v2.image_bound_date" });
+  });
+
+  it("counterexample: an edit under 2% that leaves a region is never called 맥락 조작", () => {
+    const r = run([bound(smallEdit)], "2026-10-01", [], EMPTY_TRUSTED_LIST);
+    expect(r.verdict).toBe("inconclusive");
+    expect(r.missing).toContain("찾은 사진이 넣은 이미지와 충분히 같지 않아요");
+    expect(r.missing).toContain("차이의 원인과 편집 이력을 확인하지 못했어요");
+    expect(r.headlineFinding?.kind).toBe("difference");
+  });
+
+  it("counterexample: with the trusted list it is the same, because the page is not trusted", () => {
+    expect(run([bound(smallEdit)], "2026-10-01").verdict).toBe("inconclusive");
+  });
+});
+
 describe("v2 behaviour is preserved", () => {
   it("an empty trusted list makes every trusted-source case fall back to v2", () => {
     expect(run([match(TRUSTED)], null, [], EMPTY_TRUSTED_LIST).verdict).toBe("inconclusive");

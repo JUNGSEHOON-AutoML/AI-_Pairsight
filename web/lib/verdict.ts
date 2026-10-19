@@ -204,7 +204,8 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
   }
   if (generated) return done("ai_generated", "검증된 출처 기록이나 워터마크가 AI 생성을 가리켜요.", "v2.ai_generated", "strong");
   if (edited) return done("edited", "검증된 출처 기록에 AI 편집 이력이 있어요. 차이 영역은 보조 근거예요.", "v2.ai_edited", "strong");
-  const checked = matches.filter(m => m.verified && m.comparison?.matched && m.comparison.changedFraction < .02);
+  // Same picture = under 2% changed AND no differing region (a small edit can stay under 2%; see sameImage above).
+  const checked = matches.filter(m => m.verified && m.comparison?.matched && m.comparison.changedFraction < .02 && m.comparison.diffRegions.length === 0);
   const fact = evidence.find(e => e.kind === "fact_check" && strong(e) && manip(e) &&
     e.details.claimMatched === true && e.details.imageMatched === true && e.details.pageVerified === true && e.details.assessment === "miscontextualized");
   if (fact) return done("miscontextualized", "같은 이미지·같은 주장에 대해, 확인한 팩트체크 원문이 맥락 불일치를 설명해요.", "v2.fact_check", "strong");
