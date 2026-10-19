@@ -5,7 +5,7 @@
 ## 키와 전송 경계
 
 - 키는 서버의 `process.env.GEMINI_API_KEY`에서만 얻는다. 소스·명령 인자·쿼리 URL에 넣지 않는다. 요청의 `x-goog-api-key` 헤더만 사용하며 리다이렉트를 거부한다.
-- `web/.gitignore`의 `.env*`가 `web/.env.local`을 제외하며, 파일은 Git 추적 대상이 아니다. 이번 서버에서 최초 환경 변수 존재 여부를 확인했을 때 파일이 없었다. 내용은 열어보지 않았다.
+- `web/.gitignore`의 `.env*`가 `web/.env.local`을 제외하며, 파일은 Git 추적 대상이 아니다. 사용자가 숨김 입력 도구로 저장한 뒤 런타임에서 환경 변수 설정 여부만 확인했고 실제 재판 6회 호출이 완료됐다. 파일 내용이나 키 값을 출력하지 않았다.
 - Gemini REST 호출은 도구나 파일 업로드 없이 `parts: [{text: ...}]`만 만든다. 원본 이미지, 썸네일, 히트맵, 이미지 URL, 서명 URL, 페이지 발췌는 전송하지 않는다.
 - 발신 직전에 사건 기록을 허용 목록으로 다시 구성한다. 카드 ID·종류·강도·200자 이내 요약·날짜·허용한 측정값, 검증된 공방 문장만 남긴다. 사용자 원문 주장과 판사 사유 원문도 제외한다. 텍스트 필드의 data/blob URI·긴 바이너리 문자열과 요청의 추가 멀티모달 필드는 호출 전에 거부한다.
 - 오류 응답 본문은 읽거나 기록하지 않는다. 네트워크/파싱 오류의 원문과 cause도 전달하지 않는다. 모델 출력에는 실제 환경 변수 값과 알려진 키 형식 마스킹을 적용한다.
@@ -35,7 +35,7 @@
 
 Node 24 기준, `web/`에서 실행한다. 비밀 값은 명령에 넣지 않는다. `npm run court`는 Node 런타임의 환경 파일 로더를 사용한다.
 
-키 파일이 없는 경우 사람이 터미널에서 `python3 scripts/set-gemini-key.py`를 실행해 숨김 입력할 수 있다. 파일 권한 0600으로 생성하거나 기존 파일 끝에 설정을 추가하며, 기존 `.env.local`을 읽지 않는다. 환경 파일 로더는 마지막 GEMINI_API_KEY 설정을 사용한다. 비대화형 실행은 거부한다. 채팅에 보낸 키를 도구 호출 인자로 복사하지 않는다.
+키를 새로 설정하거나 바꿀 경우 사람이 터미널에서 `python3 scripts/set-gemini-key.py`를 실행해 숨김 입력할 수 있다. 파일 권한 0600으로 생성하거나 기존 파일 끝에 설정을 추가하며, 기존 `.env.local`을 읽지 않는다. 환경 파일 로더는 마지막 GEMINI_API_KEY 설정을 사용한다. 비대화형 실행은 거부한다. 채팅에 보낸 키를 도구 호출 인자로 복사하지 않는다.
 
 ```sh
 PAIRSIGHT_LLM=mock npm run court
@@ -43,4 +43,4 @@ PAIRSIGHT_LLM=gemini npm run court -- --json /tmp/pairsight-gemini-court.json
 PAIRSIGHT_LLM=ollama npm run court -- --model qwen2.5:7b --url http://127.0.0.1:11500 --threads 8
 ```
 
-실측 비교와 미측정 사유는 `replica/llm-benchmark-2026-10-19.md`에 기록한다.
+실측 결과: Gemini 42.526초·6회 호출·편집 조작 유지. Ollama 1.5B/3B/7B와 같은 사례의 비교 조건과 한계는 [벤치마크](llm-benchmark-2026-10-19.md)에 기록했다.

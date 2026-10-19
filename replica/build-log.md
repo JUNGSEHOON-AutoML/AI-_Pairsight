@@ -438,7 +438,7 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 ## 2026-10-19 Gemini / threshold ratchet handoff
 
 - Gemini LLMProvider added with text-only evidence projection, key masking, and no-retry 429 termination. Existing Ollama/mock retained. See `gemini-provider.md`.
-- Same trusted_edited hearing remeasured on CPU Ollama: 1.5B 141.895s, 3B 232.655s, 7B 439.265s; each six calls, edited maintained. Gemini timing awaits secure local runtime key configuration; no mock time presented as real.
+- Same trusted_edited hearing measured on CPU Ollama: 1.5B 141.895s, 3B 232.655s, 7B 439.265s, and live Gemini gemini-3.8-flash 42.526s; each six calls, edited maintained. Gemini completed without retries after the user saved the key through hidden terminal input. Text-only request summaries; no key values or raw API responses recorded. One case/run per model, differing hardware and prompt/token budgets; not a general accuracy or speed comparison.
 - Central `tuning/thresholds.json` preserves current values. Dev-only guarded ratchet scaffold with protected-file hashes, branch restriction, per-experiment budget/count, strict zero-wrong adoption and guarded rollback. New dev/holdout manifests intentionally empty; fewer than 30 independent real-photo dev cases refuses start. Actual tuning loop NOT run.
 - Whole suite 259 tests passed; targeted follow-up regression and safety tests passed. Typecheck/lint/production build verified. Root tuning JSON required Turbopack root = repository; profile hash now separates analysis caches.
 - Local work-unit commits, no push. Handoff: `handoff-gemini-tuning.md`. Existing 32 untracked control-room captures preserved.
