@@ -451,3 +451,13 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 - Claw3D 20개 이벤트/7명/7개 발언, 최종 0 working/7 idle 및 토큰 비노출 재확인. 사용자용 3440 포트에서 mock 반복 재생 중.
 - 라이선스·최신 저장소 및 카테고리 정책 공식 출처 재확인. Supabase·승인 UI·실시간 Gemini 웹 연결은 미완료로 유지.
 - 인수인계: [handoff-public-entry.md](handoff-public-entry.md). 작업 단위 로컬 커밋, push 없음.
+
+
+## 2026-10-19 편집국 부서 설계·법정 근거 제한 보완
+
+- 9개 편집국 부서와 7개 법정 좌석을 구분하고, 파이프라인·담당 유형·입출력·권한·사람 승인·인계 계약을 `newsroom-departments.md`에 정리. 부서 3D 배치는 설계만.
+- 실제 카드 ID를 붙인 새 사실이 발언으로 통과하던 경로 보완: 모델 자유 문장 대신 카드 요약/날짜를 표시, 검증 전 후보 제외, 서기는 기존 검증된 주장/의심만 선택. 코드 커밋 `00e91ba`.
+- 262개 테스트·타입·린트·빌드 통과. 초기 5초 시간 초과 2개는 실행 동시성을 줄이고 제한 20초로 재검사; 테스트 기준/파일 변경 없음.
+- 1280/390 공개 2D 화면과 실제 Claw3D 20이벤트/7좌석/7발언 검증. 화면 오류·가로 넘침 0, 토큰 비노출. 사용자용 3440 mock 반복 재시작.
+- 외부 LLM 호출·튜닝 루프·공용 GPU 사용 없음. 이전 벤치마크는 이번 보완 전 기록으로 표시.
+- 인수인계: [handoff-newsroom-departments.md](handoff-newsroom-departments.md). 작업 단위 로컬 커밋, push 없음.

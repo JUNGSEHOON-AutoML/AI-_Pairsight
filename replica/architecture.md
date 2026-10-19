@@ -22,17 +22,19 @@
 | 파일 | Supabase Storage (비공개 버킷, 서명 URL 업로드) | 업로드 이미지는 비공개로 두고 서버만 읽음 |
 | 호스팅 | Vercel | Next.js 기본 배포. 무거운 이미지 비교가 함수 시간 제한에 걸리면 이 단계만 Fly 워커로 분리 |
 
-### 외부 신호 제공자 (모두 공식 공개 API, 사용자 본인 키)
+### 외부 신호 제공자 (현재 실행과 향후 무료 선택지 구분)
+
+아래 SDK/API 목록은 모두 연결 완료라는 뜻이 아닙니다. 현재 조합은 `web/lib/providers/index.ts`가 기준이며, 무료 사용 조건·계정 한도·보관 정책을 확인하지 못한 외부 서비스는 켜지 않습니다.
 
 | 신호 (evidence.kind) | 후보 | 비고 |
 | --- | --- | --- |
-| source_match (원본 추적) | **결정됨:** Google Cloud Vision Web Detection(모든 검사) + TinEye API(날짜가 필요할 때) + Google Fact Check `claims:imageSearch`. Bing Visual Search는 2025-08-11 종료 | **가장 중요한 결정입니다.** Vision은 일치 이미지와 페이지를 주지만 "처음 본 날짜"는 주지 않습니다. 날짜가 필요하면 TinEye(유료)를 검토하세요. 2단계 전에 두 서비스에 같은 이미지 20장을 넣어 비교해 보길 권합니다 |
+| source_match (원본 추적) | 현재 시연은 mock 후보, 로컬 검증. 운영 후보는 사용자가 준 URL 또는 무료 조건이 확인된 외부 API를 별도 선택 | **과거 Vision+TinEye 필수 전제는 폐기.** 유료 TinEye나 과금 가능한 기본 경로를 새로 켜지 않습니다. 후보 발견과 요청 시 페이지 검증은 분리하며, 실제 API 미연결이면 검색 미완료로 표시합니다 |
 | c2pa | Content Authenticity Initiative의 오픈소스 C2PA SDK | 서명 검증까지 서버에서 처리 |
 | exif | exifr 같은 오픈소스 라이브러리 | 촬영 기기, 편집 소프트웨어 흔적 |
-| watermark, pixel_model, screen_recapture | Hive 또는 TruthScan의 공개 API, 혹은 오픈 모델 | **경쟁사 API를 쓰는 것이 각 사 약관에 맞는지 먼저 확인해야 합니다.** 어느 쪽이든 판정을 혼자 결정하지 못하는 보조 신호로만 씁니다 |
+| watermark, pixel_model, screen_recapture | 로컬 오픈 모델 또는 mock. 외부 탐지 API는 현재 운영 의존성에서 제외 | 무료 사용과 라이선스가 확인된 신호만 선택합니다. 픽셀 모델은 약한 보조 신호이며 단독 판정 금지 |
 | fact_check | Google Fact Check Tools API (claims:search) | URL·기사 입력 시 사용(2단계) |
 | (기사 본문 추출) | Mozilla Readability | 유료 기사나 로그인이 필요한 페이지는 추출하지 않고 안내만 함 |
-| (공방 레이어) | 로컬 LLM (Ollama), mock | 유료 API는 쓰지 않음. 판정은 코드(규칙 v3)가 정하고 LLM은 근거 카드를 인용한 주장만 냄([newsroom-court.md](newsroom-court.md)) |
+| (공방 레이어) | Ollama 우선, mock 기본. 이후 요청으로 추가한 텍스트 전용 Gemini 선택 제공자 유지 | 유료 API는 쓰지 않음. 판정은 코드(규칙 v3)가 정하고 LLM은 근거 카드를 인용한 주장만 냄([newsroom-court.md](newsroom-court.md)) |
 
 ### 판정 규칙 v1 (fix-F1, F5. `analyses.pipeline_version = 1`)
 
@@ -57,7 +59,7 @@
 
 ## 스키마
 
-테이블 7개: `profiles`, `analyses`, `checks`, `evidence`, `source_matches`, `claims`, `usage_days` (`stripe_events`는 2026-10-19 결제 제거로 삭제)
+현재 스키마 테이블 8개: `profiles`, `analyses`, `checks`, `evidence`, `source_matches`, `claims`, `usage_days`, `public_cases` (`stripe_events`는 2026-10-19 결제 제거로 삭제)
 접근 규칙: **Postgres RLS.**
 
 - 브라우저는 자기 `checks`, 그리고 그 검사가 가리키는 분석 결과만 읽을 수 있습니다.
@@ -213,3 +215,7 @@ POST /api/checks에 `{ url }`을 넣는 같은 경로를 씁니다. 결과는 GE
    - 영상 키프레임 분석 (fix-F8)
 
 fix-F1~F8은 이미 위 단계에 나뉘어 들어가 있습니다. 1단계가 fix-F1, 2단계가 F2·F3·F5·F6·F7, 3단계가 F4, 4단계가 F8입니다.
+
+## 편집국 부서와 법정 권한 (2026-10-19 정합성 보완)
+
+[9개 부서 설계](newsroom-departments.md)가 각 팀의 파이프라인·담당 유형·입출력·권한과 사람 승인을 정의합니다. 7개 법정 좌석은 팩트체크 부서 안에 속합니다. 부서 9개를 자율 에이전트 9개로 실행하지 않습니다. 법정 발언은 기존 카드의 요약/날짜로 코드가 구성하며, LLM 자유 문장은 증거로 채택하지 않습니다. 판정 유지/판단 불가 경계와 서기의 새 의심 금지는 코드로 검사합니다.
