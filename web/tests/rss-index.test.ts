@@ -140,6 +140,9 @@ describe("RssIndexReverseSearch", () => {
     expect(hit.searchedProviders[0]).toMatch(/^신뢰 출처 RSS 색인 \(\d{4}-\d{2}-\d{2}부터 수집\)$/);
     const miss = await search.search(await input("tests/fixtures/comparison/unrelated.png"), AbortSignal.timeout(10000));
     expect(miss.candidates).toEqual([]);
+    // ai_generated is its own scene; it once shared the street template and hit the index.
+    const ai = await search.search(await input("public/fixtures/inputs/ai_generated.png"), AbortSignal.timeout(10000));
+    expect(ai.candidates).toEqual([]);
   });
 
   it("end to end: index → candidate page check → comparison → v3, citing the right page", async () => {

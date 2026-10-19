@@ -59,8 +59,33 @@ old = scene((214, 222, 230), (236, 238, 240), "MARKET", (122, 46, 46), label="SA
 save(old, "inputs", "miscontextualized")
 save(old, "originals", "miscontextualized")
 
-# AI 생성: no earlier copy; C2PA says an AI tool made it.
-save(scene((196, 170, 220), (90, 80, 110), "DREAM", (60, 30, 90), extra=sun, label="SAMPLE ai"), "inputs", "ai_generated")
+# AI 생성: no earlier copy; C2PA says an AI tool made it. Its own composition (not the street template), so no
+# other fixture can pass as its "original": a ringed planet over a pink dune sea with floating lanterns.
+def dreamscape():
+    im = Image.new("RGB", (W, H))
+    d = ImageDraw.Draw(im)
+    for y in range(H):  # violet sky into a pink horizon, then dunes
+        t = y / (H - 1)
+        if y < 360:
+            c = (int(40 + 190 * t), int(20 + 60 * t), int(90 + 80 * t))
+        else:
+            c = (int(236 - 60 * (t - .6)), int(150 - 70 * (t - .6)), int(120 - 40 * (t - .6)))
+        d.line([0, y, W, y], fill=c)
+    d.ellipse([90, 60, 330, 300], fill=(250, 196, 120))  # planet, upper left
+    d.ellipse([50, 165, 370, 205], outline=(255, 236, 200), width=6)  # ring
+    d.ellipse([150, 120, 210, 150], fill=(230, 160, 100))
+    for i, x in enumerate(range(-100, W + 200, 180)):  # dune crests
+        d.pieslice([x, 330 + (i % 2) * 40, x + 360, 560 + (i % 2) * 40], 180, 360, fill=(200 - i * 6, 110 - i * 4, 120))
+    for x, y, r in [(520, 120, 34), (640, 210, 26), (450, 250, 20), (720, 90, 18), (590, 320, 14)]:  # lanterns
+        d.ellipse([x - r - 10, y - r - 10, x + r + 10, y + r + 10], fill=(255, 220, 160))
+        d.ellipse([x - r, y - r, x + r, y + r], fill=(255, 140, 60))
+        d.line([x, y + r, x, y + r + 30], fill=(120, 60, 40), width=3)
+    d.rectangle([16, 16, 16 + 12 * len("SAMPLE ai") + 24, 52], fill=(28, 23, 32))
+    d.text((28, 22), "SAMPLE ai", fill=(255, 255, 255), font_size=22)
+    return im
+
+
+save(dreamscape(), "inputs", "ai_generated")
 
 # 판단 불가: only a loosely similar picture exists, no date, no provenance.
 save(scene((170, 196, 170), (96, 110, 90), "PARK", (40, 90, 60), label="SAMPLE inconclusive"), "inputs", "inconclusive")

@@ -49,7 +49,12 @@ async function main() {
   for (let i = 0; i < scenes.length; i++) for (let j = i + 1; j < scenes.length; j++) await add(studio(scenes[i]) && studio(scenes[j]) ? "lookalike" : "different", scenes[i], scenes[j], await scene(scenes[i]), await scene(scenes[j]));
   for (const s of scenes) await add("different", s, "inputs/authentic", await scene(s), await f("public/fixtures/inputs/authentic.png"));
   // template scenes: same drawn layout, different colours / sign / extras (the fixtures that share one template)
-  const tpl = ["ai_generated", "no_source", "inconclusive", "authentic", "miscontextualized", "provider_timeout"];
+  // ai_generated is drawn as its own scene (make-fixtures.py): it must not resemble any other fixture.
+  for (const o of ["no_source", "inconclusive", "authentic", "miscontextualized", "provider_timeout", "edited", "trusted_edited", "trusted_context"]) {
+    await add("different", "inputs/ai_generated", `inputs/${o}`, await f("public/fixtures/inputs/ai_generated.png"), await f(`public/fixtures/inputs/${o}.png`));
+  }
+  for (const s of scenes) await add("different", "inputs/ai_generated", s, await f("public/fixtures/inputs/ai_generated.png"), await scene(s));
+  const tpl = ["no_source", "inconclusive", "authentic", "miscontextualized", "provider_timeout"];
   for (let i = 0; i < tpl.length; i++) for (let j = i + 1; j < tpl.length; j++) await add("template", tpl[i], tpl[j], await f(`public/fixtures/inputs/${tpl[i]}.png`), await f(`public/fixtures/inputs/${tpl[j]}.png`));
 
   // per-image embedding time, steady state

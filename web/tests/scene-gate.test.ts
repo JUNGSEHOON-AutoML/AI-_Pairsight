@@ -46,6 +46,24 @@ describe("scene gate (DINOv2-small, exclusion only)", () => {
   }, T);
 });
 
+describe("ai_generated fixture is its own scene", () => {
+  // It used to share the street template with the other fixtures and came out 편집 조작 in mock free mode.
+  it("no other fixture passes as its original, by pixels or by scene", async () => {
+    const ai = await bytes("public/fixtures/inputs/ai_generated.png");
+    const others = [
+      ...["no_source", "inconclusive", "authentic", "miscontextualized", "edited", "trusted_edited", "trusted_context", "provider_timeout"].map((s) => `public/fixtures/inputs/${s}.png`),
+      ...["authentic", "edited", "inconclusive", "miscontextualized", "trusted_edited", "trusted_context"].map((s) => `public/fixtures/originals/${s}.png`),
+      ...["night_city", "beach", "forest", "fruit_table", "mountain_lake", "aerial_fields", "studio_teapot", "studio_plant", "studio_vase", "studio_bicycle"].map((s) => `public/fixtures/scenes/${s}.png`),
+    ];
+    const pixelsOnly = new LocalImageComparisonProvider(null);
+    for (const o of others) {
+      const other = await bytes(o);
+      expect((await pixelsOnly.compare(ai, other, signal())).matched, o).toBe(false);
+      expect(await gate.similarity(ai, other, signal()), o).toBeLessThan(SCENE_MIN_SIMILARITY);
+    }
+  }, T);
+});
+
 describe("counterexample: only different-scene candidates", () => {
   // Upload: studio_teapot. Candidates: three other studio photos on a (fictional) trusted wire page dated 2020-05-01.
   // Pixel alignment accepts all three as "the same picture with one changed region" (scripts/measure-scene-gate.ts),
