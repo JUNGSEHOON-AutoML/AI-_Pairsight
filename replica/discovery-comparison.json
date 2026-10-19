@@ -1,0 +1,228 @@
+{
+  "date": "2026-10-20",
+  "liveCasesUnchanged": true,
+  "groundingCalls": 0,
+  "sceneGate": "production DINOv2 + fixed thresholds",
+  "realPilotDatasetAvailable": false,
+  "realMeasurementReused": true,
+  "notes": [
+    "수동 대조 경로는 기존 피드 URL을 지정했습니다. 독립적인 검색 성능·재현율 측정이 아닙니다.",
+    "실제 접수 3건 중 2건은 같은 네팔 홍수 주장입니다. 독립 사건 3개를 대표하지 않습니다.",
+    "실제 접수에 비교할 유포 사진이 별도로 지정되지 않았습니다. 미측정은 불일치 0건과 다릅니다.",
+    "파일럿은 기존 합성 그림을 사용한 테스트입니다. 실제 유포 사례가 아니며 대시보드에 넣지 않습니다.",
+    "no_source fixture는 다른 fixture와 같은 밑그림을 공유합니다. 그 사진의 일치는 검색 미발견 시나리오와 구분합니다.",
+    "이 보고서는 고해상도 원본·HTML·Gemini 응답·외부 기관의 판정 문구를 저장하지 않습니다."
+  ],
+  "rows": [
+    {
+      "case": "b60efdd2",
+      "dataset": "real",
+      "route": "manual-known-feed-url",
+      "found": 1,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "robots_unavailable"
+    },
+    {
+      "case": "b60efdd2",
+      "dataset": "real",
+      "route": "factcheck-import",
+      "found": 1,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "robots_unavailable"
+    },
+    {
+      "case": "b60efdd2",
+      "dataset": "real",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "de10fc57",
+      "dataset": "real",
+      "route": "manual-known-feed-url",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 0,
+      "verified": null,
+      "status": "circulated_photo_not_selected"
+    },
+    {
+      "case": "de10fc57",
+      "dataset": "real",
+      "route": "factcheck-import",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 0,
+      "verified": null,
+      "status": "circulated_photo_not_selected"
+    },
+    {
+      "case": "de10fc57",
+      "dataset": "real",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "f4b06e55",
+      "dataset": "real",
+      "route": "manual-known-feed-url",
+      "found": 1,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "robots_unavailable"
+    },
+    {
+      "case": "f4b06e55",
+      "dataset": "real",
+      "route": "factcheck-import",
+      "found": 1,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "robots_unavailable"
+    },
+    {
+      "case": "f4b06e55",
+      "dataset": "real",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "fx-trusted-edited",
+      "dataset": "synthetic-pilot",
+      "route": "manual",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-trusted-edited",
+      "dataset": "synthetic-pilot",
+      "route": "factcheck-mock-article",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-trusted-edited",
+      "dataset": "synthetic-pilot",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "fx-context-factcheck",
+      "dataset": "synthetic-pilot",
+      "route": "manual",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-context-factcheck",
+      "dataset": "synthetic-pilot",
+      "route": "factcheck-mock-article",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-context-factcheck",
+      "dataset": "synthetic-pilot",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "fx-no-source-shared-art",
+      "dataset": "synthetic-pilot",
+      "route": "manual",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-no-source-shared-art",
+      "dataset": "synthetic-pilot",
+      "route": "factcheck-mock-article",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 1,
+      "verified": 1,
+      "status": "compared"
+    },
+    {
+      "case": "fx-no-source-shared-art",
+      "dataset": "synthetic-pilot",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    },
+    {
+      "case": "fx-different-scene",
+      "dataset": "synthetic-pilot",
+      "route": "manual",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 0,
+      "verified": 0,
+      "status": "compared"
+    },
+    {
+      "case": "fx-different-scene",
+      "dataset": "synthetic-pilot",
+      "route": "factcheck-mock-article",
+      "found": 1,
+      "fetched": 1,
+      "comparedMatches": 0,
+      "verified": 0,
+      "status": "compared"
+    },
+    {
+      "case": "fx-different-scene",
+      "dataset": "synthetic-pilot",
+      "route": "gemini",
+      "found": null,
+      "fetched": 0,
+      "comparedMatches": null,
+      "verified": null,
+      "status": "terms_blocked"
+    }
+  ]
+}

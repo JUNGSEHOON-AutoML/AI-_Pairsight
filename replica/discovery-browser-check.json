@@ -1,0 +1,21 @@
+{
+  "singleOrigin": true,
+  "leftBriefing": true,
+  "rooms": 7,
+  "reports": 5,
+  "jsonHidden": true,
+  "approvalBesideReview": true,
+  "liveLatencyMs": 691,
+  "reportDelivery": true,
+  "editorDelivery": true,
+  "visibleAnimation": true,
+  "visitorTwoRequiredInputs": true,
+  "privateOwnerOnly": true,
+  "fixturesHidden": true,
+  "anonymousBlocked": true,
+  "logoutRevoked": true,
+  "mobileOverflow": false,
+  "browserErrors": 0,
+  "assetErrors": 0,
+  "productionUnchanged": true
+}
