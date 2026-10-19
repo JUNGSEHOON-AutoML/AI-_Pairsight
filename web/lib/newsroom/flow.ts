@@ -3,7 +3,7 @@ import { CaseError, DEPARTMENTS, type CaseRecord, type Department } from "./mode
 import type { CaseRepository } from "./repository";
 import { ProviderError } from "../providers/types";
 
-function safeFailure(e:unknown) {
+export function safeFailure(e:unknown) {
   if(e instanceof CaseError)return {code:e.code,message:e.message};
   if(e instanceof ProviderError && e.code==="url_blocked") {
     if(e.message==="robots disallow")return {code:"robots_disallowed",message:"출처의 robots.txt가 접근을 허용하지 않아요. 우회하지 않고 중단했어요."};

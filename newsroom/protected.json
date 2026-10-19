@@ -1,8 +1,14 @@
 {
-  "web/lib/newsroom/harness/validator.ts": "c5510bd43574ee4ba5bd2b61a2b07654846f5afa45d09e8fd29a727cf1d49c48",
-  "web/lib/newsroom/harness/guard.ts": "9f5e361b2125af60139a37b894760d6084eacd949dbd4220f5e74faa46c776af",
-  "web/lib/verdict.ts": "b4b102c7fa2c7bf1093b89baaa6b4241a7ac575cb216507a8fca8c83926735d5",
-  "web/lib/newsroom/review.ts": "a366ea2284532a1adf2e8c8ab08ca7f5387be012dfa0e9ae6b4426442699cec6",
   "web/lib/court/court.ts": "c0bcb3acba3e4dc14000915fa82769caf44c4eeb66155f190ac8bf3d573dd52c",
+  "web/lib/court/docket.ts": "9384b4b2466a9ff8a95268b934d8bca1dfacf138406ee35e71b13f26574bcb34",
+  "web/lib/court/prompts.ts": "1ef07a0a44d948ddae392dc5560e2b9af2f4a7c4020cd381b2d61952ca4bb1ae",
+  "web/lib/newsroom/desk-flow.ts": "89bf2902a87ef7a327ce8390ceb749c0130e2df1c986768ad46b2283a805f00c",
+  "web/lib/newsroom/harness/guard.ts": "9f5e361b2125af60139a37b894760d6084eacd949dbd4220f5e74faa46c776af",
+  "web/lib/newsroom/harness/validator.ts": "c5510bd43574ee4ba5bd2b61a2b07654846f5afa45d09e8fd29a727cf1d49c48",
+  "web/lib/newsroom/reporting.ts": "d879d4da3f90a564e1124e8fa2cf6f2fd481990fb3fa41e1911e8be21bedb662",
+  "web/lib/newsroom/review.ts": "a366ea2284532a1adf2e8c8ab08ca7f5387be012dfa0e9ae6b4426442699cec6",
+  "web/lib/verdict.ts": "b4b102c7fa2c7bf1093b89baaa6b4241a7ac575cb216507a8fca8c83926735d5",
+  "web/tests/newsroom-access.test.ts": "73346c7f9de90263eb710b980685af84ec451e9903a67482cc2f1d27b39f981d",
+  "web/tests/newsroom-desks.test.ts": "d12a0715216af7819544219cd279b72ea1e7038e4eeb7e58ec500d05159ec075",
   "web/tests/newsroom-harness.test.ts": "6fd4e85d5bbc266a34f2fc4e80e45364db7aab6eabcb4fa7158638b7c32f43bd"
 }

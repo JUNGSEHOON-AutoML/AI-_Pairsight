@@ -131,7 +131,8 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
       return { data: { collected, imageMissing: false, thumbnailOnly: true, warnings: ["512px 이하 썸네일 비교. 미세 편집·원본 출처 검증에는 한계가 있어요.", "역이미지/Fact Check 이미지 검색은 이번 흐름에 미연결"] } satisfies AnalysisData };
     }),
     security: make("security", async c => {
-      const o = sectionData<OsintData>(c, "osint");
+      // Intake can inspect submissions before OSINT. Research adds page signals after fetching.
+      const o = c.sections.osint?.state === "done" ? sectionData<OsintData>(c, "osint") : { signals: [], inputExcerpt: c.input.claim };
       const repeated = repo.list(Boolean(options.allowTestProviders)).filter(x => duplicateKey(x) === duplicateKey(c)).length;
       return { data: { instructionSignals: [...new Set([...o.signals, ...instructionSignals(o.inputExcerpt)])],
         repeatedReports: repeated, repeated: repeated >= 3, scope: "내부 제보만 검사. 외부 SNS 계정·봇 추적 없음", requiresHumanReview: o.signals.length > 0 || repeated >= 3 } };

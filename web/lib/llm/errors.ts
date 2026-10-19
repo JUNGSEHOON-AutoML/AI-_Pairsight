@@ -10,7 +10,7 @@ export class LLMUnavailable extends Error {
 
 /** Defense in depth for model output, including accidentally echoed credentials. */
 export function maskLLMSecrets(text: string): string {
-  for (const key of [process.env.GEMINI_API_KEY, process.env.GOOGLE_FACTCHECK_API_KEY]) {
+  for (const key of [process.env.GEMINI_API_KEY, process.env.GOOGLE_FACTCHECK_API_KEY, process.env.SERPAPI_API_KEY]) {
     if (key) text = text.split(key).join("[REDACTED]");
   }
   return text

@@ -54,6 +54,8 @@ export interface CaseRecord {
   publicCase: PublicCase | null;
   evaluation: { expected: Verdict; reason: string; operatorId: string; at: string } | null;
   run: { token: string; expiresAt: number } | null;
+  desks?: Partial<Record<import("./desks").Desk, { state: "working" | "done" | "hold" | "failed"; hash?: string; calls: number; durationMs: number; error?: string }>>;
+  editor?: { state: "working" | "done" | "failed"; calls: number; at: string };
 }
 export interface CaseEvent {
   seq: number;
@@ -61,6 +63,8 @@ export interface CaseEvent {
   department: CaseRecord["stage"] | "reliability";
   state: CaseStatus | "done" | "warning" | "agent_working" | "agent_idle" | "speaking";
   actor?: string;
+  desk?: import("./desks").Desk | "editor";
+  action?: "report_started" | "report_completed" | "briefing_started" | "briefing_completed";
   at: string;
   summary: string; // code-written, <=200; no raw page/model prose or credentials
   cite: string[];

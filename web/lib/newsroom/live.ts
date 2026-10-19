@@ -1,3 +1,5 @@
+import { latestBriefing, operatorTasks } from "./briefing";
+import { deskFor, visibleStatus } from "./desks";
 import type { CaseRepository } from "./repository";
 import { newsroomSnapshot } from "./controlroom";
 import { publicProjection } from "./review";
@@ -7,15 +9,15 @@ import type { FactcheckData } from "./workers";
 /** Operator-only card projection. Never send originals, raw page text, run tokens or identities. */
 export function liveSnapshot(repo: CaseRepository) {
   const room = newsroomSnapshot(repo);
-  return { room, cases: repo.list().map(c => {
+  return { room, briefing:latestBriefing(repo), tasks:operatorTasks(repo.list()), cases: repo.list().map(c => {
     const candidate = publicProjection(c);
     const published = candidate && !candidate.example && !publishProblems(candidate).length ? candidate : null;
     const factcheck = c.sections.factcheck?.data as FactcheckData | undefined;
-    return { id:c.id, stage:c.stage, status:c.status, updatedAt:c.updatedAt,
+    return { id:c.id, desk:deskFor(c.stage), displayStatus:visibleStatus(c), stage:c.stage, status:c.status, updatedAt:c.updatedAt,
       topic:(c.sections.monitoring?.data.topic as Topic | undefined) ?? c.input.topic ?? "other",
       claim:c.input.claim, channels:c.input.channels, verdict:published?.verdict ?? factcheck?.court?.finalVerdict ?? null,
       approvalCount:c.approvals.length,
-      error:Object.values(c.sections).find(s => s.state === "failed")?.error?.message ?? null,
+      error:Object.values(c.desks??{}).find(d=>d.error)?.error ?? Object.values(c.sections).find(s => s.state === "failed")?.error?.message ?? null,
       published:published ? {truthTitle:published.truthTitle, imagePath:published.imagePath,
         verdict:published.verdict, slug:published.slug} : null };
   }) };

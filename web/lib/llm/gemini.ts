@@ -20,6 +20,17 @@ const statements = (v: unknown) => (Array.isArray(v) ? v : []).slice(0, 4).map((
  * Unknown fields are dropped; text-encoded media in permitted fields is rejected before any request.
  */
 export function geminiCaseSummary(prompt: string): string {
+  if (prompt.startsWith("<desk_report>")) {
+    const match = /^<desk_report>\s*([\s\S]*)\s*<\/desk_report>$/.exec(prompt);
+    if (!match || prompt.length > 40000) throw new LLMUnavailable("privacy", false);
+    let raw: Record<string, unknown>;
+    try { raw = object(JSON.parse(match[1])); } catch { throw new LLMUnavailable("privacy", false); }
+    if (!Array.isArray(raw.facts)) throw new LLMUnavailable("privacy", false);
+    return `<desk_report>${JSON.stringify({ facts: raw.facts.slice(0, 80).map(f => {
+      const o = object(f);
+      return { id: text(o.id, 20), text: text(o.text), section: text(o.section, 40) };
+    }) }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e")}</desk_report>`;
+  }
   const match = /^<case_file>\s*([\s\S]*)\s*<\/case_file>$/.exec(prompt);
   if (!match || prompt.length > 100_000) throw new LLMUnavailable("privacy", false);
   let raw: Record<string, unknown>;
