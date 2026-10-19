@@ -26,7 +26,7 @@ export async function intake(form: FormData, operatorId: string): Promise<CaseIn
   if (claimedDate && (!/^\d{4}-\d{2}-\d{2}$/.test(claimedDate) || !Number.isFinite(Date.parse(claimedDate)) || new Date(claimedDate).toISOString().slice(0,10) !== claimedDate || claimedDate > new Date().toISOString().slice(0,10))) throw new CaseError("invalid_date", "주장 날짜를 확인해 주세요.");
   const input: CaseInput = { origin: "manual", claim, claimedDate, pageUrl, imageUrl, candidateUrls, thumbnail: null, imageHash: null, provenance: [],
     topic: TOPICS.find(t => t.id === form.get("topic"))?.id ?? null, channels: form.getAll("channels").map(String).filter((s): s is CaseInput["channels"][number] => CHANNELS.some(c => c.id === s)),
-    contentFlags, rightsConfirmed: form.get("rights") === "yes", reportedBy: operatorId };
+    contentFlags, externalSearchAllowed: form.get("externalSearch") === "yes", rightsConfirmed: form.get("rights") === "yes", reportedBy: operatorId };
   if (file instanceof File && file.size && !contentFlags.includes("sexual_content")) {
     if (file.size > 10 * 1024 * 1024 || !/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)) throw new CaseError("invalid_image", "10MB 이하 지원 이미지 파일이 필요해요.");
     try {

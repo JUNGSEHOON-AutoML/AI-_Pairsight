@@ -19,17 +19,15 @@ export function SiteHeader() {
           </li>
           <li>
             <Link href="/check" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
-              검사
+              사진 확인
             </Link>
           </li>
           <li>
             <Link href="/newsroom" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
-              편집국
+              운영자
             </Link>
           </li>
-          <li>
-            <Link href="/newsroom/login" className="px-2 py-2">로그인</Link>
-          </li>
+
         </ul>
       </nav>
     </header>

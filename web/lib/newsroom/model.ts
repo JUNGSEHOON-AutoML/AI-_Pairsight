@@ -28,6 +28,7 @@ export interface CaseInput {
   topic: Topic | null;
   contentFlags: ContentFlag[];
   rightsConfirmed: boolean;
+  externalSearchAllowed?: boolean;
   reportedBy: string;
   feedReview?: { url: string; publisher: string; rating: string; reviewedAt: string | null };
 }

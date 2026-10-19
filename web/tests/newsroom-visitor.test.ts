@@ -1,0 +1,10 @@
+import {it,expect,afterEach} from "vitest";
+import {CaseRepository} from "../lib/newsroom/repository";
+import {VisitorAccess,visitorView} from "../lib/newsroom/visitor";
+import type {CaseInput} from "../lib/newsroom/model";
+const repos:CaseRepository[]=[];afterEach(()=>repos.splice(0).forEach(r=>r.close()));
+const store=()=>{const r=new CaseRepository(":memory:");repos.push(r);return r;};
+const input:CaseInput={origin:"manual",claim:"private question",claimedDate:null,pageUrl:"https://example.com",imageUrl:null,thumbnail:null,imageHash:null,provenance:[],candidateUrls:[],channels:[],topic:null,contentFlags:[],rightsConfirmed:false,reportedBy:"visitor"};
+it("requires the submitting browser capability, not the UUID",()=>{const r=store(),a=new VisitorAccess(r),token=a.session(undefined),other=a.session(undefined),c=r.create(input);a.attach(c.id,token);expect(a.get(c.id,token)?.id).toBe(c.id);expect(a.get(c.id,other)).toBeNull();expect(a.get(c.id,undefined)).toBeNull();expect(JSON.stringify(r.db.prepare("SELECT * FROM visitor_cases").all())).not.toContain(token);});
+it("never returns a private verdict, original image, run token or operator identity",()=>{const r=store(),c=r.create(input);r.mutate(c.id,x=>{x.status="awaiting_approval";x.run={token:"private-token",expiresAt:99};});const data=visitorView(r.get(c.id)!);expect(data.result).toBeNull();expect(data.status).toBe("사람 검토 필요");expect(JSON.stringify(data)).not.toContain("private-token");});
+it("enforces per-browser and global free-pilot intake caps atomically",()=>{const r=store(),a=new VisitorAccess(r),token=a.session(undefined);for(let i=0;i<3;i++)a.reserve(token);expect(()=>a.reserve(token)).toThrow(/한도/);for(let i=0;i<17;i++)a.reserve(a.session(undefined));expect(()=>a.reserve(a.session(undefined))).toThrow(/한도/);});

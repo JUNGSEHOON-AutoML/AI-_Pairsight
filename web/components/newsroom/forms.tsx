@@ -56,7 +56,7 @@ export function IntakeForm() {
     <fieldset><legend className="mb-2 text-sm font-semibold">제보된 유포 경로</legend><div className="flex flex-wrap gap-4">{CHANNELS.map(c => <label key={c.id}><input type="checkbox" name="channels" value={c.id} /> {c.label}</label>)}</div></fieldset>
     <fieldset className="grid gap-2"><legend className="mb-2 text-sm font-semibold">추가 검토 사항</legend>{[["sexual_content","성적 콘텐츠 (이미지를 보관하거나 표시하지 않음)"],["minor","미성년자 관련"],["private_person","사생활·사인 관련"],["graphic_violence","잔혹한 장면"],["election_period","선거 기간 관련"]].map(([v,l]) => <label key={v}><input type="checkbox" name="flags" value={v} /> {l}</label>)}</fieldset>
     <label><input type="checkbox" name="rights" value="yes" /> 이미지의 공개 이용 권한을 확인했어요.</label>
-    {error && <p role="alert">{error}</p>}<Button loading={busy} type="submit">사건 접수하고 부서 검토 시작</Button>
+    {error && <p role="alert">{error}</p>}<Button loading={busy} type="submit">사건 접수하고 확인 시작</Button>
   </form>;
 }
 export function FactcheckFeed() {
@@ -91,7 +91,7 @@ export function ReviewActions({ c }: { c: CaseRecord }) {
       <Field title="공개 요약 (200자 이내)"><textarea name="summary" required maxLength={200} defaultValue={c.approvals[0]?.summary} readOnly={!!c.approvals.length} className={fieldClass} /></Field>
       <div className="flex flex-wrap gap-2"><Button loading={busy}>검토 완료 · 게재 승인</Button><Button type="button" variant="danger" disabled={busy} onClick={()=>act("reject")}>반려</Button></div>
     </form>}
-    {c.status==="failed" && <Button variant="secondary" loading={busy} onClick={()=>act("retry")}>실패한 부서부터 다시 실행</Button>}
+    {c.status==="failed" && <Button variant="secondary" loading={busy} onClick={()=>act("retry")}>중단한 데스크 다시 실행</Button>}
     {c.approvals.length>0 && ["complete","ready","failed"].includes(c.status) && <Button variant="danger" loading={busy} onClick={()=>act("withdraw")}>공개 승인 철회</Button>}
     <p className="text-sm">승인 {c.approvals.length}건{c.status==="complete" && <> · <a href={"/cases/"+c.id}>공개 결과 보기</a></>}</p>
     {c.sections.factcheck?.state==="done" && <details><summary className="cursor-pointer">신뢰성 평가 라벨 기록</summary><form className="mt-3 grid gap-3" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void act("label",{expected:f.get("expected"),reason:f.get("reason")});}}>
@@ -100,4 +100,9 @@ export function ReviewActions({ c }: { c: CaseRecord }) {
     </form></details>}
     {error && <p role="alert">{error}</p>}<ButtonLink href="/newsroom" variant="ghost">편집국 보드로</ButtonLink>
   </Panel>;
+}
+
+export function CandidateSupplement({c}:{c:CaseRecord}) {
+ const router=useRouter(),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+ return <form className="grid gap-3 mt-5" onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);setBusy(true);setError("");try{await request("/api/operator/cases/"+c.id,{action:"candidates",revision:c.revision,urls:f.get("urls")});router.refresh();}catch(e){setError(message(e));}finally{setBusy(false);}}}><Field title="보충할 원본 후보 페이지 링크 (최대 5개)"><textarea name="urls" rows={3} required className={fieldClass}/></Field><Button loading={busy}>링크 보충하고 조사 재개</Button>{error&&<p role="alert">{error}</p>}</form>;
 }

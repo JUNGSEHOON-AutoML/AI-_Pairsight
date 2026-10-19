@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { CaseError, type CaseRecord, type Department } from "./model";
+import { CaseError, type Department } from "./model";
 import { DESKS, type Desk } from "./desks";
 import { safeFailure, type Workers } from "./flow";
 import type { CaseRepository } from "./repository";
