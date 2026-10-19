@@ -22,7 +22,7 @@ PAIRSIGHT_MODEL_CACHE="$HOME/ai-verify/web/.cache/models" \
 node --env-file-if-exists="$HOME/ai-verify/web/.env.local" scripts/newsroom-start.mjs
 ```
 
-개인 Ollama가 꺼져 있다면 별도 터미널에서:
+런처는 로컬 Ollama가 없으면 기존 설치 바이너리로 CPU 전용 개인 인스턴스를 함께 시작한다. 이미 실행 중인 개인 인스턴스는 건드리지 않는다. PAIRSIGHT_MANAGE_OLLAMA=0이면 자동 시작하지 않는다. 수동 실행이 필요하면:
 
 ```sh
 CUDA_VISIBLE_DEVICES=-1 OLLAMA_HOST=127.0.0.1:11500 \
@@ -49,6 +49,14 @@ OLLAMA_MODELS="$HOME/.ollama-pairsight" OLLAMA_NUM_PARALLEL=1 ollama serve
 - 통합 브라우저: 임시 DB 복사본·별도 계정·별도 서버 사용. 동일 출처 3D, 문서 전달 두 종류, 실제 픽셀 움직임, 보고서 5개, 승인 옆 배치, 방문자 필수 입력 2개, 비소유자 404, 익명 운영 API 차단, 세션 철회, fixture 숨김, 390px 넘침 없음. 결과와 캡처: replica/clone-screens/five-desks/.
 - 빌드와 테스트가 겹친 실행에서 기존 이미지 비교 한 건이 5초 시간 초과. 빌드 완료 후 전체를 다시 실행하여 316개 모두 통과. 기준값이나 테스트 제한 시간을 바꾸지 않았다.
 
+실행 서버 확인에서 개인 Ollama가 종료되어 편집장 브리핑이 코드 비상 현황으로 저장되는 문제를 발견했다. 런처가 개인 CPU Ollama를 함께 관리하도록 보정했다. 비상 보고서는 삭제하지 않고 파일을 유지하며, 사람이 요청하는 재작성은 같은 사건 상태/일일 인덱스의 새 문서로 갱신한다. 자동 하루 한 번 규칙은 그대로다. 수동 복구 명령:
+
+```sh
+PAIRSIGHT_LLM=ollama node --env-file-if-exists="$HOME/ai-verify/web/.env.local" --import tsx scripts/newsroom-briefing.ts --retry
+```
+
+실행 서버 최종 확인: 실제 사건 4건은 중단 3건·사람 승인 대기 1건, 승인 0건으로 보존됐다. legacy 마크다운 보고서 10개를 이관했다. 사건 브리핑 4개와 일일 브리핑 1개가 실제 LLM으로 완료됐으며 최종 비상 fallback 문서는 0개다. 이는 기록 생성 검증이며 사건의 진위·게재 승인을 새로 확정한 것이 아니다. 정상 완료 뒤 워커는 새로운 사건·상태 변경 또는 다음 날짜를 기다린다.
+
 ## 남은 설정과 한계
 
 SERPAPI_API_KEY 미설정: 실서비스 인증·실제 검색 결과 연결 확인은 수행하지 못했다. 키 값은 읽어 출력하지 않았고 .env.local의 Git 제외를 확인했다. 운영자는 아래 명령으로 화면에 보이지 않게 입력할 수 있다. 키를 채팅에 보내지 않는다.
@@ -69,4 +77,7 @@ python3 "$HOME/Documents/Codex/2026-10-19/my-app-playwright-mcp-node-v16/worktre
 - Pairsight 18f05f5: 5개 데스크·편집장 이벤트 투영
 - Pairsight dcc8a22: 무료 SerpApi·한도·수동 대안
 - Claw3D 0e6a3aa: 7개 구역·문서 전달 동작
-- 이후 보정·브라우저 검증·인수인계 커밋은 각 브랜치 최신 git log 참고.
+- Pairsight c903eed: 중단 문서·간결한 할 일·기존 기록 이관 보정
+- Pairsight 5036c7e: 통합 브라우저 검증·인수인계
+- Claw3D a0255dc: 동일 배치의 실제 빌더 입력 화면
+- 이후 개인 LLM 수명 관리 보정은 최신 git log 참고.

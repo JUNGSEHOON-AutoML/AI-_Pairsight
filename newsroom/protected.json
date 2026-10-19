@@ -12,7 +12,7 @@
   "web/lib/public/types.ts": "3c81f7d1a6421ee0df541ae199a298493d04a6620db4a30a9ac1025b09ff17b9",
   "web/lib/verdict.ts": "b4b102c7fa2c7bf1093b89baaa6b4241a7ac575cb216507a8fca8c83926735d5",
   "web/tests/newsroom-access.test.ts": "73346c7f9de90263eb710b980685af84ec451e9903a67482cc2f1d27b39f981d",
-  "web/tests/newsroom-desks.test.ts": "87ff5d763491fad18fa1ab15c07f2af3491760a4c1c8ac4d41e45052e9506ef5",
+  "web/tests/newsroom-desks.test.ts": "922369b8de4d978a22f40803e56dc63daed008d1271649525f52214879ce3312",
   "web/tests/newsroom-harness.test.ts": "6fd4e85d5bbc266a34f2fc4e80e45364db7aab6eabcb4fa7158638b7c32f43bd",
   "web/tests/newsroom-visitor.test.ts": "80c19230316e27e3a72ba6e18e88cf6f988f7ffb7b52c7803c7d34183d53173f"
 }

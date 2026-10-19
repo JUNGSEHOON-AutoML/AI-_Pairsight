@@ -24,11 +24,11 @@ export function latestBriefing(repo:CaseRepository,root=newsroomRoot()){
  try{const path=join(root,"briefings",row.path);if(lstatSync(path).isSymbolicLink())return null;const markdown=readFileSync(path,"utf8");if(digest(markdown)!==row.hash)return null;return {key:row.key,at:row.at,markdown};}catch{return null;}
 }
 /** Persistent per-day/per-state claim; crashes can recover after the lease, never duplicate completed briefs. */
-export async function writeBriefing(repo:CaseRepository,kind:"daily"|"case",caseId?:string,options:{llm?:LLMProvider;root?:string;guard?:()=>void;timeoutMs?:number}={}){
+export async function writeBriefing(repo:CaseRepository,kind:"daily"|"case",caseId?:string,options:{llm?:LLMProvider;root?:string;guard?:()=>void;timeoutMs?:number;retry?:boolean}={}){
  schema(repo);const all=repo.list(),c=caseId?repo.get(caseId):null;if(caseId&&(!c||c.input.origin==="fixture"))return;
  const cases=c?[c]:all,key=kind==="daily"?`daily-${koreaDay()}`:`case-${caseId}-${briefingSignature(c!)}`;
  const at=new Date().toISOString(),now=Date.now(),filename=`${kind}-${randomUUID()}.md`;
- const inserted=repo.db.prepare("INSERT INTO newsroom_briefings(key,at,state,path,expires) VALUES(?,?,'working',?,?) ON CONFLICT(key) DO UPDATE SET state='working',at=excluded.at,path=excluded.path,expires=excluded.expires WHERE newsroom_briefings.state='working' AND newsroom_briefings.expires<? RETURNING key").get(key,at,filename,now+180000,now);
+ const inserted=repo.db.prepare("INSERT INTO newsroom_briefings(key,at,state,path,expires) VALUES(?,?,'working',?,?) ON CONFLICT(key) DO UPDATE SET state='working',at=excluded.at,path=excluded.path,expires=excluded.expires WHERE (newsroom_briefings.state='working' AND newsroom_briefings.expires<?) OR (?=1 AND newsroom_briefings.state='done') RETURNING key").get(key,at,filename,now+180000,now,options.retry?1:0);
  if(!inserted)return;
  const eventCase=c??all[0];
  if(eventCase)repo.mutate(eventCase.id,(x,emit)=>{x.editor={state:"working",calls:(x.editor?.calls??0)+1,at};emit({department:"reliability",desk:"editor",action:"briefing_started",state:"agent_working",summary:kind==="daily"?"일일 브리핑 작성 시작":"사건 브리핑 작성 시작",cite:[]});});
