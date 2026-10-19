@@ -52,6 +52,12 @@ insert into source_matches (analysis_id, url, provider) values
   ('10000000-0000-0000-0000-00000000000b', 'https://b.example/secret', 'vision');
 insert into claims (analysis_id, position, text) values ('10000000-0000-0000-0000-00000000000b', 0, 'b claim');
 insert into usage_days (user_id, day, used) values ('{A}', '2026-10-18', 1), ('{B}', '2026-10-18', 2);
+insert into public_cases (slug, topic, verdict, truth_title, summary, approval_status, reviewed_by, reviewed_at, second_reviewed_by, second_reviewed_at, published_at) values
+  ('approved-economy', 'economy', 'edited', '급매 표지는 나중에 합성됐어요', 's', 'approved', '{A}', now(), null, null, now()),
+  ('approved-politics', 'politics', 'inconclusive', '유세 현장 사진이라는 근거는 없어요', 's', 'approved', '{A}', now(), '{B}', now(), now()),
+  ('pending-case', 'society', 'miscontextualized', '검토 중인 사례예요', 's', 'pending_review', null, null, null, null, null),
+  ('rejected-case', 'other', 'ai_generated', '반려된 사례예요', 's', 'rejected', '{B}', now(), null, null, null),
+  ('draft-case', 'entertainment', 'edited', '초안 사례예요', 's', 'draft', null, null, null, null, null);
 """)
 
 
@@ -134,6 +140,37 @@ expect("anon cannot call take_quota", db, "anon", None, f"select take_quota('{A}
 # 5. The server (service_role) sees everything and can use the quota functions
 expect("service_role sees all checks", db, "service_role", None, "select count(*) from checks;", ["4"])
 expect("service_role can take quota", db, "service_role", None, f"select take_quota('{A}');", ["t"])
+
+# 9. Public dashboard (2026-10-19): approved cases only, and category rules enforced by the database
+expect("anon sees approved public cases only", db, "anon", None,
+       "select string_agg(slug, ',' order by slug) from public_cases;", ["approved-economy,approved-politics"])
+expect("signed-in user sees approved public cases only", db, U, A, "select count(*) from public_cases;", ["2"])
+expect("anon cannot read a pending case by slug", db, "anon", None,
+       "select count(*) from public_cases where slug = 'pending-case';", ["0"])
+expect("A cannot approve a pending case", db, U, A,
+       "with u as (update public_cases set approval_status = 'approved' where slug = 'pending-case' returning 1) select count(*) from u;", ["0"])
+expect("A cannot unpublish an approved case", db, U, A,
+       "with u as (update public_cases set approval_status = 'withdrawn' returning 1) select count(*) from u;", ["0"])
+expect("A cannot insert a public case", db, U, A,
+       "insert into public_cases (slug, topic, verdict, truth_title, summary) values ('x-case', 'other', 'edited', '내가 만든 사례', 's');",
+       want_error="row-level security")
+expect("approval without a reviewer is rejected", db, "service_role", None,
+       "update public_cases set approval_status = 'approved', published_at = now() where slug = 'pending-case';",
+       want_error="approved_needs_reviewer")
+expect("politics needs a second, different reviewer", db, "service_role", None,
+       f"update public_cases set second_reviewed_by = '{A}' where slug = 'approved-politics';",
+       want_error="politics_two_reviewers")
+expect("sexual content can never be approved", db, "service_role", None,
+       "update public_cases set content_flags = '{sexual_content}' where slug = 'approved-economy';",
+       want_error="never_publish_sexual_or_minor")
+expect("private individuals can never be approved", db, "service_role", None,
+       "update public_cases set content_flags = '{private_person}' where slug = 'approved-economy';",
+       want_error="never_publish_private_person")
+expect("election-period political cases are text-only", db, "service_role", None,
+       "update public_cases set content_flags = '{election_period}', image_path = 'x.png' where slug = 'approved-politics';",
+       want_error="election_period_text_only")
+expect("unknown spread channel is rejected", db, "service_role", None,
+       "update public_cases set channels = '{tiktok}' where slug = 'approved-economy';", want_error="check constraint")
 
 # 6. Regression: the version that only revoked from PUBLIC
 old = "rls_old"

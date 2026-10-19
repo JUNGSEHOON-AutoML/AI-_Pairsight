@@ -26,6 +26,18 @@ PASS A cannot refund own quota (refund_quota)
 PASS anon cannot call take_quota
 PASS service_role sees all checks
 PASS service_role can take quota
+PASS anon sees approved public cases only
+PASS signed-in user sees approved public cases only
+PASS anon cannot read a pending case by slug
+PASS A cannot approve a pending case
+PASS A cannot unpublish an approved case
+PASS A cannot insert a public case
+PASS approval without a reviewer is rejected
+PASS politics needs a second, different reviewer
+PASS sexual content can never be approved
+PASS private individuals can never be approved
+PASS election-period political cases are text-only
+PASS unknown spread channel is rejected
 PASS [old schema] A can call take_quota on B, but RLS inside the function makes it return false
 PASS [old schema] A can call refund_quota, but RLS makes it change nothing
 PASS [old schema + security definer] A CAN burn B's quota: the hole the revoke prevents
@@ -41,4 +53,4 @@ PASS quota day defaults to UTC
 PASS source date provenance is preserved
 PASS unknown date source code is rejected
 
-42/42 passed
+54/54 passed
