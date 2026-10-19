@@ -38,7 +38,7 @@ export function UsageMeter({ me }: { me: Me | null }) {
 export function HeaderAccountLink() {
   const me = useMe();
   return (
-    <a href={me?.signedIn ? "/account" : "/login"} className="rounded-md px-3 py-2 text-text no-underline hover:bg-surface">
+    <a href={me?.signedIn ? "/account" : "/login"} className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
       {me?.signedIn ? "내 계정" : "로그인"}
     </a>
   );
