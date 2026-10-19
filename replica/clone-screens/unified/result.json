@@ -1,0 +1,20 @@
+{
+  "singleOrigin": true,
+  "leftDashboard": true,
+  "departments": 9,
+  "realCases": 3,
+  "liveLatencyMs": 681,
+  "selectionBothDirections": true,
+  "caseHandoff": true,
+  "workingAndStopped": true,
+  "visibleAnimation": true,
+  "publicApprovalAndWithdrawal": true,
+  "fakeImagesBlurred": true,
+  "fixturesHidden": true,
+  "anonymousBlocked": true,
+  "logoutRevoked": true,
+  "mobileOverflow": false,
+  "browserErrors": 0,
+  "assetErrors": 0,
+  "productionUnchanged": true
+}
