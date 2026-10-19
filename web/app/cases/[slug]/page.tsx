@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -6,6 +7,7 @@ import { getPublicCase } from "@/lib/public/store";
 
 async function CaseDetail({ params }: { params: PageProps<"/cases/[slug]">["params"] }) {
   const { slug } = await params;
+  await connection();
   const c = getPublicCase(slug); // approved cases only; anything else is a 404
   if (!c) notFound();
   return (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { HeaderAccountLink } from "./me";
 
 export function SiteHeader() {
   return (
@@ -24,12 +23,12 @@ export function SiteHeader() {
             </Link>
           </li>
           <li>
-            <Link href="/history" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
+            <Link href="/newsroom" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
               기록
             </Link>
           </li>
           <li>
-            <HeaderAccountLink />
+            <Link href="/newsroom/login" className="px-2 py-2">로그인</Link>
           </li>
         </ul>
       </nav>

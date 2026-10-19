@@ -46,7 +46,7 @@ export function CheckForm() {
     const data = await res.json().catch(() => ({}));
     if (data.error === "bad_date") return setError("사건 날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.");
     if (!res.ok) return setError(ERROR_COPY[(data.errorCode as ErrorCode) ?? "internal"] ?? ERROR_COPY.internal);
-    router.push(`/check/${data.id}`);
+    router.push(`/dev/check/${data.id}`);
   }
 
   async function findImages(e: React.FormEvent) {

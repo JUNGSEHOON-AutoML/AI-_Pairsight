@@ -50,6 +50,10 @@ export class CaseRepository {
     const rows = this.db.prepare("SELECT seq,record FROM case_events WHERE seq>? ORDER BY seq LIMIT ?").all(after, Math.min(limit, 1000)) as { seq: number; record: string }[];
     return rows.map(r => ({ ...JSON.parse(r.record), seq: r.seq }));
   }
+  allEvents(): CaseEvent[] {
+    const rows = this.db.prepare("SELECT seq,record FROM case_events ORDER BY seq").all() as { seq: number; record: string }[];
+    return rows.map(r => ({ ...JSON.parse(r.record), seq: r.seq }));
+  }
 }
 const globalStore = globalThis as unknown as { newsroomRepository?: CaseRepository };
 export const caseRepository = () => globalStore.newsroomRepository ??= new CaseRepository();

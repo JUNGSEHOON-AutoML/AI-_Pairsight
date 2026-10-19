@@ -29,7 +29,7 @@ export interface FactcheckData { court: CourtRecord; rule: string; calls: number
 const bytes = (data: string) => Buffer.from(data.split(",")[1], "base64");
 const imageData = async (url: string, b: Uint8Array): Promise<SavedImage> => ({ url, hash: hash(b), thumbnail: "data:image/png;base64," + Buffer.from(await thumbnail(b)).toString("base64") });
 export function classify(text: string): Topic {
-  if (/선거|정당|대통령|국회|정치|투표/.test(text)) return "politics";
+  if (/선거|정당|대통령|국회|정치|투표|개표/.test(text)) return "politics";
   if (/연예|배우|가수|아이돌|엔터|영화/.test(text)) return "entertainment";
   if (/재난|산불|지진|홍수|사회|사고|태풍/.test(text)) return "society";
   if (/경제|금리|주식|투자|부동산|은행/.test(text)) return "economy";
@@ -68,6 +68,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
     }),
     osint: make("osint", async (c, signal) => {
       const out: OsintData = { inputImage: null, selection: "none", inputExcerpt: "", candidates: [], signals: [], scope: "운영자가 지정한 후보/팩트체크 링크만 검증. 웹 전체 검색·자체 색인 없음" };
+      if (c.input.contentFlags.includes("sexual_content")) return { data: { ...out, scope: "성적 합성물 신고 전용: 페이지·이미지 가져오기 및 표시 금지" } };
       if (c.input.thumbnail) { out.inputImage = { url: "", thumbnail: c.input.thumbnail, hash: c.input.imageHash! }; out.selection = "operator"; }
       if (c.input.pageUrl) {
         const article = await pages.page(c.input.pageUrl, signal);
@@ -140,7 +141,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
       if (!options.allowTestProviders && (selection === "mock" || options.llm?.name.includes("mock"))) throw new CaseError("mock_forbidden", "실제 사건에 mock 법정을 사용할 수 없어요. 로컬 LLM 설정을 확인해 주세요.");
       const llm = options.llm ?? createLLMProvider(selection, { baseUrl: process.env.PAIRSIGHT_OLLAMA_URL ?? "http://127.0.0.1:11500", numThread: 4 });
       const court = await runCourt({ verdict: judge, evidence: a.collected.evidence, matches: a.collected.matches }, llm, signal);
-      if (court.incomplete.length || court.reviewStatus === "unavailable") throw new CaseError("court_incomplete", "맥락·법정 확인 못 함. 제공자 상태를 확인한 후 이 부서에서 다시 실행해 주세요.");
+      if (court.incomplete.length || court.reviewStatus === "unavailable") throw new CaseError("court_incomplete", "맥락·법정 확인 못 함. 제공자 상태를 확인한 후 이 부서에서 다시 실행해 주세요.", {llmCalls:court.llmCalls});
       court.rejected = court.rejected.map(r => ({ ...r, text: "" }));
       return { data: { court, rule: judge.rule, calls: court.llmCalls } };
     }),
@@ -157,7 +158,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         imageAlt: "운영자가 확인한 제보 이미지", court: { opened: court.opened, judgeVerdict: court.judgeVerdict, judgeReason: court.docket.judge.reason,
           finalVerdict: court.finalVerdict, downgraded: court.downgraded, prosecution: court.prosecution, defense: court.defense, jurors: court.jurors,
           rejectedCount: court.rejected.length, rejected: court.rejected.map(r => ({ role: r.role, reason: r.reason })), judgment: court.judgment },
-        cards: court.docket.cards.map(({ untrustedPageText: _unused, ...card }) => ({ ...card, sourceUrl: card.sourceUrl })),
+        cards: court.docket.cards.map(({ untrustedPageText, ...card }) => { void untrustedPageText; return card; }),
         contentFlags: c.input.contentFlags, legalWarnings: sectionData<{ warnings: string[] }>(c, "legal").warnings,
         approvalStatus: "approved", reviewedBy: first.operatorId, reviewedAt: first.at, secondReviewedBy: second?.operatorId ?? null, secondReviewedAt: second?.at ?? null,
         publishedAt: new Date().toISOString(), example: false };

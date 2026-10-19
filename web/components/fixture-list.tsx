@@ -34,7 +34,7 @@ export function FixtureList({ scenarios }: { scenarios: { id: string; note: stri
                   if (extra?.claimedDate) fd.set("claimedDate", extra.claimedDate);
                   const res = await fetch("/api/checks", { method: "POST", body: fd });
                   setBusy(null);
-                  if (res.ok) router.push(`/check/${(await res.json()).id}`);
+                  if (res.ok) router.push(`/dev/check/${(await res.json()).id}`);
                   else setError(res.status === 429 ? "오늘 무료 검사를 다 썼어요." : "검사를 시작하지 못했어요.");
                 }}
               >

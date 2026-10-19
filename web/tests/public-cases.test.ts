@@ -1,18 +1,19 @@
 // Public dashboard read side: only approved, policy-clean cases reach a page (mirrors public_cases RLS + constraints).
+import seed from "../data/public-cases.json";
 import { describe, expect, it } from "vitest";
-import { allCasesForTests, getPublicCase, listPublicCases } from "../lib/public/store";
+import { getPublicCase, listPublicCases } from "../lib/public/store";
 import { isBlurred, publishProblems, type PublicCase } from "../lib/public/types";
 
-const all = allCasesForTests();
+const all = seed as unknown as PublicCase[];
 const ok = all.find((c) => c.slug === "alley-house-sold-sign")!;
 
 describe("public cases", () => {
   it("lists approved cases only; pending, rejected and flagged cases never appear", () => {
-    const slugs = listPublicCases().map((c) => c.slug);
+    const slugs = listPublicCases({}, all).map((c) => c.slug);
     expect(slugs).toEqual(["alley-house-sold-sign", "park-festival-not-flood", "desert-lantern-concert-ai", "sale-cafe-sign-edited", "rally-crowd-no-evidence"]);
     for (const hidden of ["pending-market-photo", "rejected-example", "blocked-sexual-flag"]) {
       expect(slugs).not.toContain(hidden);
-      expect(getPublicCase(hidden)).toBeNull();
+      expect(getPublicCase(hidden, all)).toBeNull();
     }
   });
 
@@ -36,14 +37,14 @@ describe("public cases", () => {
   });
 
   it("filters by topic, manipulation type and spread channel", () => {
-    expect(listPublicCases({ topic: "economy" }).map((c) => c.slug)).toEqual(["alley-house-sold-sign", "sale-cafe-sign-edited"]);
-    expect(listPublicCases({ verdict: "miscontextualized" }).map((c) => c.slug)).toEqual(["park-festival-not-flood"]);
-    expect(listPublicCases({ channel: "youtube" }).map((c) => c.slug)).toEqual(["desert-lantern-concert-ai"]);
-    expect(listPublicCases({ topic: "politics", verdict: "edited" })).toEqual([]);
+    expect(listPublicCases({ topic: "economy" }, all).map((c) => c.slug)).toEqual(["alley-house-sold-sign", "sale-cafe-sign-edited"]);
+    expect(listPublicCases({ verdict: "miscontextualized" }, all).map((c) => c.slug)).toEqual(["park-festival-not-flood"]);
+    expect(listPublicCases({ channel: "youtube" }, all).map((c) => c.slug)).toEqual(["desert-lantern-concert-ai"]);
+    expect(listPublicCases({ topic: "politics", verdict: "edited" }, all)).toEqual([]);
   });
 
   it("every published statement cites existing cards, no page text is published, fakes are blurred", () => {
-    for (const c of listPublicCases()) {
+    for (const c of listPublicCases({}, all)) {
       const ids = new Set(c.cards.map((k) => k.id));
       const statements = [...c.court.prosecution, ...c.court.defense, ...c.court.jurors.flatMap((j) => (j.doubt ? [j.doubt] : [])), ...c.court.judgment.remainingDoubts];
       for (const s of statements) for (const id of s.cite) expect(ids.has(id), `${c.slug} ${id}`).toBe(true);
@@ -51,6 +52,6 @@ describe("public cases", () => {
       expect(isBlurred(c.verdict)).toBe(true);
       expect(c.example).toBe(true);
     }
-    expect(listPublicCases().find((c) => c.topic === "politics")!.secondReviewedBy).not.toBeNull();
+    expect(listPublicCases({}, all).find((c) => c.topic === "politics")!.secondReviewedBy).not.toBeNull();
   });
 });

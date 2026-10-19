@@ -67,9 +67,11 @@ export interface CaseEvent {
 export type NewEvent = Omit<CaseEvent, "seq">;
 export const departmentLabel = (id: CaseRecord["stage"]) => DEPARTMENTS.find(d => d.id === id)?.label ?? (id === "intake" ? "접수" : "완료");
 export class CaseError extends Error {
-  constructor(readonly code: string, message: string) { super(message); this.name = "CaseError"; }
+  constructor(readonly code: string, message: string, readonly metrics?: { llmCalls: number }) { super(message); this.name = "CaseError"; }
 }
 export const sectionData = <T>(c: Readonly<CaseRecord>, id: Department): T => {
   if (c.sections[id]?.state !== "done") throw new CaseError("missing_section", "이전 부서 기록이 완료되지 않았어요.");
   return c.sections[id]!.data as T;
 };
+
+export const statusLabel: Record<CaseStatus,string> = {ready:"진행 대기",running:"작업 중",failed:"실패 · 중단",awaiting_approval:"사람 승인 대기",rejected:"반려",complete:"완료",withdrawn:"공개 철회"};

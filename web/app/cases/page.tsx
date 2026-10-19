@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { CaseCard, FilterBar, TopicNav, type Filters } from "@/components/public-cases";
@@ -19,6 +20,7 @@ function parse(sp: Record<string, string | string[] | undefined>): Filters {
 
 async function Dashboard({ searchParams }: { searchParams: PageProps<"/cases">["searchParams"] }) {
   const filters = parse(await searchParams);
+  await connection();
   const cases = listPublicCases(filters);
   return (
     <div className="grid gap-6 md:grid-cols-[12rem_1fr]">

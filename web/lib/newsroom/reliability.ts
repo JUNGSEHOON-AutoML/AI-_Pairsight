@@ -4,6 +4,8 @@ import type { FactcheckData } from "./workers";
 /** No ground-truth labels means accuracy is unknown, never 100%. */
 export function reliability(cases: CaseRecord[], events: CaseEvent[]) {
   const rows = cases.filter(c => c.input.origin !== "fixture");
+  const realIds = new Set(rows.map(c => c.id));
+  events = events.filter(e => realIds.has(e.caseId));
   const labeled = rows.filter(c => c.evaluation && c.sections.factcheck?.state === "done");
   const wrong = labeled.filter(c => (c.sections.factcheck!.data as unknown as FactcheckData).court.finalVerdict !== c.evaluation!.expected);
   const suspected = rows.filter(c => c.sections.security?.data.requiresHumanReview || (c.sections.factcheck?.data as FactcheckData | undefined)?.court?.downgraded);

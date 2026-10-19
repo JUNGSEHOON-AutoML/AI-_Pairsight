@@ -1,6 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { CaseError, DEPARTMENTS, type CaseRecord, type Department } from "./model";
 import type { CaseRepository } from "./repository";
+import { ProviderError } from "../providers/types";
+
+function safeFailure(e:unknown) {
+  if(e instanceof CaseError)return {code:e.code,message:e.message};
+  if(e instanceof ProviderError && e.code==="url_blocked") {
+    if(e.message==="robots disallow")return {code:"robots_disallowed",message:"출처의 robots.txt가 접근을 허용하지 않아요. 우회하지 않고 중단했어요."};
+    if(e.message.startsWith("robots")||e.message.includes("robots redirect"))return {code:"robots_unavailable",message:"출처의 robots.txt 허용 여부를 확인하지 못해 중단했어요."};
+    if(e.message==="paywall or bot challenge")return {code:"source_access_blocked",message:"유료벽 또는 봇 차단을 확인했어요. 우회하지 않고 중단했어요."};
+    if(e.message==="source disallows retention")return {code:"retention_disallowed",message:"출처가 발췌 보관을 허용하지 않아 중단했어요."};
+    return {code:"source_unavailable",message:"출처 페이지 또는 이미지를 정상적으로 가져오지 못했어요. 접근 제한을 우회하지 않아요."};
+  }
+  return {code:"worker_failed",message:"부서 처리에 실패했어요. 원문 오류와 비밀 정보는 저장하지 않아요."};
+}
 
 export interface WorkerOutput { data: Record<string, unknown>; waitForApproval?: boolean }
 export interface DepartmentWorker {
@@ -64,8 +77,9 @@ export async function runCase(repo: CaseRepository, id: string, workers: Workers
     } catch (e) {
       return repo.mutate(id, (x, emit) => {
         if (x.run?.token !== token) throw new CaseError("stale_run", "작업 소유권이 바뀌었어요.");
-        const safe = e instanceof CaseError ? { code: e.code, message: e.message } : { code: "worker_failed", message: "부서 처리에 실패했어요. 원문 오류와 비밀 정보는 저장하지 않아요." };
+        const safe = safeFailure(e);
         Object.assign(x.sections[dept.id]!, { state: "failed", error: safe, finishedAt: new Date().toISOString(), durationMs: Date.now() - start });
+        if(e instanceof CaseError && e.metrics)x.sections[dept.id]!.data={calls:e.metrics.llmCalls,reviewStatus:"unavailable"};
         x.status = "failed"; x.run = null;
         emit({ department: dept.id, state: "failed", summary: safe.message, cite: [] });
         emit({ department: "reliability", state: "warning", summary: dept.label + " 실패 기록", cite: [] });

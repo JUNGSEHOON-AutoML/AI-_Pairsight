@@ -1,6 +1,6 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
-import { usesMockTransport } from "@/lib/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,12 +18,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           본문으로 건너뛰기
         </a>
-        {usesMockTransport && (
-          <p role="note" className="bg-verdict-edited-bg px-4 py-2 text-center text-sm text-text">
-            <strong className="text-verdict-edited">개발용 모의 데이터</strong> · 지금 결과는 실제 검색이 아니라 고정된
-            예시 데이터로 만들어져요.
-          </p>
-        )}
         <SiteHeader />
         <main id="main" className="mx-auto w-full max-w-content flex-1 px-4 py-8 md:px-8 md:py-12">
           {children}
@@ -32,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Pairsight · 자동 분석에는 오류가 있을 수 있어요.{" "}
           <a href="/how-it-works" className="underline">
             판정·게재 기준
-          </a>
+          </a> · <Link href="/newsroom">운영자 편집국</Link>
         </footer>
       </body>
     </html>
