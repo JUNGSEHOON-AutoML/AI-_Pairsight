@@ -186,7 +186,7 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
   - Fact Check API에 `imageSearch`가 있습니다. 결제 없이 되는지는 확인하지 못했습니다.
   - c2pa-node는 MIT지만 이 서버의 glibc 2.31에서 실행되지 않습니다.
   - CPU 임베딩은 1장 31–133 ms. OpenAI CLIP 가중치는 배포 범위 밖입니다.
-- **검증:** 테스트 171개, `tsc`, `eslint`, `next build` 모두 통과. 예시 하네스 `--mock --index` 결과는 맞힘 6, 판단 불가 3, 오판 0.
+- **검증:** 테스트 170개, `tsc`, `eslint`, `next build` 모두 통과. 예시 하네스 `--mock --index` 결과는 맞힘 6, 판단 불가 3, 오판 0.
 
 ## 미완료
 
