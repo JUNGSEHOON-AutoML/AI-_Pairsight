@@ -13,7 +13,11 @@
     "fixtures": "python3 scripts/make-fixtures.py && node scripts/make-comparison-fixtures.mjs && python3 scripts/make-temporal-fixtures.py",
     "eval": "tsx eval/run.ts",
     "index:collect": "tsx scripts/index-collect.ts",
-    "controlroom": "node scripts/controlroom-claw3d.mjs"
+    "controlroom": "node scripts/controlroom-claw3d.mjs",
+    "court": "node --env-file-if-exists=.env.local --import tsx scripts/court-run.ts",
+    "tuning:check": "tsx scripts/tune.ts --check",
+    "tuning:run": "tsx scripts/tune.ts",
+    "tuning:holdout": "tsx scripts/tuning-holdout.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

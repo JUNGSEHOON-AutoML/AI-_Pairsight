@@ -2,6 +2,7 @@ import sharp from "sharp";
 import type { ComparisonResult, ImageComparisonProvider } from "./types";
 import { DECODE_LIMIT, hash } from "./retention";
 import { defaultSceneGate, type SceneGate } from "./scene-gate";
+import { THRESHOLDS } from "./thresholds";
 
 const SIZE = 96;
 type Raster = { data: Uint8Array; width: number; height: number };
@@ -81,7 +82,7 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
     }
     const pHashDistance = hammingDistance(rasterHash(a), rasterHash(b));
     const alignedDistance = hammingDistance(rasterHash(a), rasterHash(b, best));
-    const aligned = score >= .9 && alignedDistance <= 18;
+    const aligned = score >= THRESHOLDS.minAlignment && alignedDistance <= THRESHOLDS.maxAlignedDistance;
     // Pixel alignment accepts lookalikes (same backdrop, same layout). The scene gate can only exclude.
     const sceneSimilarity = aligned && this.sceneGate ? await this.sceneGate.similarity(input, reference, signal) : null;
     const sceneRejected = sceneSimilarity !== null && sceneSimilarity < this.sceneGate!.minSimilarity;

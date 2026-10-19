@@ -7,6 +7,7 @@ import { join } from "node:path";
 import sharp from "sharp";
 import { ProviderError } from "../providers/types";
 import { DECODE_LIMIT } from "./retention";
+import { THRESHOLDS } from "./thresholds";
 
 /** DINOv2-small (Meta, Apache-2.0), ONNX conversion pinned to one revision; 8-bit weights (~25 MB). */
 export const SCENE_MODEL = {
@@ -19,7 +20,7 @@ export const SCENE_MODEL = {
 /** Cosine similarity of the CLS embeddings below which a candidate is treated as a different scene.
  * Synthetic scene calibration plus the real-photo pilot (no evidence to change .76).
  * See replica/verification-pipeline.md §3-1 and §3-3; real-photo results are scoped, not universal. */
-export const SCENE_MIN_SIMILARITY = 0.76;
+export const SCENE_MIN_SIMILARITY = THRESHOLDS.minSceneSimilarity;
 
 export interface SceneGate {
   readonly name: string;

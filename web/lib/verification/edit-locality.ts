@@ -1,4 +1,5 @@
 import type { ComparisonResult } from "./types";
+import { THRESHOLDS } from "./thresholds";
 
 /** Real-photo pilot: 72 calibration JPEG pairs max outside MAE .019869;
  * frozen camera-disjoint validation and synthetic regressions in eval/real-photos/.
@@ -11,9 +12,9 @@ export interface EditLocalityLimits {
 }
 
 export const LOCAL_EDIT_LIMITS = {
-  maxOutsideResidual: 0.020, // mean absolute RGB error after registration/color normalization, 0..1
-  maxDiffAreaFraction: 0.08, // sum of ALL bounding-box areas, before UI truncation
-  maxDiffRegionCount: 2,
+  maxOutsideResidual: THRESHOLDS.maxOutsideResidual,
+  maxDiffAreaFraction: THRESHOLDS.maxDiffAreaFraction,
+  maxDiffRegionCount: THRESHOLDS.maxDiffRegionCount,
 } as const;
 
 /** Exclusion only. Passing does not prove an edit; missing/invalid measurements fail closed.

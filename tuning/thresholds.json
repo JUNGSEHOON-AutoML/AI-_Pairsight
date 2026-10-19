@@ -1,0 +1,10 @@
+{
+  "minSceneSimilarity": 0.76,
+  "maxOutsideResidual": 0.02,
+  "maxDiffAreaFraction": 0.08,
+  "maxDiffRegionCount": 2,
+  "minAlignment": 0.9,
+  "maxAlignedDistance": 18,
+  "sameImageMaxChange": 0.02,
+  "maxLocalChange": 0.25
+}

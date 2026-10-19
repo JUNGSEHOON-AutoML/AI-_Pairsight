@@ -13,6 +13,7 @@ import {
 } from "./domain";
 import { LOCAL_EDIT_LIMITS, passesLocalEditGuard, type EditLocalityLimits } from "./verification/edit-locality";
 import { EMPTY_TRUSTED_LIST, findTrustedSource, type TrustedSource, type TrustedSourceList } from "./verification/trusted-sources";
+import { THRESHOLDS } from "./verification/thresholds";
 
 // Real-photo calibration revision; do not reuse earlier comparison-policy caches.
 export const PIPELINE_VERSION = 5;
@@ -23,10 +24,10 @@ export const PIPELINE_VERSION = 5;
  * does not silently loosen if that provider's thresholds change.
  */
 export const TRUSTED_RULES = {
-  minAlignment: 0.9, // luminance correlation after alignment
-  maxAlignedDistance: 18, // pHash Hamming distance after alignment (of 63 bits)
-  sameImageMaxChange: 0.02, // same picture: no differing region AND less than this fraction of changed cells
-  maxLocalChange: 0.25, // above this the difference is not "local" any more (different photo, heavy edit)
+  minAlignment: THRESHOLDS.minAlignment,
+  maxAlignedDistance: THRESHOLDS.maxAlignedDistance,
+  sameImageMaxChange: THRESHOLDS.sameImageMaxChange,
+  maxLocalChange: THRESHOLDS.maxLocalChange,
   contextMinDays: 30, // trusted page date must be at least this many days before the claimed date
 } as const;
 

@@ -14,6 +14,7 @@ import {
 import { getProviders } from "./providers";
 import { ProviderError } from "./providers/types";
 import { PIPELINE_VERSION, sortEvidence, type VerdictResult } from "./verdict";
+import { THRESHOLD_FINGERPRINT } from "./verification/thresholds";
 
 import { collectEvidence, compareContext } from "./verification/engine";
 import type { NormalizedInput } from "./verification/types";
@@ -56,8 +57,9 @@ export async function startCheck(user: User, input: StartInput): Promise<StartRe
   if (!quota.ok) return { ok: false, reason: "quota", used: quota.used, limit: quota.limit };
 
   const sha256 = normalized.image.sha256;
-  const reusable = input.forceFresh ? null : await store.findReusableAnalysis(sha256, PIPELINE_VERSION);
-  const analysis = reusable ?? (await store.createAnalysis(sha256, PIPELINE_VERSION));
+  const inputKey = `${sha256}:${THRESHOLD_FINGERPRINT}`;
+  const reusable = input.forceFresh ? null : await store.findReusableAnalysis(inputKey, PIPELINE_VERSION);
+  const analysis = reusable ?? (await store.createAnalysis(inputKey, PIPELINE_VERSION));
 
   const check = await store.createCheck({
     userId: user.id,
