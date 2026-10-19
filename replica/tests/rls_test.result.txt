@@ -8,7 +8,6 @@ PASS A cannot read B's source matches
 PASS A cannot read B's claims
 PASS A sees only own usage
 PASS A sees only own profile
-PASS A cannot read stripe_events
 PASS B sees the shared analysis too
 PASS B does not see A's check on the shared analysis
 PASS anon (no JWT) reads 0 rows from checks
@@ -16,10 +15,10 @@ PASS anon (no JWT) reads 0 rows from analyses
 PASS anon (no JWT) reads 0 rows from evidence
 PASS anon (no JWT) reads 0 rows from profiles
 PASS anon (no JWT) reads 0 rows from usage_days
-PASS A cannot upgrade own plan
+PASS A cannot raise own daily limit
 PASS A cannot reset own usage
 PASS A cannot delete B's check
-PASS A cannot change a verdict
+PASS A cannot change the evidence used for a verdict
 PASS A cannot insert a check
 PASS A cannot insert fake evidence
 PASS A cannot burn B's quota (take_quota)
@@ -31,5 +30,15 @@ PASS [old schema] A can call take_quota on B, but RLS inside the function makes 
 PASS [old schema] A can call refund_quota, but RLS makes it change nothing
 PASS [old schema + security definer] A CAN burn B's quota: the hole the revoke prevents
 PASS [current schema + security definer] A still gets permission denied
+PASS shared analyses have no stored verdict columns
+PASS recheck can create a second run of the same image
+PASS duplicate run is rejected
+PASS non-positive run number is rejected
+PASS different pipeline version starts at run 1
+PASS claimed dates stay separate on checks sharing an analysis
+PASS browser cannot rewrite claimed dates
+PASS quota day defaults to UTC
+PASS source date provenance is preserved
+PASS unknown date source code is rejected
 
-33/33 passed
+42/42 passed

@@ -39,7 +39,7 @@ export function AccountPanel() {
       </Block>
       <Block title="오늘 무료 검사">
         <UsageMeter me={me} />
-        <p className="mt-1 text-sm text-text-muted">유료 요금제는 아직 준비 중이에요.</p>
+        <p className="mt-1 text-sm text-text-muted">비영리 시범 운영이라 결제와 유료 요금제는 없어요.</p>
       </Block>
       {me?.signedIn && (
         <Block>

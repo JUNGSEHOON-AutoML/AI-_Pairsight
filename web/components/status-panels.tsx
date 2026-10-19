@@ -93,7 +93,7 @@ export function QuotaExhausted() {
       <div className="mt-3 flex flex-wrap gap-2">
         <ButtonLink href="/login">가입하고 기록 저장하기</ButtonLink>
         <ButtonLink href="/pricing" variant="secondary">
-          요금제 보기
+          운영 안내 보기
         </ButtonLink>
       </div>
       <p className="mt-2 text-sm text-text-muted">결제 정보 없이 가입할 수 있어요.</p>

@@ -15,8 +15,6 @@ end $$;
 -- One row per auth user, anonymous ones included.
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  plan text not null default 'free' check (plan in ('free', 'plus')),
-  stripe_customer_id text unique,
   daily_limit int not null default 5 check (daily_limit >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -137,13 +135,6 @@ create table usage_days (
   primary key (user_id, day)
 );
 
--- Stripe webhook ids we have handled. Stripe can deliver the same event twice.
-create table stripe_events (
-  id text primary key,
-  type text not null,
-  processed_at timestamptz not null default now()
-);
-
 create trigger t_profiles before update on profiles for each row execute function set_updated_at();
 create trigger t_analyses before update on analyses for each row execute function set_updated_at();
 create trigger t_checks before update on checks for each row execute function set_updated_at();
@@ -198,7 +189,6 @@ alter table evidence enable row level security;
 alter table source_matches enable row level security;
 alter table claims enable row level security;
 alter table usage_days enable row level security;
-alter table stripe_events enable row level security;
 
 create policy own_profile on profiles for select using (id = auth.uid());
 create policy own_checks on checks for select using (user_id = auth.uid());
@@ -214,4 +204,3 @@ create policy matches_via_check on source_matches for select using (
   exists (select 1 from checks c where c.analysis_id = source_matches.analysis_id and c.user_id = auth.uid()));
 create policy claims_via_check on claims for select using (
   exists (select 1 from checks c where c.analysis_id = claims.analysis_id and c.user_id = auth.uid()));
--- stripe_events: no policy, service role only.

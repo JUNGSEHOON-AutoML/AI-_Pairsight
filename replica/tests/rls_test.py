@@ -52,7 +52,6 @@ insert into source_matches (analysis_id, url, provider) values
   ('10000000-0000-0000-0000-00000000000b', 'https://b.example/secret', 'vision');
 insert into claims (analysis_id, position, text) values ('10000000-0000-0000-0000-00000000000b', 0, 'b claim');
 insert into usage_days (user_id, day, used) values ('{A}', '2026-10-18', 1), ('{B}', '2026-10-18', 2);
-insert into stripe_events (id, type) values ('evt_1', 'checkout.session.completed');
 """)
 
 
@@ -99,7 +98,6 @@ expect("A cannot read B's source matches", db, U, A, "select count(*) from sourc
 expect("A cannot read B's claims", db, U, A, "select count(*) from claims;", ["0"])
 expect("A sees only own usage", db, U, A, "select string_agg(used::text, ',') from usage_days;", ["1"])
 expect("A sees only own profile", db, U, A, "select count(*) from profiles;", ["1"])
-expect("A cannot read stripe_events", db, U, A, "select count(*) from stripe_events;", ["0"])
 expect("B sees the shared analysis too", db, U, B,
        "select count(*) from analyses where id = '10000000-0000-0000-0000-0000000000ab';", ["1"])
 expect("B does not see A's check on the shared analysis", db, U, B,
@@ -110,8 +108,8 @@ for t in ["checks", "analyses", "evidence", "profiles", "usage_days"]:
     expect(f"anon (no JWT) reads 0 rows from {t}", db, "anon", None, f"select count(*) from {t};", ["0"])
 
 # 3. Writing: no write policies, so every write from the browser is a no-op or an error
-expect("A cannot upgrade own plan", db, U, A,
-       "with u as (update profiles set plan = 'plus', daily_limit = 9999 returning 1) select count(*) from u;", ["0"])
+expect("A cannot raise own daily limit", db, U, A,
+       "with u as (update profiles set daily_limit = 9999 returning 1) select count(*) from u;", ["0"])
 expect("A cannot reset own usage", db, U, A,
        "with u as (update usage_days set used = 0 returning 1) select count(*) from u;", ["0"])
 expect("A cannot delete B's check", db, U, A,

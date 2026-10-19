@@ -1,5 +1,7 @@
 # Architecture: Pairsight (TruthScan·Hive Detect의 핵심 흐름 + 원본 추적)
 
+> **2026-10-19 운영 전제 변경: 비영리·시범 운영.** 결제(Stripe)를 설계에서 뺐습니다. 유료 요금제, 결제 웹훅, `stripe_events`, `profiles.plan` 없이 하루 무료 횟수만 둡니다. 외부 서비스는 무료 등급이나 로컬 실행만 씁니다(역이미지: 수동 후보·RSS 해시 색인, LLM: Ollama 로컬 모델). 근거: [free-options-research.md](free-options-research.md), [llm-options.md](llm-options.md), [newsroom-court.md](newsroom-court.md).
+>
 > 2026-10-19 판별 v2: 현재 엔진·보관 정책·5종 규칙은 [verification-pipeline.md](verification-pipeline.md)가 우선합니다. 아래 v1의 동일한 과거 사본 → 진짜 확인, 픽셀 차이만으로 편집 조작, 공유 근거만으로 맥락 판정하는 규칙은 폐기했습니다. DB는 아직 v2에 연결하지 않았습니다.
 
 근거 문서: [recon.md](recon.md) (화면 S01~S11, 흐름 F01~F06), [features.csv](features.csv) (23행), [fixes.md](fixes.md) (fix-F1~F8)
@@ -14,8 +16,8 @@
 | 데이터베이스 | Postgres on Supabase | DB, 인증, 파일 저장, RLS를 한 곳에서 관리. 무료 등급으로 시작 가능 |
 | ORM | Drizzle | SQL에 가까워서 `schema.sql`과 일대일로 맞추기 쉬움 |
 | 인증 | Supabase Auth (익명 로그인 → 이메일 매직 링크 / Google로 연결) | 비회원도 처음부터 user_id를 가지므로 RLS 규칙이 하나로 통일됨. 가입하면 같은 id에 계정을 연결해서 기록이 유지됨 |
-| 결제 | Stripe Checkout + Customer Portal | 해지를 Stripe 포털에서 버튼 하나로 처리(리뷰 불만 #2 대응). 1단계에서는 무료만 출시하고 결제는 3단계로 미룸 |
-| 이메일 | Resend | 매직 링크와 영수증만 보냄 |
+| 결제 | **없음 (비영리 시범 운영)** | 결제 단계를 설계에서 제거. 리뷰 불만 #1·#2(결제 강요, 해지 불가)는 결제 자체가 없어서 생기지 않음 |
+| 이메일 | Resend (무료 등급) | 매직 링크만 보냄 |
 | 작업 큐 | Inngest | 분석 파이프라인이 외부 API를 여러 번 부르는 다단계 작업이라, 단계별 재시도와 중복 실행 방지가 필요함 |
 | 파일 | Supabase Storage (비공개 버킷, 서명 URL 업로드) | 업로드 이미지는 비공개로 두고 서버만 읽음 |
 | 호스팅 | Vercel | Next.js 기본 배포. 무거운 이미지 비교가 함수 시간 제한에 걸리면 이 단계만 Fly 워커로 분리 |
@@ -30,7 +32,7 @@
 | watermark, pixel_model, screen_recapture | Hive 또는 TruthScan의 공개 API, 혹은 오픈 모델 | **경쟁사 API를 쓰는 것이 각 사 약관에 맞는지 먼저 확인해야 합니다.** 어느 쪽이든 판정을 혼자 결정하지 못하는 보조 신호로만 씁니다 |
 | fact_check | Google Fact Check Tools API (claims:search) | URL·기사 입력 시 사용(2단계) |
 | (기사 본문 추출) | Mozilla Readability | 유료 기사나 로그인이 필요한 페이지는 추출하지 않고 안내만 함 |
-| (주장 추출) | LLM (Anthropic API) | 모델과 프롬프트는 `/replica-backend`에서 정함 |
+| (공방 레이어) | 로컬 LLM (Ollama), mock | 유료 API는 쓰지 않음. 판정은 코드(규칙 v3)가 정하고 LLM은 근거 카드를 인용한 주장만 냄([newsroom-court.md](newsroom-court.md)) |
 
 ### 판정 규칙 v1 (fix-F1, F5. `analyses.pipeline_version = 1`)
 
@@ -55,7 +57,7 @@
 
 ## 스키마
 
-테이블 8개: `profiles`, `analyses`, `checks`, `evidence`, `source_matches`, `claims`, `usage_days`, `stripe_events`
+테이블 7개: `profiles`, `analyses`, `checks`, `evidence`, `source_matches`, `claims`, `usage_days` (`stripe_events`는 2026-10-19 결제 제거로 삭제)
 접근 규칙: **Postgres RLS.**
 
 - 브라우저는 자기 `checks`, 그리고 그 검사가 가리키는 분석 결과만 읽을 수 있습니다.
@@ -94,7 +96,7 @@ SQL 전체: [schema.sql](schema.sql)
   - 사용자 A는 자기 검사만 봅니다. B의 검사는 id로도, 공유 슬러그를 추측해도 보이지 않습니다.
   - 같은 이미지를 둘 다 검사했다면 공유 분석은 둘 다 보지만, 상대의 검사 행은 보이지 않습니다.
   - JWT 없는 요청은 아무것도 읽지 못합니다.
-  - 브라우저에서는 요금제 올리기, 사용량 초기화, 판정 바꾸기, 검사·근거 넣기가 모두 막힙니다.
+  - 브라우저에서는 하루 한도 올리기, 사용량 초기화, 판정 바꾸기, 검사·근거 넣기가 모두 막힙니다.
   - 무료 한도 함수는 브라우저에서 호출할 수 없고, 서버(service_role)만 호출할 수 있습니다.
 - **고친 것:** `take_quota`/`refund_quota`의 실행 권한을 public, anon, authenticated에서 명시적으로 회수했습니다.
   - 지금 정의(security invoker)에서는 함수 안의 RLS가 이미 효과를 막고 있었습니다.
@@ -143,17 +145,17 @@ POST /api/checks에 `{ url }`을 넣는 같은 경로를 씁니다. 결과는 GE
 | GET /auth/callback | 매직 링크 또는 Google 로그인을 마무리하고, 익명 계정에 연결 | Supabase 리다이렉트 | code | 세션 쿠키 |
 | GET /api/history | 내 검사 목록 (S06) | 로그인한 사용자 | cursor | checks[] |
 
-### F06 해지하거나 데이터를 삭제한다 (S09)
+### F06 데이터를 삭제한다 (S09)
 
 | method path | 하는 일 | 호출 가능 | 입력 | 출력 |
 | --- | --- | --- | --- | --- |
-| POST /api/billing/checkout | Stripe Checkout 세션 생성 (3단계) | 가입한 사용자 | plan | url |
-| POST /api/billing/portal | Stripe 고객 포털(해지, 결제수단 변경) | 가입한 사용자 | — | url |
-| DELETE /api/account | 업로드 파일 삭제 → auth 사용자 삭제(연쇄 삭제) → Stripe 고객 삭제 | 본인 | 확인 문구 | 204 |
+| DELETE /api/account | 업로드 파일 삭제 → auth 사용자 삭제(연쇄 삭제) | 본인 | 확인 문구 | 204 |
+
+결제 라우트(`/api/billing/*`)는 결제 제거로 없습니다.
 
 ### 웹훅과 작업
 
-- **들어오는 웹훅:** `POST /api/webhooks/stripe`. 서명을 검증하고, `stripe_events`에 이벤트 id를 먼저 넣은 다음 처리합니다. Inngest는 `/api/inngest` 엔드포인트로 연결합니다.
+- **들어오는 웹훅:** 결제가 없으므로 없습니다. Inngest는 `/api/inngest` 엔드포인트로 연결합니다.
 - **나가는 웹훅:** 1단계에서는 없습니다.
 
 | 작업 | 언제 | 하는 일 |
@@ -166,7 +168,7 @@ POST /api/checks에 `{ url }`을 넣는 같은 경로를 씁니다. 결과는 GE
 ## 까다로운 부분
 
 - **같은 이미지 동시 제출:** 두 사람이 같은 이미지를 동시에 넣는 경우입니다. `insert … on conflict do nothing returning`으로 처리하고, 결과가 없으면 select로 기존 분석을 가져옵니다. 이벤트는 분석을 새로 만든 쪽만 발행합니다.
-- **중복 실행:** Stripe 이벤트는 `stripe_events`로 중복을 걸러냅니다. Inngest 단계는 재시도될 수 있으므로, 결과를 `(analysis_id, kind, provider)` 유니크 키로 upsert해서 여러 번 실행해도 결과가 같게 합니다.
+- **중복 실행:** Inngest 단계는 재시도될 수 있으므로, 결과를 `(analysis_id, kind, provider)` 유니크 키로 upsert해서 여러 번 실행해도 결과가 같게 합니다.
 - **무료 한도 경쟁:** `take_quota()` 한 문장이 원자적으로 처리합니다. 실패한 분석은 refund로 돌려줍니다. 날짜 기준은 UTC이고, 화면에는 사용자 현지 시각으로 "자정에 초기화"라고 표시합니다.
 - **외부 API 한도와 비용:** 역이미지 검색이 건당 가장 비쌉니다. 분석 결과를 해시 기준으로 공유하므로 같은 이미지는 한 번만 호출합니다. 제공자별 분당 한도를 넘으면 Inngest가 지수 백오프로 재시도합니다.
 - **파일 크기와 형식:** 10MB 상한은 DB 제약과 서명 URL 양쪽에 둡니다. HEIC는 서버에서 변환합니다. 원본 후보를 내려받을 때도 크기와 시간 제한을 둡니다.
@@ -204,7 +206,7 @@ POST /api/checks에 `{ url }`을 넣는 같은 경로를 씁니다. 결과는 GE
    - 가입·로그인: S07, /auth/callback
    - 공유 링크: S10, share 라우트
    - 결과 리포트 다운로드
-   - 요금제 페이지: S08. Stripe 연결은 `/replica-launch`에서 가격을 정한 뒤에 합니다.
+   - 운영 안내 페이지: S08(구 요금제). 비영리 시범 운영과 하루 무료 횟수를 안내합니다. 결제는 없습니다.
 4. **선택 기능 (could 3)**
    - 생성 모델 추정
    - 히트맵
