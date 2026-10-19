@@ -4,6 +4,7 @@ import { resolve, join } from "node:path";
 import { CaseError } from "../model";
 
 export const projectRoot = () => resolve(process.env.PAIRSIGHT_PROJECT_ROOT ?? join(process.cwd(), ".."));
+export const newsroomRoot = () => resolve(process.env.PAIRSIGHT_NEWSROOM_ROOT ?? join(projectRoot(), "newsroom"));
 export const digest = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 export function protectionGuard(root = projectRoot()) {
   const path = join(root, "newsroom", "protected.json");

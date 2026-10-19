@@ -11,14 +11,14 @@ import { evidenceIds, reportingLLM, writeDeskReport } from "./reporting";
 
 /** Existing worker sections/rules are retained. A validated Markdown report gates each new desk. */
 export async function runDesks(repo:CaseRepository,id:string,workers:Workers,options:{llm?:LLMProvider;store?:ReportStore;timeoutMs?:number;allowFixture?:boolean;guard?:()=>void}={}) {
- const token=randomUUID(), timeout=options.timeoutMs??180000, store=options.store??new ReportStore();
+ const token=randomUUID(), timeout=options.timeoutMs??480000, store=options.store??new ReportStore();
  let c=repo.get(id);if(!c)throw new CaseError("not_found","사건이 없어요.");
  if(c.input.origin==="fixture"&&!options.allowFixture)throw new CaseError("fixture_forbidden","실제 편집국에서 시연 사건을 처리하지 않아요.");
  if(["complete","awaiting_approval","rejected","withdrawn"].includes(c.status))return c;
  if(c.run){if(c.run.expiresAt>Date.now())throw new CaseError("busy","이미 처리 중이에요.");return repo.mutate(id,(x,emit)=>{x.status="failed";x.run=null;emit({department:x.stage,state:"failed",summary:"작업 프로세스 중단. 운영자가 재시도해야 합니다.",cite:[]});});}
- c=repo.mutate(id,x=>{x.run={token,expiresAt:Date.now()+timeout*18};x.desks??={};});
+ c=repo.mutate(id,x=>{x.run={token,expiresAt:Date.now()+timeout+30000};x.desks??={};});
  let desk:Desk="intake", current:Department="monitoring";
- const update=(fn:Parameters<CaseRepository["mutate"]>[1])=>{c=repo.mutate(id,(x,emit)=>{if(x.run?.token!==token)throw new CaseError("stale_run","작업 소유권이 바뀌었어요.");fn(x,emit);});return c!;};
+ const update=(fn:Parameters<CaseRepository["mutate"]>[1])=>{c=repo.mutate(id,(x,emit)=>{if(x.run?.token!==token)throw new CaseError("stale_run","작업 소유권이 바뀌었어요.");x.run.expiresAt=Date.now()+timeout+30000;fn(x,emit);});return c!;};
  const bounded=async<T>(fn:(signal:AbortSignal)=>Promise<T>)=>{
   const controller=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined;
   try{return await Promise.race([fn(controller.signal),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new CaseError("worker_timeout","데스크 작업 시간이 초과됐어요."));},timeout);})]);}finally{clearTimeout(timer);controller.abort();}

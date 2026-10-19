@@ -6,7 +6,7 @@ import type { CaseRecord } from "./model";
 import type { LLMProvider } from "../llm/types";
 import { DESKS, deskFor, visibleStatus } from "./desks";
 import { composeFacts, reportingLLM, safeReportText, type ReportFact } from "./reporting";
-import { projectRoot, digest, protectionGuard } from "./harness/guard";
+import { projectRoot, newsroomRoot, digest, protectionGuard } from "./harness/guard";
 import { reliability } from "./reliability";
 export interface OperatorTask {caseId:string;label:string;reason:string}
 export const operatorTasks=(cases:CaseRecord[]):OperatorTask[]=>cases.flatMap(c=>{
@@ -18,7 +18,7 @@ export const operatorTasks=(cases:CaseRecord[]):OperatorTask[]=>cases.flatMap(c=
 const schema=(repo:CaseRepository)=>repo.db.exec("CREATE TABLE IF NOT EXISTS newsroom_briefings(key TEXT PRIMARY KEY,at TEXT NOT NULL,state TEXT NOT NULL,path TEXT NOT NULL,hash TEXT,expires INTEGER NOT NULL)");
 export const briefingSignature=(c:CaseRecord)=>digest(JSON.stringify({status:c.status,sections:Object.values(c.sections).map(s=>[s.state,s.attempt]),desks:c.desks,approvals:c.approvals.length}));
 export const koreaDay=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-export function latestBriefing(repo:CaseRepository,root=join(projectRoot(),"newsroom")){
+export function latestBriefing(repo:CaseRepository,root=newsroomRoot()){
  schema(repo);const row=repo.db.prepare("SELECT key,at,path,hash FROM newsroom_briefings WHERE state='done' ORDER BY at DESC LIMIT 1").get() as {key:string;at:string;path:string;hash:string}|undefined;
  if(!row)return null;
  try{const path=join(root,"briefings",row.path);if(lstatSync(path).isSymbolicLink())return null;const markdown=readFileSync(path,"utf8");if(digest(markdown)!==row.hash)return null;return {key:row.key,at:row.at,markdown};}catch{return null;}
@@ -47,7 +47,7 @@ export async function writeBriefing(repo:CaseRepository,kind:"daily"|"case",case
  catch{author="code-fallback";} // Operator actions must remain visible even when the LLM/protection check fails.
  const heading=kind==="daily"?"일일 브리핑":"사건 브리핑";
  const markdown=`# ${heading}\n\n${at} · ${author==="llm"?"편집장 LLM 구성 · 코드 기록 기준":"LLM 브리핑을 완료하지 못해 코드가 비상 현황을 기록했습니다. 제공자·보호 파일 상태를 확인하세요."}\n\n`+["요약 3줄","사건별 상태","막힌 이유","운영자가 할 일"].map(h=>`## ${h}\n${ordered.filter(f=>f.section===h).map(f=>"- "+f.text).join("\n")}`).join("\n\n")+"\n";
- const dir=join(options.root??join(projectRoot(),"newsroom"),"briefings");
+ const dir=join(options.root??newsroomRoot(),"briefings");
  if(existsSync(dir)&&lstatSync(dir).isSymbolicLink())throw Error("Unsafe briefing directory");
  mkdirSync(dir,{recursive:true,mode:0o700});const temp=join(dir,`.${randomUUID()}.tmp`);writeFileSync(temp,markdown,{mode:0o600,flag:"wx"});renameSync(temp,join(dir,filename));
  repo.db.prepare("UPDATE newsroom_briefings SET state='done',hash=? WHERE key=?").run(digest(markdown),key);

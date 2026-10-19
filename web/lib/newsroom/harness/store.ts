@@ -3,11 +3,11 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { DESKS, type Desk } from "../desks";
 import { CaseError } from "../model";
-import { projectRoot, digest } from "./guard";
+import { newsroomRoot, digest } from "./guard";
 import { validateReport } from "./validator";
 
 export class ReportStore {
-  constructor(readonly root = join(projectRoot(), "newsroom")) {}
+  constructor(readonly root = newsroomRoot()) {}
   private directory(id: string) {
     if (!/^[a-f0-9-]{36}$/.test(id)) throw new CaseError("report_path", "사건 경로가 올바르지 않아요.");
     for (const dir of [this.root, join(this.root, "cases"), join(this.root, "cases", id)]) {

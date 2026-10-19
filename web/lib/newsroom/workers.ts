@@ -1,3 +1,5 @@
+import { SerpApiLensProvider } from "./serpapi";
+import type { ReverseSearchProvider } from "../providers/types";
 import { collectEvidence, type Collected } from "../verification/engine";
 import { OnDemandCandidateVerifier, NormalizingInputProvider, LocalMetadataProvider } from "../verification/adapters";
 import { OnDemandPageProvider, PolicyFetch, guardedTransport, instructionSignals } from "../verification/page-fetch";
@@ -20,7 +22,7 @@ export interface OsintData {
   inputImage: SavedImage | null;
   selection: "operator" | "representative_unconfirmed" | "none";
   inputExcerpt: string;
-  candidates: { url: string; excerpt: string; dates: Article["dates"]; images: SavedImage[] }[];
+  candidates: { url: string; provider?: string; excerpt: string; dates: Article["dates"]; images: SavedImage[] }[];
   signals: string[];
   scope: string;
 }
@@ -60,7 +62,7 @@ export function legalWarnings(c: Readonly<CaseRecord>, osint: OsintData): string
 
 /** Code workers call existing providers. No live worker uses fixture discovery, mock LLM or an image index. */
 export function createNewsroomWorkers(repo: CaseRepository, options: {
-  pages?: PageFetchProvider; images?: ImageComparisonProvider; llm?: LLMProvider; allowTestProviders?: boolean;
+  pages?: PageFetchProvider; images?: ImageComparisonProvider; llm?: LLMProvider; allowTestProviders?: boolean; reverseSearch?: ReverseSearchProvider;
 } = {}): Workers {
   const pages = options.pages ?? new OnDemandPageProvider(new PolicyFetch(guardedTransport, 1000));
   const images = options.images ?? new LocalImageComparisonProvider();
@@ -88,11 +90,19 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         }
       }
       const urls = [...new Set([...c.input.candidateUrls, ...(c.input.feedReview ? [c.input.feedReview.url] : [])])];
-      for (const url of urls) {
-        const v = await verifier.verify({ url, provider: "operator-selected" }, signal);
+      let discovered: import("../verification/types").Candidate[] = urls.map(url=>({url,provider:"operator-selected"}));
+      if(!discovered.length&&out.inputImage&&(options.reverseSearch||!options.allowTestProviders)){
+        const provider=options.reverseSearch??new SerpApiLensProvider(repo,{allowUpload:c.input.externalSearchAllowed===true});
+        const found=await provider.search({bytes:bytes(out.inputImage.thumbnail),mime:"image/png",sha256:out.inputImage.hash,publicUrl:out.inputImage.url||null},signal);
+        discovered=found.candidates;
+        out.scope="외부 API로 발견한 후보만 요청 시점에 robots 준수 검증. 발견 결과 자체는 근거가 아님";
+        if(!discovered.length)throw new CaseError("candidate_required","자동 검색에서 검증할 후보를 찾지 못했어요. 원본 후보 페이지 링크를 보충해 주세요.");
+      }
+      for (const candidate of discovered) {
+        const v = await verifier.verify(candidate, signal);
         if (v.images.length < Math.min(2, v.article.images.length)) throw new CaseError("candidate_image_failed", "후보 이미지 일부를 가져오지 못했어요. OSINT에서 멈췄어요.");
         out.signals.push(...v.article.securitySignals ?? []);
-        out.candidates.push({ url: v.article.url, excerpt: retainedExcerpt(c,v.article.url,v.article.excerpt), dates: v.dates,
+        out.candidates.push({ url: v.article.url, provider: candidate.provider, excerpt: retainedExcerpt(c,v.article.url,v.article.excerpt), dates: v.dates,
           images: await Promise.all(v.images.map(i => imageData(i.url, i.bytes))) });
       }
       out.signals = [...new Set(out.signals)];
@@ -104,13 +114,13 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         return { data: { collected: { matches: [], evidence: [], searchedProviders: [], verification: { sources: [], factChecks: [], warnings: ["비교할 이미지 없음"], discoveryComplete: false, verificationComplete: false } },
           imageMissing: true, thumbnailOnly: true, warnings: ["기사에 비교할 이미지가 없어요. 이미지 진위는 판단할 수 없어요."] } satisfies AnalysisData };
       }
-      const candidates: VerifiedCandidate[] = source.candidates.map(v => ({ candidate: { url: v.url, provider: "operator-selected" },
+      const candidates: VerifiedCandidate[] = source.candidates.map(v => ({ candidate: { url: v.url, provider: v.provider??"operator-selected" },
         article: { url: v.url, title: "", excerpt: v.excerpt, dates: v.dates, images: [] },
         dates: v.dates.map(d => ({ ...d, imageBound: false })), images: v.images.map(i => ({ url: i.url, bytes: bytes(i.thumbnail), mime: "image/png" })) }));
       if (candidates.some(v => !v.images.length)) throw new CaseError("candidate_without_image", "원본 후보 페이지에 비교할 이미지가 없어요.");
       const p: Providers = {
         pages, input: new NormalizingInputProvider(pages),
-        reverseSearch: { name: "manual-candidates", search: async () => ({ candidates: candidates.map(v => v.candidate), searchedProviders: ["운영자 지정 후보"] }) },
+        reverseSearch: { name: "case-candidates", search: async () => ({ candidates: candidates.map(v => v.candidate), searchedProviders: [...new Set(candidates.map(v=>v.candidate.provider))] }) },
         factCheck: { name: "image-search-not-connected", search: async () => [] },
         temporaryImages: { name: "local-only", publish: async () => ({ url: "https://unused.invalid/local", expiresAt: new Date().toISOString(), revoke: async () => {} }) },
         candidates: { name: "verified-case-snapshot", verify: async candidate => candidates.find(v => v.candidate.url === candidate.url)! },
@@ -128,7 +138,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         summary: "기존 팩트체크 링크가 있어요. 유포 이미지·주장의 동일성을 확인하기 전에는 판정 근거로 사용하지 않아요.",
         details: { claimMatched: false, imageMatched: false, pageVerified: false } });
       collected.verification.discoveryComplete = false; // manual search never proves that no original exists on the web
-      return { data: { collected, imageMissing: false, thumbnailOnly: true, warnings: ["512px 이하 썸네일 비교. 미세 편집·원본 출처 검증에는 한계가 있어요.", "역이미지/Fact Check 이미지 검색은 이번 흐름에 미연결"] } satisfies AnalysisData };
+      return { data: { collected, imageMissing: false, thumbnailOnly: true, warnings: ["512px 이하 썸네일 비교. 미세 편집·원본 출처 검증에는 한계가 있어요.", "유한한 후보 검색으로 웹 전체에 원본이 없음을 증명하지 못해요. Fact Check 이미지 검색은 미연결"] } satisfies AnalysisData };
     }),
     security: make("security", async c => {
       // Intake can inspect submissions before OSINT. Research adds page signals after fetching.
