@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
     pageUrl: typeof pageUrl === "string" && pageUrl ? pageUrl.slice(0, 2000) : null,
     publicImageUrl,
     claimedDate,
+    claimText: typeof form.get("claimText") === "string" ? String(form.get("claimText")).slice(0, 200) : "",
   });
   if (!result.ok && result.reason === "quota") return json({ reason: "quota", used: result.used, limit: result.limit }, 429);
   if (!result.ok) return errorCode(result.errorCode);

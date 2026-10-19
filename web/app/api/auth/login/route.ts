@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
 
   const user = await requireUser();
   const token = await getStore().createLoginToken(user.id, email);
-  const devLink = new URL(`/auth/callback?token=${encodeURIComponent(token)}`, req.nextUrl.origin).toString();
+  // Keep the same origin, including when the browser uses a loopback IP instead of localhost.
+  const devLink = `/auth/callback?token=${encodeURIComponent(token)}`;
   return json({ sent: false, devLink });
 }

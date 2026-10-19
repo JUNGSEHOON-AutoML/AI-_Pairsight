@@ -1,11 +1,14 @@
 // Domain types and the words users see. Every label here comes from replica/design/glossary.md;
 // screens import these instead of writing their own wording. Code values match schema.sql.
+import type { ComparisonResult, DateRecord, VerificationFacts } from "./verification/types";
 
 export const VERDICTS = ["authentic", "ai_generated", "edited", "miscontextualized", "inconclusive"] as const;
 export type Verdict = (typeof VERDICTS)[number];
 
 export const EVIDENCE_KINDS = [
   "source_match",
+  "image_comparison",
+  "context",
   "c2pa",
   "watermark",
   "fact_check",
@@ -28,6 +31,8 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
 
 export const EVIDENCE_LABEL: Record<EvidenceKind, string> = {
   source_match: "원본 일치",
+  image_comparison: "이미지 비교",
+  context: "맥락 비교 (모의 LLM)",
   c2pa: "출처 증명 (C2PA)",
   watermark: "워터마크",
   fact_check: "팩트체크 기록",
@@ -52,6 +57,8 @@ export const KIND_ORDER: EvidenceKind[] = [...EVIDENCE_KINDS];
 export const DATE_SOURCE_LABEL = {
   tineye_crawl: "TinEye가 처음 발견한 날짜 (실제 게시일은 더 이를 수 있음)",
   page_meta: "페이지에 적힌 게시일",
+  wayback_first_capture: "Wayback에 확인된 가장 이른 저장일 (최초 게시일은 아님)",
+  search_discovered: "검색 API가 발견한 날짜",
 } as const;
 export type DateSource = keyof typeof DATE_SOURCE_LABEL;
 
@@ -78,6 +85,11 @@ export interface SourceMatch {
   isEarliest: boolean;
   diffRegions: DiffRegion[];
   provider: string;
+  verified?: boolean;
+  dates?: DateRecord[];
+  dateDisputed?: boolean;
+  excerpt?: string;
+  comparison?: ComparisonResult;
 }
 
 export interface Evidence {
@@ -91,15 +103,17 @@ export interface Evidence {
   provider: string;
 }
 
-export type StepId = "image" | "source" | "provenance" | "verdict";
+export type StepId = "image" | "source" | "verification" | "provenance" | "context" | "verdict";
 export type StepState = "waiting" | "running" | "done" | "failed";
 export const STEP_LABEL: Record<StepId, string> = {
   image: "이미지 확인",
-  source: "원본 검색",
-  provenance: "출처 증명·워터마크",
+  source: "원본 후보·팩트체크 검색",
+  verification: "후보 페이지 확인",
+  provenance: "이미지 비교·출처 증명",
+  context: "주장과 맥락 비교",
   verdict: "판정",
 };
-export const STEP_ORDER: StepId[] = ["image", "source", "provenance", "verdict"];
+export const STEP_ORDER: StepId[] = ["image", "source", "verification", "provenance", "context", "verdict"];
 
 export type AnalysisStatus = "pending" | "running" | "done" | "failed";
 export type ErrorCode =
@@ -123,14 +137,14 @@ export interface Analysis {
   id: string;
   inputKey: string;
   pipelineVersion: number;
+  runNumber: number;
   status: AnalysisStatus;
   steps: Record<StepId, StepState>;
-  verdict: Verdict | null;
-  verdictReason: string | null;
   errorCode: ErrorCode | null;
   evidence: Evidence[];
   matches: SourceMatch[];
   searchedProviders: string[];
+  verification?: VerificationFacts;
   startedAt: string;
   finishedAt: string | null;
 }
@@ -143,6 +157,9 @@ export interface Check {
   pageUrl: string | null;
   fileName: string | null;
   claimedDate: string | null; // YYYY-MM-DD the user says the event happened, optional
+  claimText?: string;
+  contextStatus?: "pending" | "done";
+  contextEvidence?: Evidence[];
   charged: boolean;
   quotaDay: string; // UTC day the quota was taken from
   createdAt: string;

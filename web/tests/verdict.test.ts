@@ -11,7 +11,7 @@ describe("fixtures reproduce every verdict", () => {
     ["authentic", "authentic"],
     ["ai_generated", "ai_generated"],
     ["edited", "edited"],
-    ["miscontextualized", "miscontextualized"],
+    ["miscontextualized", "inconclusive"], // legacy unverified rows are not trusted; integrated fixtures test the verified verdict
     ["inconclusive", "inconclusive"],
     ["no_source", "inconclusive"],
   ] as const)("%s → %s", (scenario, verdict) => {
@@ -44,12 +44,10 @@ describe("rules", () => {
     expect(decideVerdict({ evidence: [pixel(99)], matches: [], claimedDate: null }).verdict).toBe("inconclusive");
   });
 
-  it("an identical older copy becomes 맥락 조작 when the user's date is later", () => {
-    const m = { ...SCENARIO_DATA.authentic.matches[0] }; // first seen 2024-05-10
+  it("a page date alone cannot prove when an image was added", () => {
+    const m = { ...SCENARIO_DATA.authentic.matches[0] };
     const r = decideVerdict({ evidence: SCENARIO_DATA.authentic.evidence, matches: [m], claimedDate: "2026-10-01" });
-    expect(r.verdict).toBe("miscontextualized");
-    expect(r.reason).toContain("2024-05-10");
-    expect(r.reason).toContain("페이지에 적힌 게시일");
+    expect(r.verdict).toBe("inconclusive");
   });
 
   it("the same picture with no date stays 판단 불가, never 진짜 확인", () => {
@@ -77,5 +75,20 @@ describe("rules", () => {
     for (const d of Object.values(SCENARIO_DATA)) {
       for (const e of d.evidence) if (e.kind === "pixel_model") expect(e.strength).toBe("weak");
     }
+  });
+});
+
+describe("v2 independent evidence gates", () => {
+  it("older equal images do not prove authentic and local edits alone do not prove manipulation", () => {
+    expect(decideVerdict({ evidence: [], matches: SCENARIO_DATA.authentic.matches, claimedDate: null }).verdict).toBe("inconclusive");
+    expect(decideVerdict({ evidence: [], matches: SCENARIO_DATA.edited.matches, claimedDate: null }).verdict).toBe("inconclusive");
+  });
+  it("conflicting signed provenance is inconclusive", () => {
+    const evidence = [...SCENARIO_DATA.authentic.evidence, ...SCENARIO_DATA.ai_generated.evidence];
+    expect(decideVerdict({ evidence, matches: [], claimedDate: null }).verdict).toBe("inconclusive");
+  });
+  it("an unsigned C2PA assertion cannot decide", () => {
+    const evidence = SCENARIO_DATA.ai_generated.evidence.map(e => ({ ...e, details: {} }));
+    expect(decideVerdict({ evidence, matches: [], claimedDate: null }).verdict).toBe("inconclusive");
   });
 });

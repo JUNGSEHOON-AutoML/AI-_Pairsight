@@ -1,6 +1,7 @@
 // Provider seams. The analysis pipeline only talks to these interfaces, so swapping the mock for
 // Google Vision / TinEye / Fact Check (reverse-search-comparison.md) changes no screen or pipeline code.
-import type { Evidence, SourceMatch } from "../domain";
+import type { Evidence } from "../domain";
+import type { Candidate } from "../verification/types";
 
 export interface ImageInput {
   bytes: Uint8Array;
@@ -10,7 +11,7 @@ export interface ImageInput {
 }
 
 export interface ReverseSearchResult {
-  matches: SourceMatch[]; // empty = 원본 없음
+  candidates: Candidate[]; // discovery only; never trusted as verified originals
   searchedProviders: string[]; // shown as "검색한 곳"
 }
 

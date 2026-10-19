@@ -18,6 +18,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
     pageUrl: check.pageUrl,
     publicImageUrl: null,
     claimedDate: check.claimedDate,
+    claimText: check.claimText,
+    thumbnailOnly: true,
     forceFresh: true,
   });
   if (!result.ok && result.reason === "quota") return json({ reason: "quota", used: result.used, limit: result.limit }, 429);

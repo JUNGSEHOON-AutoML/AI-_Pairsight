@@ -25,24 +25,22 @@ create table profiles (
 -- The work itself, shared by everyone who submits the same input (fix-F6).
 -- input_key = sha256 of the file bytes, or of the normalised URL plus its fetched content.
 -- A new pipeline_version re-analyses instead of serving an old verdict.
+-- A recheck allocates a new run_number. The verdict is computed in verdictForCheck from
+-- shared evidence plus checks.claimed_date; it is never stored on the shared analysis.
 create table analyses (
   id uuid primary key default gen_random_uuid(),
   input_type text not null check (input_type in ('image', 'url')),
   input_key text not null,
   pipeline_version int not null,
+  run_number int not null default 1 check (run_number > 0),
   status text not null default 'pending'
     check (status in ('pending', 'running', 'done', 'failed')),
-  -- Five verdicts, names fixed in design/glossary.md.
-  verdict text check (verdict in (
-    'authentic', 'ai_generated', 'edited', 'miscontextualized', 'inconclusive')),
-  verdict_reason text,
   error_code text,
   started_at timestamptz,
   finished_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint verdict_only_when_done check ((status = 'done') = (verdict is not null)),
-  unique (input_type, input_key, pipeline_version)
+  unique (input_type, input_key, pipeline_version, run_number)
 );
 create index on analyses (status, created_at);
 
@@ -55,8 +53,10 @@ create table checks (
   input_url text,
   file_path text,
   file_bytes int check (file_bytes between 1 and 10485760),
+  claimed_date date,
   share_slug text unique,
   charged boolean not null default false,
+  quota_day date not null default (now() at time zone 'utc')::date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint input_present check (
@@ -98,6 +98,7 @@ create table source_matches (
   image_url text,
   page_title text,
   first_seen_at timestamptz,
+  first_seen_source text check (first_seen_source in ('tineye_crawl', 'page_meta')),
   similarity numeric(4,3) check (similarity between 0 and 1),
   is_earliest boolean not null default false,
   diff_regions jsonb not null default '[]',

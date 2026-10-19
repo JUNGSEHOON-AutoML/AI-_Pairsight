@@ -1,0 +1,9 @@
+{
+  "_about": "Mock mode only. Fictional .example.test domains used by the fixtures, so verdict v3 can be shown without fabricating pages for real news organisations. Merged with trusted-sources.json only when PAIRSIGHT_PROVIDERS=mock. .test domains never resolve on the real internet.",
+  "version": "mock-1",
+  "reviewedBy": "fixture",
+  "sources": [
+    { "id": "mock_wire", "name": "예시 통신사 (가상)", "domains": ["wire.example.test"], "category": "kr_wire", "basis": "테스트용 가상 도메인" },
+    { "id": "mock_gov", "name": "예시 정부 기관 (가상)", "domains": ["gov.example.test"], "category": "government", "basis": "테스트용 가상 도메인" }
+  ]
+}

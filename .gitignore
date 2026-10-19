@@ -1,2 +1,6 @@
 # local dev data: uploads and memory-store artefacts
 web/.data/
+
+# eval: real case images and run outputs stay local (internal evaluation only)
+web/eval/images/
+web/eval/out/

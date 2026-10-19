@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MOCK_FIXTURE_INPUT, type Scenario } from "@/lib/providers/mock/fixtures";
 import { Button } from "./ui";
 
 export function FixtureList({ scenarios }: { scenarios: { id: string; note: string }[] }) {
@@ -28,6 +29,9 @@ export function FixtureList({ scenarios }: { scenarios: { id: string; note: stri
                   const blob = await (await fetch(`/fixtures/inputs/${s.id}.png`)).blob();
                   const fd = new FormData();
                   fd.set("file", new File([blob], `${s.id}.png`, { type: "image/png" }));
+                  const extra = MOCK_FIXTURE_INPUT[s.id as Scenario];
+                  if (extra?.claimText) fd.set("claimText", extra.claimText);
+                  if (extra?.claimedDate) fd.set("claimedDate", extra.claimedDate);
                   const res = await fetch("/api/checks", { method: "POST", body: fd });
                   setBusy(null);
                   if (res.ok) router.push(`/check/${(await res.json()).id}`);

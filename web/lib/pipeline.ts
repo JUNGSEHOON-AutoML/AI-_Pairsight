@@ -2,7 +2,6 @@
 // Steps are recorded so the 분석 중 screen shows real progress, never a fake bar.
 // The verdict is computed per check at read time (verdictForCheck), because it depends on the
 // claimed date the user typed, while the evidence itself is shared by everyone who sent the same image.
-import { createHash } from "node:crypto";
 import { getStore, type User } from "./data/store";
 import {
   ACCEPTED_MIME,
@@ -13,10 +12,13 @@ import {
   type StepId,
 } from "./domain";
 import { getProviders } from "./providers";
-import { type ImageInput, ProviderError } from "./providers/types";
-import { decideVerdict, PIPELINE_VERSION, sortEvidence, type VerdictResult } from "./verdict";
+import { ProviderError } from "./providers/types";
+import { PIPELINE_VERSION, sortEvidence, type VerdictResult } from "./verdict";
 
-const PROVIDER_TIMEOUT_MS = 20_000;
+import { collectEvidence, compareContext } from "./verification/engine";
+import type { NormalizedInput } from "./verification/types";
+import { excerpt, publicUrl } from "./verification/retention";
+const PROVIDER_TIMEOUT_MS = 30_000;
 
 export type StartResult =
   | { ok: true; check: Check }
@@ -31,6 +33,8 @@ export interface StartInput {
   pageUrl: string | null;
   publicImageUrl: string | null;
   claimedDate: string | null;
+  claimText?: string;
+  thumbnailOnly?: boolean;
   forceFresh?: boolean; // 재검사: ignore a cached analysis
 }
 
@@ -44,11 +48,14 @@ export async function startCheck(user: User, input: StartInput): Promise<StartRe
   const invalid = validateImage(input.bytes, input.mime);
   if (invalid) return { ok: false, reason: "invalid", errorCode: invalid };
 
+  let normalized: NormalizedInput;
+  try { normalized = await getProviders().input.normalize(input, AbortSignal.timeout(PROVIDER_TIMEOUT_MS)); }
+  catch (e) { return { ok: false, reason: "invalid", errorCode: e instanceof ProviderError ? e.code : "unsupported_type" }; }
   const store = getStore();
   const quota = await store.takeQuota(user.id);
   if (!quota.ok) return { ok: false, reason: "quota", used: quota.used, limit: quota.limit };
 
-  const sha256 = createHash("sha256").update(input.bytes).digest("hex");
+  const sha256 = normalized.image.sha256;
   const reusable = input.forceFresh ? null : await store.findReusableAnalysis(sha256, PIPELINE_VERSION);
   const analysis = reusable ?? (await store.createAnalysis(sha256, PIPELINE_VERSION));
 
@@ -56,52 +63,38 @@ export async function startCheck(user: User, input: StartInput): Promise<StartRe
     userId: user.id,
     analysisId: analysis.id,
     inputType: input.inputType,
-    pageUrl: input.pageUrl,
+    pageUrl: input.pageUrl ? publicUrl(input.pageUrl) : null,
     fileName: input.fileName,
     claimedDate: input.claimedDate,
+    claimText: excerpt(input.claimText ?? ""),
+    contextStatus: "pending",
+    contextEvidence: [],
     charged: true,
     quotaDay: quota.day,
   });
-  await store.saveUpload(check.id, input.bytes, input.mime);
+  await store.saveUpload(check.id, normalized.thumbnail.bytes, normalized.thumbnail.mime);
 
-  if (!reusable) {
-    const image: ImageInput = { bytes: input.bytes, mime: input.mime, sha256, publicUrl: input.publicImageUrl };
-    // Fire and forget: the client polls GET /api/checks/:id. A real deployment runs this as an Inngest job.
-    void runAnalysis(analysis.id, image);
+  if (!reusable) void runAnalysis(analysis.id, normalized);
+  else if (reusable.status === "done") void finishContext(check.id);
+  else {
+    const latest = await store.getAnalysis(analysis.id);
+    if (latest?.status === "done") void finishContext(check.id);
+    if (latest?.status === "failed") await refundFailedChecks(analysis.id);
   }
   return { ok: true, check };
 }
 
-async function runAnalysis(analysisId: string, image: ImageInput) {
+async function runAnalysis(analysisId: string, input: NormalizedInput) {
   const store = getStore();
-  const { reverseSearch, signals } = getProviders();
-  const step = (id: StepId, state: "running" | "done" | "failed") => store.updateAnalysis(analysisId, { steps: { [id]: state } as Analysis["steps"] });
-
+  const providers = getProviders();
+  const step = async (id: StepId, state: "running" | "done") => { await store.updateAnalysis(analysisId, { steps: { [id]: state } as Analysis["steps"] }); };
   try {
     await store.updateAnalysis(analysisId, { status: "running" });
-    await step("image", "running");
     await step("image", "done");
-
-    await step("source", "running");
-    const found = await reverseSearch.search(image, AbortSignal.timeout(PROVIDER_TIMEOUT_MS));
-    await store.updateAnalysis(analysisId, { matches: found.matches, searchedProviders: found.searchedProviders });
-    await step("source", "done");
-
-    await step("provenance", "running");
-    const evidence = await signals.collect(image, AbortSignal.timeout(PROVIDER_TIMEOUT_MS));
-    await store.updateAnalysis(analysisId, { evidence: sortEvidence(evidence) });
-    await step("provenance", "done");
-
-    await step("verdict", "running");
-    // Stored verdict assumes no claimed date; each check recomputes with its own (verdictForCheck).
-    const base = decideVerdict({ evidence, matches: found.matches, claimedDate: null });
-    await store.updateAnalysis(analysisId, {
-      steps: { verdict: "done" } as Analysis["steps"],
-      status: "done",
-      verdict: base.verdict,
-      verdictReason: base.reason,
-      finishedAt: new Date().toISOString(),
-    });
+    const collected = await collectEvidence(input, providers, AbortSignal.timeout(PROVIDER_TIMEOUT_MS), step);
+    await store.updateAnalysis(analysisId, { ...collected, evidence: sortEvidence(collected.evidence),
+      status: "done", finishedAt: new Date().toISOString() });
+    for (const check of await store.listChecksForAnalysis(analysisId)) await finishContext(check.id);
   } catch (e) {
     const code: ErrorCode =
       e instanceof ProviderError ? (e.code === "provider_timeout" ? "provider_timeout" : "internal")
@@ -116,7 +109,7 @@ async function runAnalysis(analysisId: string, image: ImageInput) {
       ...(running ? { steps: { [running]: "failed" } as Analysis["steps"] } : {}),
     });
     await refundFailedChecks(analysisId);
-    if (code === "internal") console.error("analysis failed", analysisId, e);
+    if (code === "internal") console.error("analysis failed", analysisId, code);
   }
 }
 
@@ -130,7 +123,19 @@ async function refundFailedChecks(analysisId: string) {
   }
 }
 
+async function finishContext(checkId: string) {
+  const store = getStore(), check = await store.getCheck(checkId);
+  if (!check) return;
+  const analysis = await store.getAnalysis(check.analysisId);
+  if (!analysis || analysis.status !== "done") return;
+  const contextEvidence = await compareContext({ text: check.claimText ?? "", date: check.claimedDate }, {
+    evidence: analysis.evidence, matches: analysis.matches, searchedProviders: analysis.searchedProviders,
+    verification: analysis.verification ?? { factChecks: [], sources: [], warnings: [] },
+  }, getProviders(), AbortSignal.timeout(PROVIDER_TIMEOUT_MS));
+  if (await store.getCheck(checkId)) await store.updateCheck(checkId, { contextEvidence, contextStatus: "done" });
+}
+
 export function verdictForCheck(analysis: Analysis, check: Check): VerdictResult | null {
-  if (analysis.status !== "done") return null;
-  return decideVerdict({ evidence: analysis.evidence, matches: analysis.matches, claimedDate: check.claimedDate });
+  if (analysis.status !== "done" || check.contextStatus === "pending") return null;
+  return getProviders().verdict.decide({ evidence: [...analysis.evidence, ...(check.contextEvidence ?? [])], matches: analysis.matches, claimedDate: check.claimedDate, claimText: check.claimText });
 }

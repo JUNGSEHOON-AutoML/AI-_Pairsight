@@ -1,7 +1,7 @@
 # Pairsight 용어집
 
 모든 화면 문구, 코드 상수, 공유 페이지, 고지문은 이 표의 표기를 그대로 씁니다. 같은 뜻을 다른 말로 쓰지 않습니다.
-코드 값(영문)은 DB의 `analyses.verdict`, `evidence.kind`, `evidence.strength`와 1:1로 맞춥니다.
+판정 코드(영문)는 검사별 API 응답의 `verdict`와 맞춥니다. 근거 코드는 DB의 `evidence.kind`, `evidence.strength`와 1:1로 맞춥니다.
 
 ## 판정 (5종)
 
@@ -9,8 +9,8 @@
 | --- | --- | --- | --- | --- |
 | **진짜 확인** | `authentic` | 원본 일치나 출처 증명(C2PA)으로 이 이미지가 실제 촬영본임을 확인함 | `badge-check` | `verdict-real` |
 | **AI 생성** | `ai_generated` | 이미지 전체가 AI로 만들어졌다는 강한 근거가 있음 | `bot` | `verdict-ai` |
-| **편집 조작** | `edited` | 실제 사진의 일부를 바꾸거나 합성했다는 근거가 있음 (원본과 달라진 곳이 있음) | `scissors` | `verdict-edited` |
-| **맥락 조작** | `miscontextualized` | 사진 자체는 진짜지만, 다른 시점이나 다른 사건의 사진으로 쓰였다는 근거가 있음 | `calendar-x` | `verdict-context` |
+| **편집 조작** | `edited` | 실제 사진의 일부를 바꾸거나 합성했다는 근거가 있음 (원본과 달라진 곳이 있음). v3: 더 이르게 게시된 **신뢰 출처** 사진과 국소적으로 다름. 의도는 단정하지 않음 | `scissors` | `verdict-edited` |
+| **맥락 조작** | `miscontextualized` | 사진 자체는 진짜지만, 다른 시점이나 다른 사건의 사진으로 쓰였다는 근거가 있음. v3: **신뢰 출처** 페이지에 같은 사진이 알려준 날짜보다 30일 이상 이른 게시일로 있음 | `calendar-x` | `verdict-context` |
 | **판단 불가** | `inconclusive` | 결론을 내릴 만큼 강한 근거가 없음. 진짜라는 뜻도, 가짜라는 뜻도 아님 | `circle-help` | `verdict-unsure` |
 
 규칙:
@@ -78,8 +78,36 @@
 
 ## DB 반영
 
-[schema.sql](../schema.sql)에 반영했습니다(2026-10-18).
+[schema.sql](../schema.sql)에 반영했습니다(2026-10-19 갱신).
 
-- `analyses.verdict`는 위 5개 코드 값만 받습니다.
+- 판정은 공유 분석에 저장하지 않습니다. `verdictForCheck`가 공유 근거와 `checks.claimed_date`로 위 5개 값 중 하나를 계산합니다.
+- `analyses.run_number`가 재검사 실행을 구분합니다. 같은 이미지라도 사용자가 입력한 사건 날짜가 다르면 판정이 달라질 수 있습니다.
+- `source_matches.first_seen_source`로 날짜 근거(`tineye_crawl | page_meta`)를 보존합니다. 모르는 출처는 `null`입니다.
 - `evidence.strength`는 `strong | medium | weak`만 받습니다.
 - `pixel_model`은 DB 제약으로 항상 `weak`입니다.
+
+## 판별 v2 변경 (2026-10-19)
+
+현재 세부 규칙은 [verification-pipeline.md](../verification-pipeline.md)를 따릅니다.
+
+- 원본 후보: 같은 이미지라고 검증한 공개 기록. 저작자의 원본·최초 배포처를 뜻하지 않습니다.
+- 이미지 비교(`image_comparison`): 실제 pHash·정렬·변환·차이 관찰, 강도 중 이하.
+- 맥락 비교(`context`): 날짜·장소·사건의 관찰. 현재 모의 LLM, 강도 중 이하, 단독 판정 금지.
+- Wayback에 확인된 가장 이른 저장일(`wayback_first_capture`)과 검색 API 발견일(`search_discovered`)은 날짜 출처와 신뢰도를 함께 표시합니다. 해당 이미지 존재 여부를 별도로 검증합니다.
+- 원본 확인 미완료: 검색·후보 접근을 마치지 못한 상태. 원본 없음과 다릅니다.
+- 유포 주장: 사용자 입력 200자 이내. 검증된 동일 이미지·동일 주장 팩트체크를 연결하며, 기사 전체 사실 확인은 하지 않습니다.
+- 재검사: 보관된 썸네일 기반. 원본 EXIF·C2PA 재확인을 위해서는 파일을 다시 업로드해야 합니다.
+- v2 검사별 맥락 근거·새 날짜/근거 타입은 기존 SQL에 아직 반영하지 않았습니다. Supabase 연결 전 별도 마이그레이션과 RLS 검증이 필요합니다.
+
+## 판별 v3 변경 (2026-10-19)
+
+세부 규칙: [verification-pipeline.md](../verification-pipeline.md) §5 · 목록과 선정 기준: [trusted-sources.md](../trusted-sources.md)
+
+| 화면 표기 | 코드 | 뜻 | 쓰지 않는 표현 |
+| --- | --- | --- | --- |
+| **신뢰 출처** | `findTrustedSource()` | `config/trusted-sources.json` 목록에 있는 통신사·주요 언론·정부 도메인. 그 페이지를 실제로 가져와 이미지 비교를 통과했을 때만 씀. 내용이 사실이라는 보증이 아님 | ~~공식 원본~~, ~~진짜 출처~~ |
+| **신뢰 출처 원본과 다름** | `v3.trusted_edited` | 편집 조작(v3)의 판정 이유 첫머리. 더 이르게 게시된 신뢰 출처 사진과 비교해 국소 영역이 다름 | ~~조작했다~~, ~~위조~~, ~~가짜 사진~~ (의도 단정 금지) |
+| **핵심 발견** | `headlineFinding` | 판정과 별개로, 찾은 것 중 가장 강한 관찰 하나. 출처 이름과 날짜(뜻 포함)를 붙임. 판단 불가에서는 "단, …"으로 맨 위에 표시 | ~~원본 확인~~ |
+| **판정 근거 강도** | `verdictStrength` | 판정을 낸 근거의 강도. 강도 배지(강/중/약)를 그대로 씀. v3 규칙은 중, 이미지가 확인된 보관 기록이나 더 늦은 사본이 있으면 강 | |
+
+날짜 옆 괄호 단어(핵심 발견·판정 이유): **(게시)** = 페이지에 적힌 게시일, **(보관 기록)** = Wayback 저장일, **(검색 발견)** = 검색 서비스 발견일.

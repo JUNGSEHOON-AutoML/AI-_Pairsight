@@ -19,6 +19,7 @@ export function CheckForm() {
   const [dragging, setDragging] = useState(false);
   const [pageUrl, setPageUrl] = useState("");
   const [images, setImages] = useState<PageImage[] | null>(null);
+  const [claimText, setClaimText] = useState("");
   const [claimedDate, setClaimedDate] = useState("");
   const [busy, setBusy] = useState<null | "file" | "url" | string>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function CheckForm() {
   async function submit(body: FormData, tag: string) {
     setBusy(tag);
     setError(null);
+    if (claimText) body.set("claimText", claimText);
     if (claimedDate) body.set("claimedDate", claimedDate);
     const res = await fetch("/api/checks", { method: "POST", body }).catch(() => null);
     setBusy(null);
@@ -173,6 +175,13 @@ export function CheckForm() {
         )}
       </section>
 
+      <label className="grid gap-2 rounded-md border border-border p-4">
+        <span className="font-semibold">유포 주장 (선택)</span>
+        <textarea value={claimText} onChange={e => setClaimText(e.target.value)} maxLength={200} rows={2}
+          placeholder="예: 이 사진은 2026년 서울 홍수 현장이다."
+          className="w-full rounded-md border border-border-input bg-bg p-3" />
+        <span className="text-sm text-text-muted">사진과 함께 전달된 날짜·장소·사건을 적어 주세요. 최대 200자.</span>
+      </label>
       <details className="rounded-md border border-border p-4">
         <summary className="cursor-pointer font-semibold">사건 날짜를 알고 있다면 (선택)</summary>
         <div className="mt-3 grid gap-1">
@@ -186,7 +195,7 @@ export function CheckForm() {
             onChange={(e) => setClaimedDate(e.target.value)}
             className="h-10 w-fit rounded-md border border-border-input bg-bg px-3"
           />
-          <p className="text-sm text-text-muted">같은 사진이 이 날짜보다 먼저 있었다면 &lsquo;맥락 조작&rsquo;으로 알려드려요.</p>
+          <p className="text-sm text-text-muted">이미지의 과거 존재가 독립적인 기록으로 확인될 때 날짜 불일치를 판단해요.</p>
         </div>
       </details>
 

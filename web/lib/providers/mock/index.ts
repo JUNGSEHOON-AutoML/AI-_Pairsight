@@ -12,6 +12,7 @@ import type {
 } from "../types";
 import { ProviderError } from "../types";
 import { SCENARIO_DATA, SCENARIOS, type Scenario } from "./fixtures";
+import { thumbnail, hash } from "../../verification/retention";
 
 const FIXTURE_DIR = join(process.cwd(), "public", "fixtures", "inputs");
 export const DEMO_HOST = "demo.pairsight.test";
@@ -26,6 +27,7 @@ async function scenarioIndex(): Promise<Map<string, Scenario>> {
     if (!SCENARIOS.includes(name)) continue;
     const bytes = await readFile(join(FIXTURE_DIR, file));
     map.set(createHash("sha256").update(bytes).digest("hex"), name);
+    map.set(hash(await thumbnail(bytes)), name);
   }
   byHash = map;
   return map;
@@ -39,11 +41,13 @@ export async function scenarioFor(sha256: string): Promise<Scenario> {
 const MOCK_LATENCY_MS = Number(process.env.PAIRSIGHT_MOCK_DELAY_MS ?? 700);
 const wait = (ms: number, signal: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
+    signal.throwIfAborted();
+    const abort = () => {
       clearTimeout(t);
       reject(signal.reason);
-    });
+    };
+    const t = setTimeout(() => { signal.removeEventListener("abort", abort); resolve(); }, ms);
+    signal.addEventListener("abort", abort, { once: true });
   });
 
 export class MockReverseSearchProvider implements ReverseSearchProvider {
@@ -55,7 +59,8 @@ export class MockReverseSearchProvider implements ReverseSearchProvider {
     if (data.fail === "provider_timeout") {
       throw new ProviderError("provider_timeout", "mock reverse search timed out");
     }
-    return { matches: data.matches, searchedProviders: ["Google (모의)", "TinEye (모의)"] };
+    return { candidates: data.matches.map(m => ({ url: m.url, imageUrl: "https://assets.example.test/originals/" + s + ".png",
+      provider: this.name, ...(m.firstSeenAt ? { discoveredAt: m.firstSeenAt } : {}) })), searchedProviders: ["Google (모의)", "TinEye (모의)"] };
   }
 }
 

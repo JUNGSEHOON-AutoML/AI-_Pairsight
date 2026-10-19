@@ -2,15 +2,19 @@
 
 Usage: python3 -I rls_test.py <scratch_dir> <schema.sql>
 Each test runs in its own transaction as a given role with a given JWT "sub", then rolls back.
+Use only a disposable cluster: this script recreates databases named rls and rls_old.
+PSQL, PGHOST, PGPORT, PGUSER and PGPASSFILE can override the legacy scratch defaults.
 """
 import os
 import subprocess
 import sys
 
 S, SCHEMA = sys.argv[1], sys.argv[2]
-PSQL = f"{S}/pgenv/bin/psql"
-ENV = dict(os.environ, PGPASSFILE=f"{S}/.pgpass")
-BASE = [PSQL, "-h", "127.0.0.1", "-p", "54329", "-U", "postgres", "-X", "-q", "-v", "ON_ERROR_STOP=1"]
+PSQL = os.environ.get("PSQL", f"{S}/pgenv/bin/psql")
+ENV = dict(os.environ, PGPASSFILE=os.environ.get("PGPASSFILE", f"{S}/.pgpass"))
+BASE = [PSQL, "-h", os.environ.get("PGHOST", "127.0.0.1"),
+        "-p", os.environ.get("PGPORT", "54329"), "-U", os.environ.get("PGUSER", "postgres"),
+        "-X", "-q", "-v", "ON_ERROR_STOP=1"]
 
 A = "aaaaaaaa-0000-0000-0000-00000000000a"
 B = "bbbbbbbb-0000-0000-0000-00000000000b"
@@ -23,18 +27,18 @@ def psql(db, sql, check=True):
     return p
 
 
-def setup(db, schema_file):
+def setup(db, schema):
     psql("postgres", f"drop database if exists {db}; create database {db};")
-    psql(db, open(f"{S}/supabase_bootstrap.sql").read())
-    psql(db, open(schema_file).read())
+    psql(db, open(os.path.join(os.path.dirname(__file__), "supabase_bootstrap.sql")).read())
+    psql(db, schema)
     # Seed as the owner (bypasses RLS). A and B each have a private image; both checked the same shared image.
     psql(db, f"""
 insert into auth.users values ('{A}'), ('{B}');
 insert into profiles (id, daily_limit) values ('{A}', 5), ('{B}', 5);
-insert into analyses (id, input_type, input_key, pipeline_version, status, verdict) values
-  ('10000000-0000-0000-0000-00000000000a', 'image', 'hash-a', 1, 'done', 'edited'),
-  ('10000000-0000-0000-0000-00000000000b', 'image', 'hash-b', 1, 'done', 'ai_generated'),
-  ('10000000-0000-0000-0000-0000000000ab', 'image', 'hash-shared', 1, 'done', 'inconclusive');
+insert into analyses (id, input_type, input_key, pipeline_version, status) values
+  ('10000000-0000-0000-0000-00000000000a', 'image', 'hash-a', 1, 'done'),
+  ('10000000-0000-0000-0000-00000000000b', 'image', 'hash-b', 1, 'done'),
+  ('10000000-0000-0000-0000-0000000000ab', 'image', 'hash-shared', 1, 'done');
 insert into checks (id, user_id, analysis_id, input_type, file_path, share_slug) values
   ('20000000-0000-0000-0000-00000000000a', '{A}', '10000000-0000-0000-0000-00000000000a', 'image', 'a/1.jpg', 'slug-a'),
   ('20000000-0000-0000-0000-00000000000b', '{B}', '10000000-0000-0000-0000-00000000000b', 'image', 'b/1.jpg', 'slug-b'),
@@ -76,7 +80,8 @@ def expect(name, db, role, sub, sql, want=None, want_error=None):
 
 
 db = "rls"
-setup(db, SCHEMA)
+schema = open(SCHEMA).read()
+setup(db, schema)
 U = "authenticated"
 
 # 1. Reading: each user sees only their own rows
@@ -111,8 +116,8 @@ expect("A cannot reset own usage", db, U, A,
        "with u as (update usage_days set used = 0 returning 1) select count(*) from u;", ["0"])
 expect("A cannot delete B's check", db, U, A,
        "with d as (delete from checks returning user_id) select count(*) from d where user_id <> auth.uid();", ["0"])
-expect("A cannot change a verdict", db, U, A,
-       "with u as (update analyses set verdict = 'authentic' returning 1) select count(*) from u;", ["0"])
+expect("A cannot change the evidence used for a verdict", db, U, A,
+       "with u as (update evidence set outcome = 'supports_real' returning 1) select count(*) from u;", ["0"])
 expect("A cannot insert a check", db, U, A,
        f"insert into checks (user_id, analysis_id, input_type, file_path) values ('{A}', '10000000-0000-0000-0000-00000000000b', 'image', 'x');",
        want_error="row-level security")
@@ -134,7 +139,7 @@ expect("service_role can take quota", db, "service_role", None, f"select take_qu
 
 # 6. Regression: the version that only revoked from PUBLIC
 old = "rls_old"
-setup(old, f"{S}/schema.revoke_public_only.sql")
+setup(old, schema.replace("from public, anon, authenticated;", "from public;"))
 expect("[old schema] A can call take_quota on B, but RLS inside the function makes it return false", old, U, A,
        f"select take_quota('{B}');", ["f"])
 expect("[old schema] A can call refund_quota, but RLS makes it change nothing", old, U, A,
@@ -147,6 +152,32 @@ expect("[old schema + security definer] A CAN burn B's quota: the hole the revok
        f"select take_quota('{B}');", ["t"])
 expect("[current schema + security definer] A still gets permission denied", db, U, A,
        f"select take_quota('{B}');", want_error="permission denied for function take_quota")
+
+# 8. Per-check context and explicit recheck runs (2026-10-19).
+expect("shared analyses have no stored verdict columns", db, "service_role", None,
+       "select count(*) from information_schema.columns where table_name = 'analyses' and column_name in ('verdict', 'verdict_reason');", ["0"])
+expect("recheck can create a second run of the same image", db, "service_role", None,
+       "insert into analyses (input_type,input_key,pipeline_version,run_number) values ('image','hash-a',1,2) returning run_number;", ["2"])
+expect("duplicate run is rejected", db, "service_role", None,
+       "insert into analyses (input_type,input_key,pipeline_version,run_number) values ('image','hash-a',1,1);",
+       want_error="duplicate key")
+expect("non-positive run number is rejected", db, "service_role", None,
+       "insert into analyses (input_type,input_key,pipeline_version,run_number) values ('image','new',1,0);",
+       want_error="check constraint")
+expect("different pipeline version starts at run 1", db, "service_role", None,
+       "insert into analyses (input_type,input_key,pipeline_version) values ('image','hash-a',2) returning run_number;", ["1"])
+expect("claimed dates stay separate on checks sharing an analysis", db, "service_role", None,
+       "update checks set claimed_date = case when user_id = '" + A + "' then date '2024-05-10' else date '2026-10-01' end "
+       "where analysis_id = '10000000-0000-0000-0000-0000000000ab'; "
+       "select count(distinct claimed_date) from checks where analysis_id = '10000000-0000-0000-0000-0000000000ab';", ["2"])
+expect("browser cannot rewrite claimed dates", db, U, A,
+       "with u as (update checks set claimed_date = '2026-10-01' returning 1) select count(*) from u;", ["0"])
+expect("quota day defaults to UTC", db, "service_role", None,
+       "select bool_and(quota_day = (now() at time zone 'utc')::date) from checks;", ["t"])
+expect("source date provenance is preserved", db, "service_role", None,
+       "update source_matches set first_seen_source = 'tineye_crawl' returning first_seen_source;", ["tineye_crawl"])
+expect("unknown date source code is rejected", db, "service_role", None,
+       "update source_matches set first_seen_source = 'guessed';", want_error="check constraint")
 
 passed = sum(ok for ok, _, _ in results)
 for ok, name, got in results:

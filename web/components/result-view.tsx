@@ -45,9 +45,9 @@ export function NoSourceBlock({ view }: { view: CheckView }) {
     <section aria-labelledby="nosource-title" className="rounded-md bg-surface p-4 md:p-5">
       <h3 id="nosource-title" className="flex items-center gap-2 font-semibold">
         <SearchX aria-hidden="true" className="size-5" />
-        {COPY.noSourceTitle}
+        {view.verification?.discoveryComplete === false || view.verification?.verificationComplete === false ? "원본 확인 미완료" : COPY.noSourceTitle}
       </h3>
-      <p className="mt-1">{COPY.noSourceBody}</p>
+      <p className="mt-1">{view.verification?.discoveryComplete === false || view.verification?.verificationComplete === false ? "검색이나 후보 확인을 완료하지 못했어요. 원본이 없는 것으로 해석하지 마세요." : COPY.noSourceBody}</p>
       <p className="mt-3 text-sm text-text-muted">이런 경우에 원본이 안 나올 수 있어요</p>
       <ul className="mt-1 list-disc pl-5 text-sm">
         <li>방금 찍었거나 처음 올라온 사진</li>
@@ -80,8 +80,8 @@ function CheckedItems({ view }: { view: CheckView }) {
   ];
   return (
     <ul className="grid gap-1.5 text-sm">
-      {rows.map(([label, result]) => (
-        <li key={label} className="grid grid-cols-[20px_1fr_auto] items-center gap-2">
+      {rows.map(([label, result], i) => (
+        <li key={`${label}-${i}`} className="grid grid-cols-[20px_1fr_auto] items-center gap-2">
           <CheckIcon aria-hidden="true" className="size-4 text-verdict-real" />
           <span>{label}</span>
           <span className="text-right text-text-muted">{result}</span>
@@ -108,8 +108,8 @@ function Details({ view }: { view: CheckView }) {
           </tr>
         </thead>
         <tbody>
-          {view.evidence.map((e) => (
-            <tr key={`${e.kind}-${e.provider}`} className="border-b border-border">
+          {view.evidence.map((e, i) => (
+            <tr key={`${e.kind}-${e.provider}-${i}`} className="border-b border-border">
               <td className="py-1">{EVIDENCE_LABEL[e.kind]}</td>
               <td className="py-1">{e.score == null ? "—" : e.score.toFixed(1)}</td>
               <td className="py-1">{e.provider}</td>
@@ -117,7 +117,7 @@ function Details({ view }: { view: CheckView }) {
           ))}
           {view.matches.map((m) => (
             <tr key={m.url} className="border-b border-border">
-              <td className="py-1">원본 유사도</td>
+              <td className="py-1">정렬 상관도 (진위 확률 아님)</td>
               <td className="py-1">{(m.similarity * 100).toFixed(1)}</td>
               <td className="py-1">{m.provider}</td>
             </tr>
@@ -125,7 +125,7 @@ function Details({ view }: { view: CheckView }) {
         </tbody>
       </table>
       <p className="mt-2 text-text-muted">
-        판정 규칙 v{view.pipelineVersion} · 분석 {view.analysisId.slice(0, 8)}
+        판정 규칙 v{view.pipelineVersion}{view.verdictRule ? ` (${view.verdictRule})` : ""} · 분석 {view.analysisId.slice(0, 8)}
         {view.claimedDate && ` · 알려준 사건 날짜 ${view.claimedDate}`}
       </p>
     </details>
@@ -139,7 +139,7 @@ export function ResultView({ view }: { view: CheckView }) {
   const earliest = view.matches.find((m) => m.isEarliest) ?? view.matches[0];
 
   const banner = (
-    <VerdictBanner verdict={view.verdict} reason={view.reason}>
+    <VerdictBanner verdict={view.verdict} reason={view.reason} headline={view.headlineFinding} strength={view.verdictStrength}>
       <CheckedAt at={view.checkedAt}>
         <RecheckButton id={view.id} onQuota={() => setQuotaHit(true)} />
       </CheckedAt>
@@ -160,6 +160,17 @@ export function ResultView({ view }: { view: CheckView }) {
   return (
     <div className="grid gap-4">
       {quotaHit && <QuotaExhausted />}
+      {view.claimText && <p className="rounded-md bg-surface p-3 text-sm">확인할 주장: {view.claimText}</p>}
+      {!!view.verification?.warnings.length && <ul className="rounded-md bg-surface p-3 text-sm list-inside list-disc">
+        {view.verification.warnings.map(w => <li key={w}>{w}</li>)}
+      </ul>}
+      {!!view.verification?.factChecks.length && <section className="rounded-md border border-border p-4">
+        <h3 className="font-semibold">기존 팩트체크 결과</h3>
+        {view.verification.factChecks.map(f => <article key={f.url} className="mt-2 text-sm">
+          <a href={f.url} rel="noopener noreferrer nofollow" target="_blank">{f.publisher} · {f.rating}</a>
+          <p>{f.claim}</p><p className="text-text-muted">{f.verified ? "페이지와 이미지 일치 확인" : "원문 또는 이미지 일치 미확인"} · 현재 주장과의 일치는 별도로 확인해요.</p>
+        </article>)}
+      </section>}
       {inconclusive ? (
         <Panel aria-label="판단 불가 결과">
           <Block className="!p-0">{banner}</Block>
@@ -171,8 +182,8 @@ export function ResultView({ view }: { view: CheckView }) {
               <p className="text-sm">판정에 쓸 만한 근거를 찾지 못했어요.</p>
             ) : (
               <div className="grid gap-3">
-                {view.evidence.map((e) => (
-                  <EvidenceCard key={`${e.kind}-${e.provider}`} e={e} />
+                {view.evidence.map((e, i) => (
+                  <EvidenceCard key={`${e.kind}-${e.provider}-${i}`} e={e} />
                 ))}
               </div>
             )}
@@ -213,8 +224,8 @@ export function ResultView({ view }: { view: CheckView }) {
             <h3 id="evidence-title" className="text-base font-semibold">
               근거
             </h3>
-            {view.evidence.map((e) => (
-              <EvidenceCard key={`${e.kind}-${e.provider}`} e={e} />
+            {view.evidence.map((e, i) => (
+              <EvidenceCard key={`${e.kind}-${e.provider}-${i}`} e={e} />
             ))}
           </section>
           {compare}

@@ -24,7 +24,6 @@ export interface DataStore {
   createAnonymousUser(): Promise<User>;
   getUser(id: string): Promise<User | null>;
   findUserByEmail(email: string): Promise<User | null>;
-  linkEmail(userId: string, email: string): Promise<User>;
   deleteUser(userId: string): Promise<void>;
 
   usage(userId: string): Promise<QuotaResult>;
@@ -46,7 +45,7 @@ export interface DataStore {
   readUpload(checkId: string): Promise<{ bytes: Uint8Array; mime: string } | null>;
 
   createLoginToken(userId: string, email: string): Promise<string>;
-  consumeLoginToken(token: string): Promise<{ userId: string; email: string } | null>;
+  completeLogin(token: string): Promise<User | null>;
 }
 
 export const utcDay = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -74,15 +73,8 @@ class MemoryStore implements DataStore {
     for (const u of this.users.values()) if (u.email === email) return u;
     return null;
   }
-  async linkEmail(userId: string, email: string) {
-    // Same id before and after sign-in, like Supabase anonymous → permanent linking: history is kept.
-    const u = this.users.get(userId);
-    if (!u) throw new Error("no such user");
-    const next = { ...u, email, dailyLimit: Math.max(u.dailyLimit, LIMIT_SIGNED_IN) };
-    this.users.set(userId, next);
-    return next;
-  }
   async deleteUser(userId: string) {
+    this.invalidateLoginTokens(userId);
     for (const [id, c] of this.checks) {
       if (c.userId !== userId) continue;
       this.checks.delete(id);
@@ -119,19 +111,25 @@ class MemoryStore implements DataStore {
     let best: Analysis | null = null;
     for (const a of this.analyses.values()) {
       if (a.inputKey !== inputKey || a.pipelineVersion !== pipelineVersion || a.status === "failed") continue;
-      if (!best || a.startedAt > best.startedAt) best = a;
+      if (!best || a.runNumber > best.runNumber) best = a;
     }
     return best;
   }
   async createAnalysis(inputKey: string, pipelineVersion: number) {
+    // Allocate synchronously so rechecks in the same millisecond still have a stable order.
+    let runNumber = 1;
+    for (const a of this.analyses.values()) {
+      if (a.inputKey === inputKey && a.pipelineVersion === pipelineVersion) {
+        runNumber = Math.max(runNumber, a.runNumber + 1);
+      }
+    }
     const a: Analysis = {
       id: randomUUID(),
       inputKey,
       pipelineVersion,
+      runNumber,
       status: "pending",
       steps: Object.fromEntries(STEP_ORDER.map((s) => [s, "waiting" as StepState])) as Analysis["steps"],
-      verdict: null,
-      verdictReason: null,
       errorCode: null,
       evidence: [],
       matches: [],
@@ -195,11 +193,47 @@ class MemoryStore implements DataStore {
     this.tokens.set(token, { userId, email, expires: Date.now() + 15 * 60_000 });
     return token;
   }
-  async consumeLoginToken(token: string) {
+  private invalidateLoginTokens(userId: string) {
+    for (const [token, value] of this.tokens) {
+      if (value.userId === userId) this.tokens.delete(token);
+    }
+  }
+
+  async completeLogin(token: string): Promise<User | null> {
+    // One synchronous transaction: consume proof, resolve identity, transfer ownership and quota.
+    // A future database implementation must do all of this in one transaction as well.
     const t = this.tokens.get(token);
     this.tokens.delete(token); // single use
-    if (!t || t.expires < Date.now()) return null;
-    return { userId: t.userId, email: t.email };
+    if (!t || t.expires <= Date.now()) return null;
+    const source = this.users.get(t.userId);
+    if (!source) return null;
+
+    let target = [...this.users.values()].find((u) => u.email === t.email);
+    if (!target) {
+      // Linking an anonymous identity preserves its id. Switching from a registered account
+      // to a new email creates another account; it must never rename or merge the old account.
+      target = source.email === null
+        ? { ...source, email: t.email, dailyLimit: Math.max(source.dailyLimit, LIMIT_SIGNED_IN) }
+        : { id: randomUUID(), email: t.email, dailyLimit: LIMIT_SIGNED_IN, createdAt: new Date().toISOString() };
+      this.users.set(target.id, target);
+    }
+
+    this.invalidateLoginTokens(source.id);
+    if (source.email === null && source.id !== target.id) {
+      for (const [id, check] of this.checks) {
+        if (check.userId === source.id) this.checks.set(id, { ...check, userId: target.id });
+      }
+      // Keep every UTC day's usage, even above the target's limit, so signing in cannot reset it.
+      for (const [key, used] of this.usageDays) {
+        if (!key.startsWith(`${source.id}|`)) continue;
+        const targetKey = `${target.id}|${key.slice(source.id.length + 1)}`;
+        this.usageDays.set(targetKey, (this.usageDays.get(targetKey) ?? 0) + used);
+        this.usageDays.delete(key);
+      }
+      // Uploads are keyed by check id, which is unchanged. Shared analyses are unchanged too.
+      this.users.delete(source.id);
+    }
+    return target;
   }
 }
 
