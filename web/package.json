@@ -10,7 +10,7 @@
     "theme": "node scripts/gen-theme.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "fixtures": "python3 scripts/make-fixtures.py && node scripts/make-comparison-fixtures.mjs",
+    "fixtures": "python3 scripts/make-fixtures.py && node scripts/make-comparison-fixtures.mjs && python3 scripts/make-temporal-fixtures.py",
     "eval": "tsx eval/run.ts",
     "index:collect": "tsx scripts/index-collect.ts"
   },
