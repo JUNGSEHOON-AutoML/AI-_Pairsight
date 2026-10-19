@@ -20,7 +20,7 @@ export interface OsintData {
   inputImage: SavedImage | null;
   selection: "operator" | "representative_unconfirmed" | "none";
   inputExcerpt: string;
-  candidates: { url: string; excerpt: string; dates: Article["dates"]; images: SavedImage[]; review?: Article["review"] }[];
+  candidates: { url: string; excerpt: string; dates: Article["dates"]; images: SavedImage[] }[];
   signals: string[];
   scope: string;
 }
@@ -28,6 +28,12 @@ export interface AnalysisData { collected: Collected; imageMissing: boolean; thu
 export interface FactcheckData { court: CourtRecord; rule: string; calls: number }
 const bytes = (data: string) => Buffer.from(data.split(",")[1], "base64");
 const imageData = async (url: string, b: Uint8Array): Promise<SavedImage> => ({ url, hash: hash(b), thumbnail: "data:image/png;base64," + Buffer.from(await thumbnail(b)).toString("base64") });
+/** A feed item's text already uses part of the per-page 200-character retention budget. */
+function retainedExcerpt(c:Readonly<CaseRecord>,url:string,text:string) {
+  const f=c.input.feedReview;
+  const used=f?.url===url?[...c.input.claim+f.publisher+f.rating].length:0;
+  return [...excerpt(text)].slice(0,Math.max(0,200-used)).join("");
+}
 export function classify(text: string): Topic {
   if (/선거|정당|대통령|국회|정치|투표|개표/.test(text)) return "politics";
   if (/연예|배우|가수|아이돌|엔터|영화/.test(text)) return "entertainment";
@@ -72,7 +78,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
       if (c.input.thumbnail) { out.inputImage = { url: "", thumbnail: c.input.thumbnail, hash: c.input.imageHash! }; out.selection = "operator"; }
       if (c.input.pageUrl) {
         const article = await pages.page(c.input.pageUrl, signal);
-        out.inputExcerpt = excerpt(article.excerpt); out.signals.push(...article.securitySignals ?? []);
+        out.inputExcerpt = retainedExcerpt(c,article.url,article.excerpt); out.signals.push(...article.securitySignals ?? []);
         const selected = c.input.imageUrl ? article.images.find(i => i.url === c.input.imageUrl) : article.images[0];
         if (c.input.imageUrl && !selected) throw new CaseError("image_not_on_page", "선택한 이미지가 제출한 페이지에 없어요.");
         if (!out.inputImage && selected) {
@@ -86,8 +92,8 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         const v = await verifier.verify({ url, provider: "operator-selected" }, signal);
         if (v.images.length < Math.min(2, v.article.images.length)) throw new CaseError("candidate_image_failed", "후보 이미지 일부를 가져오지 못했어요. OSINT에서 멈췄어요.");
         out.signals.push(...v.article.securitySignals ?? []);
-        out.candidates.push({ url: v.article.url, excerpt: excerpt(v.article.excerpt), dates: v.dates,
-          images: await Promise.all(v.images.map(i => imageData(i.url, i.bytes))), ...(v.article.review ? { review: v.article.review } : {}) });
+        out.candidates.push({ url: v.article.url, excerpt: retainedExcerpt(c,v.article.url,v.article.excerpt), dates: v.dates,
+          images: await Promise.all(v.images.map(i => imageData(i.url, i.bytes))) });
       }
       out.signals = [...new Set(out.signals)];
       return { data: { ...out } };
@@ -99,7 +105,7 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
           imageMissing: true, thumbnailOnly: true, warnings: ["기사에 비교할 이미지가 없어요. 이미지 진위는 판단할 수 없어요."] } satisfies AnalysisData };
       }
       const candidates: VerifiedCandidate[] = source.candidates.map(v => ({ candidate: { url: v.url, provider: "operator-selected" },
-        article: { url: v.url, title: "", excerpt: v.excerpt, dates: v.dates, images: [], ...(v.review ? { review: v.review } : {}) },
+        article: { url: v.url, title: "", excerpt: v.excerpt, dates: v.dates, images: [] },
         dates: v.dates.map(d => ({ ...d, imageBound: false })), images: v.images.map(i => ({ url: i.url, bytes: bytes(i.thumbnail), mime: "image/png" })) }));
       if (candidates.some(v => !v.images.length)) throw new CaseError("candidate_without_image", "원본 후보 페이지에 비교할 이미지가 없어요.");
       const p: Providers = {
@@ -140,7 +146,14 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
       const selection = process.env.PAIRSIGHT_LLM ?? "ollama";
       if (!options.allowTestProviders && (selection === "mock" || options.llm?.name.includes("mock"))) throw new CaseError("mock_forbidden", "실제 사건에 mock 법정을 사용할 수 없어요. 로컬 LLM 설정을 확인해 주세요.");
       const llm = options.llm ?? createLLMProvider(selection, { baseUrl: process.env.PAIRSIGHT_OLLAMA_URL ?? "http://127.0.0.1:11500", numThread: 4 });
-      const court = await runCourt({ verdict: judge, evidence: a.collected.evidence, matches: a.collected.matches }, llm, signal);
+      const court = await runCourt({ verdict: judge, evidence: a.collected.evidence, matches: a.collected.matches }, llm, signal, {onEvent:event=>{
+        signal.throwIfAborted();
+        repo.mutate(c.id,(current,emit)=>{
+          if(!c.run || current.run?.token!==c.run.token)throw new CaseError("stale_run","작업 소유권이 바뀌었어요.");
+          emit({department:"factcheck",actor:event.seat,state:event.status==="speaking"?"speaking":event.status==="working"?"agent_working":"agent_idle",
+            summary:excerpt(event.summary??event.seat+" · "+event.status),cite:event.cite});
+        });
+      }});
       if (court.incomplete.length || court.reviewStatus === "unavailable") throw new CaseError("court_incomplete", "맥락·법정 확인 못 함. 제공자 상태를 확인한 후 이 부서에서 다시 실행해 주세요.", {llmCalls:court.llmCalls});
       court.rejected = court.rejected.map(r => ({ ...r, text: "" }));
       return { data: { court, rule: judge.rule, calls: court.llmCalls } };

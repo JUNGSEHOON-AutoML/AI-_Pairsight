@@ -24,7 +24,7 @@ export function SiteHeader() {
           </li>
           <li>
             <Link href="/newsroom" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
-              기록
+              편집국
             </Link>
           </li>
           <li>

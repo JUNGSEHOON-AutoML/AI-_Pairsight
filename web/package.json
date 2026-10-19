@@ -17,7 +17,11 @@
     "court": "node --env-file-if-exists=.env.local --import tsx scripts/court-run.ts",
     "tuning:check": "tsx scripts/tune.ts --check",
     "tuning:run": "tsx scripts/tune.ts",
-    "tuning:holdout": "tsx scripts/tuning-holdout.ts"
+    "tuning:holdout": "tsx scripts/tuning-holdout.ts",
+    "newsroom:worker": "node --env-file-if-exists=.env.local --import tsx scripts/newsroom-worker.ts",
+    "newsroom:operator": "python3 scripts/create-newsroom-operator.py",
+    "newsroom:start": "node --env-file-if-exists=.env.local scripts/newsroom-start.mjs",
+    "newsroom:feed": "node --env-file-if-exists=.env.local --import tsx scripts/newsroom-feed.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

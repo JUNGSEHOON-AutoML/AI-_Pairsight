@@ -59,7 +59,8 @@ export interface CaseEvent {
   seq: number;
   caseId: string;
   department: CaseRecord["stage"] | "reliability";
-  state: CaseStatus | "done" | "warning";
+  state: CaseStatus | "done" | "warning" | "agent_working" | "agent_idle" | "speaking";
+  actor?: string;
   at: string;
   summary: string; // code-written, <=200; no raw page/model prose or credentials
   cite: string[];

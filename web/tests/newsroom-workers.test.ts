@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFile } from "node:fs/promises";
 import { CaseRepository } from "../lib/newsroom/repository";
 import { createNewsroomWorkers, type AnalysisData } from "../lib/newsroom/workers";
@@ -10,6 +10,7 @@ import { createMockProviders } from "../lib/providers";
 import { MockLLMProvider } from "../lib/llm/mock";
 import { LocalImageComparisonProvider } from "../lib/verification/image-comparison";
 import { instructionSignals } from "../lib/verification/page-fetch";
+import { ProviderError } from "../lib/providers/types";
 import { thumbnail } from "../lib/verification/retention";
 const repos: CaseRepository[] = [];
 afterEach(() => repos.splice(0).forEach(r => r.close()));
@@ -33,6 +34,7 @@ describe("department minimum functions", () => {
     const done = await runCase(repo, c.id, workers, { allowFixture: true });
     expect(done.status).toBe("complete"); expect(Object.values(done.sections)).toHaveLength(9);
     expect(done.sections.literacy!.data.howToCheck).toBeInstanceOf(Array);
+    expect(repo.events().some(e=>e.actor==="judge"&&e.state==="speaking")).toBe(true);
     expect(publicProjection(done)).toBeNull(); // test-origin cases cannot appear publicly
   }, 20000);
   it("requires two different human reviewers for politics and rejects a stale approval", async () => {
@@ -68,4 +70,29 @@ describe("department minimum functions", () => {
     labelCase(repo, c.id, "human", "inconclusive", "판정할 이미지와 근거가 부족함");
     expect(reliability(repo.list(), repo.events()).evaluated).toBe(1);
   });
+  it("records a safe robots reason and never runs later departments", async () => {
+    const {repo}=setup(),pages=createMockProviders().pages;
+    pages.page=async()=>{throw new ProviderError("url_blocked","robots disallow");};
+    const c=repo.create({...input(),pageUrl:"https://blocked.example/article"});
+    const result=await runCase(repo,c.id,createNewsroomWorkers(repo,{pages,allowTestProviders:true}),{allowFixture:true});
+    expect(result.sections.osint?.error?.code).toBe("robots_disallowed");expect(result.sections.ai_data).toBeUndefined();
+  });
+  it("does not fetch any page or image for flagged sexual reports", async () => {
+    const {repo}=setup(),pages=createMockProviders().pages;
+    pages.page=vi.fn();pages.image=vi.fn();
+    const c=repo.create({...input(),contentFlags:["sexual_content"],pageUrl:"https://blocked.example/article",candidateUrls:["https://blocked.example/source"]});
+    const result=await runCase(repo,c.id,createNewsroomWorkers(repo,{pages,allowTestProviders:true,llm:new MockLLMProvider()}),{allowFixture:true});
+    expect(result.status).toBe("awaiting_approval");expect(pages.page).not.toHaveBeenCalled();expect(pages.image).not.toHaveBeenCalled();
+  });
+
+  it("exposes only a completed approved real case and removes it immediately on withdrawal", async () => {
+    const {repo,workers}=setup(),c=repo.create({...input(),origin:"manual"});
+    const waiting=await runCase(repo,c.id,workers);
+    expect(publicProjection(waiting)).toBeNull();
+    reviewCase(repo,c.id,"human",waiting.revision,"approve",{title:"근거가 부족해 판단할 수 없어요",summary:"출처와 추가 자료를 확인해야 해요."});
+    const done=await runCase(repo,c.id,workers);
+    expect(publicProjection(done)?.id).toBe(c.id);expect(publicProjection(done)?.example).toBe(false);
+    expect(publicProjection(reviewCase(repo,c.id,"human",done.revision,"withdraw"))).toBeNull();
+  });
+
 });
