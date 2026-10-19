@@ -4,3 +4,8 @@ web/.data/
 # eval: real case images and run outputs stay local (internal evaluation only)
 web/eval/images/
 web/eval/out/
+
+# capture folders kept locally, not tracked
+replica/clone-screens/stage3/
+replica/clone-screens/stage4/
+replica/clone-screens/stage4-account/
