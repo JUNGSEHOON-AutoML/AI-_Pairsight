@@ -77,6 +77,13 @@ export function summarize(rows: ScoredRow[]): Summary {
   return { total: rows.length, ran: rows.length - outcomes.error, outcomes, distribution, byLabel, confusion, byOutcome };
 }
 
+/** A candidate page given by hand instead of a search (pilot mode). imageUrl picks one photo on a multi-photo page. */
+export interface ManualSource {
+  url: string;
+  imageUrl?: string;
+}
+export const MAX_MANUAL_SOURCES = 5; // the engine verifies at most 5 candidates per request
+
 export interface EvalCase {
   id: string;
   image: string; // path relative to the cases file
@@ -84,6 +91,37 @@ export interface EvalCase {
   claimedDate: string | null; // YYYY-MM-DD the post says it was taken, if any
   label: Label;
   source: string; // where the ground truth comes from (original article, fact-check URL, ...)
+  sourceUrls: ManualSource[]; // empty = use the search/index; non-empty = skip search, verify these pages
+}
+
+const httpUrl = (v: unknown): string | null => {
+  if (typeof v !== "string") return null;
+  try {
+    const u = new URL(v);
+    if (!["http:", "https:"].includes(u.protocol) || u.username || u.password) return null;
+    // Same rule as the app: no credential-looking query parameters in anything that is fetched or stored.
+    if ([...u.searchParams.keys()].some((k) => /token|signature|credential|api.?key/i.test(k))) return null;
+    u.hash = "";
+    return u.href;
+  } catch {
+    return null;
+  }
+};
+
+function parseSourceUrls(raw: unknown, lineNo: number): ManualSource[] {
+  if (raw == null) return [];
+  if (!Array.isArray(raw)) throw new Error(`line ${lineNo}: "sourceUrls" must be an array`);
+  if (raw.length > MAX_MANUAL_SOURCES) throw new Error(`line ${lineNo}: at most ${MAX_MANUAL_SOURCES} sourceUrls (the engine checks 5 candidates)`);
+  const out: ManualSource[] = [];
+  for (const [i, item] of raw.entries()) {
+    const obj = typeof item === "string" ? { url: item } : (item as { url?: unknown; imageUrl?: unknown });
+    const url = httpUrl(obj?.url);
+    if (!url) throw new Error(`line ${lineNo}: sourceUrls[${i}] is not a public http(s) URL`);
+    const imageUrl = obj.imageUrl == null ? undefined : httpUrl(obj.imageUrl);
+    if (obj.imageUrl != null && !imageUrl) throw new Error(`line ${lineNo}: sourceUrls[${i}].imageUrl is not a public http(s) URL`);
+    if (!out.some((s) => s.url === url)) out.push({ url, ...(imageUrl ? { imageUrl } : {}) });
+  }
+  return out;
 }
 
 /** Parses one JSONL line; throws a message that names the line. */
@@ -112,7 +150,7 @@ export function parseCase(line: string, lineNo: number): EvalCase {
   if (claimedDate && !/^\d{4}-\d{2}-\d{2}$/.test(claimedDate)) throw new Error(`line ${lineNo}: claimedDate must be YYYY-MM-DD`);
   const claim = str("claim", false);
   if ([...claim].length > 200) throw new Error(`line ${lineNo}: claim is longer than 200 characters (the app's limit)`);
-  return { id: str("id"), image: str("image"), claim, claimedDate, label: label as Label, source: str("source", false) };
+  return { id: str("id"), image: str("image"), claim, claimedDate, label: label as Label, source: str("source", false), sourceUrls: parseSourceUrls(raw.sourceUrls, lineNo) };
 }
 
 /** Parses a whole JSONL file. Blank lines and lines starting with // are skipped. Duplicate ids are an error. */

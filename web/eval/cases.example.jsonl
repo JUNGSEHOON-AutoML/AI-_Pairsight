@@ -9,3 +9,4 @@
 {"id":"fx-trusted-context","image":"../public/fixtures/inputs/trusted_context.png","claim":"2026년 10월 공원 집회 사진","claimedDate":"2026-10-01","label":"miscontextualized","source":"fixture: fictional trusted wire, 2018 page"}
 {"id":"fx-trusted-context-nodate","image":"../public/fixtures/inputs/trusted_context.png","claim":"","claimedDate":null,"label":"miscontextualized","source":"fixture: same picture, but the post gives no date → expected 판단 불가 (missed)"}
 {"id":"fx-unrelated-as-authentic","image":"../public/fixtures/inputs/no_source.png","claim":"","claimedDate":null,"label":"authentic","source":"fixture: nothing found anywhere → expected 판단 불가 (missed)"}
+{"id":"fx-manual-trusted-edited","image":"../public/fixtures/inputs/trusted_edited.png","claim":"","claimedDate":null,"label":"edited","source":"fixture: candidate page given by hand (sourceUrls), no search","sourceUrls":["https://wire.example.test/2021/04/old-house"]}

@@ -2,7 +2,10 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { classify, parseCase, parseCases, summarize } from "../eval/metrics";
 import { buildReport, type CaseResult } from "../eval/report";
-import { pickProviders } from "../eval/providers";
+import { pickProviders, providersForCase } from "../eval/providers";
+import { decideVerdict } from "../lib/verdict";
+import { collectEvidence } from "../lib/verification/engine";
+import { loadTrustedSources } from "../lib/verification/trusted-sources";
 import { GoogleVisionReverseSearch, type FetchLike } from "../lib/providers/google-vision";
 import { ProviderError } from "../lib/providers/types";
 
@@ -77,15 +80,52 @@ describe("eval metrics", () => {
     expect(() => parseCase("{nope", 9)).toThrow(/line 9/);
   });
 
-  it("falls back to mock providers without a key", () => {
+  it("defaults to free live mode; --mock is for fixtures; a Vision key is optional", () => {
     const saved = process.env.GOOGLE_VISION_API_KEY;
     delete process.env.GOOGLE_VISION_API_KEY;
-    expect(pickProviders({ forceMock: false }).mode).toBe("mock");
+    expect(pickProviders({ forceMock: false })).toMatchObject({ mode: "live", defaultSource: "none" });
+    expect(pickProviders({ forceMock: true })).toMatchObject({ mode: "mock", defaultSource: "mock-search" });
     process.env.GOOGLE_VISION_API_KEY = "test-key";
-    expect(pickProviders({ forceMock: false }).mode).toBe("live");
-    expect(pickProviders({ forceMock: true }).mode).toBe("mock");
+    expect(pickProviders({ forceMock: false }).defaultSource).toBe("vision");
     if (saved == null) delete process.env.GOOGLE_VISION_API_KEY;
     else process.env.GOOGLE_VISION_API_KEY = saved;
+  });
+
+  it("parses sourceUrls: strings or {url, imageUrl}, public http(s) only, at most 5, de-duplicated", () => {
+    const c = parseCase(JSON.stringify({ id: "x", image: "a.jpg", label: "edited", sourceUrls: [
+      "https://www.yna.co.kr/view/1#top", { url: "https://www.yna.co.kr/view/1" }, { url: "https://news1.kr/a", imageUrl: "https://image.news1.kr/b.jpg" } ] }), 1);
+    expect(c.sourceUrls).toEqual([{ url: "https://www.yna.co.kr/view/1" }, { url: "https://news1.kr/a", imageUrl: "https://image.news1.kr/b.jpg" }]);
+    expect(parseCase('{"id":"x","image":"a.jpg","label":"edited"}', 1).sourceUrls).toEqual([]);
+    for (const bad of [["ftp://a.kr/x"], ["https://a.kr/x?token=abc"], ["https://u:p@a.kr/"], "https://a.kr", [{ url: "https://a.kr", imageUrl: "javascript:1" }],
+      ["https://a.kr/1", "https://a.kr/2", "https://a.kr/3", "https://a.kr/4", "https://a.kr/5", "https://a.kr/6"]]) {
+      expect(() => parseCase(JSON.stringify({ id: "x", image: "a.jpg", label: "edited", sourceUrls: bad }), 5), JSON.stringify(bad)).toThrow(/line 5/);
+    }
+  });
+
+  it("manual candidates skip search but still go through page fetch, image comparison and the verdict", async () => {
+    const choice = pickProviders({ forceMock: true });
+    const run = async (url: string) => {
+      const c = parseCase(JSON.stringify({ id: "m", image: "x.png", label: "edited", sourceUrls: [url] }), 1);
+      const { providers, source } = providersForCase(choice, c);
+      expect(source).toBe("manual");
+      expect(providers.reverseSearch.name).toBe("manual");
+      const input = await providers.input.normalize({ bytes: await readFile("public/fixtures/inputs/trusted_edited.png"), mime: "image/png", pageUrl: null, publicImageUrl: null }, AbortSignal.timeout(30000));
+      const collected = await collectEvidence(input, providers, AbortSignal.timeout(30000));
+      return { collected, verdict: decideVerdict({ evidence: collected.evidence, matches: collected.matches, claimedDate: null, trustedSources: loadTrustedSources({ includeMock: true }) }) };
+    };
+    const right = await run("https://wire.example.test/2021/04/old-house");
+    expect(right.collected.searchedProviders).toContain("수동 후보 (검색 안 함)");
+    expect(right.collected.matches[0]?.url).toBe("https://wire.example.test/2021/04/old-house");
+    expect(right.verdict).toMatchObject({ verdict: "edited", rule: "v3.trusted_edited" });
+    // Hand-picked pages are not trusted blindly. A page that does not load gives no candidate and a warning...
+    const missing = await run("https://news.example.test/does-not-exist");
+    expect(missing.collected.matches).toEqual([]);
+    expect(missing.collected.verification.warnings.join(" ")).toContain("후보 페이지 하나를 확인하지 못했어요");
+    expect(missing.verdict.verdict).toBe("inconclusive");
+    // ...and an untrusted page that compares as the same scene still does not decide anything on its own (v2 rule).
+    const untrusted = await run("https://news.example.test/2024/05/street-cafe");
+    expect(untrusted.collected.matches[0]?.comparison?.diffRegions.length).toBeGreaterThan(0);
+    expect(untrusted.verdict.verdict).toBe("inconclusive");
   });
 });
 

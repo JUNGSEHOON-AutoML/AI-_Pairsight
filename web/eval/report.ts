@@ -3,6 +3,7 @@
 import { EVIDENCE_LABEL, type EvidenceKind, OUTCOME_LABEL as EVIDENCE_OUTCOME, type Outcome as EvidenceOutcome, STRENGTH_LABEL, type Strength, VERDICT_LABEL, type Verdict } from "../lib/domain";
 import type { VerdictResult } from "../lib/verdict";
 import { classify, LABELS, type Label, OUTCOME_LABEL, summarize, type Summary } from "./metrics";
+import { CANDIDATE_SOURCE_LABEL, type CandidateSource } from "./providers";
 
 export interface EvidenceRow {
   kind: EvidenceKind;
@@ -32,6 +33,8 @@ export interface CaseResult {
   source: string;
   claim: string;
   claimedDate: string | null;
+  candidateSource?: CandidateSource;
+  sourceUrls?: string[];
   error?: string;
   v2?: Pick<VerdictResult, "verdict" | "rule">;
   v3?: VerdictResult;
@@ -53,6 +56,7 @@ function wrongCase(r: CaseResult, lines: string[]) {
   lines.push(`- 핵심 발견: ${d.headlineFinding?.text ?? "—"}`);
   lines.push(`- 정답 출처: ${r.source || "—"}`);
   lines.push(`- 유포 주장: ${r.claim || "—"} · 주장한 날짜: ${r.claimedDate ?? "—"}`);
+  lines.push(`- 후보 출처: ${r.candidateSource ? CANDIDATE_SOURCE_LABEL[r.candidateSource] : "—"}${r.sourceUrls?.length ? ` (${r.sourceUrls.join(", ")})` : ""}`);
   lines.push("", "근거 카드 (강한 순):", "", "| 근거 | 결과 | 강도 | 요약 | 출처 | 제공자 |", "| --- | --- | --- | --- | --- | --- |");
   for (const e of r.evidence ?? []) {
     lines.push(`| ${EVIDENCE_LABEL[e.kind]} | ${EVIDENCE_OUTCOME[e.outcome]} | ${STRENGTH_LABEL[e.strength]} | ${cell(e.summary)} | ${e.sourceUrl ?? "—"} | ${e.provider} |`);
@@ -88,6 +92,14 @@ export function buildReport(mode: string, listVersion: string, results: CaseResu
   }
   lines.push(`- 모드: **${mode}** · 사례 ${s3.total}건 (실행 ${s3.ran}건, 실행 실패 ${s3.outcomes.error}건) · 신뢰 출처 목록 ${listVersion}`);
   lines.push(`- v3: 맞힘 ${s3.outcomes.correct} · 판단 불가 ${s3.outcomes.missed} · **오판 ${s3.outcomes.wrong}**`);
+  const bySource = new Map<CandidateSource, number>();
+  for (const r of results) if (r.candidateSource) bySource.set(r.candidateSource, (bySource.get(r.candidateSource) ?? 0) + 1);
+  if (bySource.size) lines.push(`- 후보 출처: ${[...bySource].map(([s, n]) => `${CANDIDATE_SOURCE_LABEL[s]} ${n}건`).join(" · ")}`);
+  const manual = bySource.get("manual") ?? 0;
+  if (manual) {
+    lines.push(`- **검색 없이 수동 후보로 평가함 (${manual}건).** 이 사례들은 사람이 정답 쪽 페이지를 알려준 상태라, 시스템이 원본을 스스로 찾는 능력은 측정하지 않아요. 후보 페이지 확인·이미지 비교·판정 규칙만 측정해요.`);
+  }
+  if (bySource.get("none")) lines.push(`- 검색 안 함 (${bySource.get("none")}건): 후보가 없어서 판단 불가가 정상이에요.`);
   lines.push("- 오판 = 정답과 다른 **확정** 판정 전부입니다. 조작 유형만 틀린 경우(예: 편집본을 맥락 조작으로 판정)도 오판입니다. 판단 불가는 오판이 아니라 놓침으로 셉니다.", "");
 
   lines.push(`## 오판 (v3, ${s3.outcomes.wrong}건)`, "");
@@ -109,12 +121,12 @@ export function buildReport(mode: string, listVersion: string, results: CaseResu
   } else lines.push("없음");
   lines.push("");
 
-  lines.push("## 사례별 요약", "", "| 사례 | 정답 | v3 판정 | 결과 | 강도 | 후보(확인/일치/신뢰) | 핵심 발견 · 부족한 근거 | 경고·오류 |", "| --- | --- | --- | --- | --- | --- | --- | --- |");
+  lines.push("## 사례별 요약", "", "| 사례 | 정답 | v3 판정 | 결과 | 강도 | 후보 출처 | 후보(확인/일치/신뢰) | 핵심 발견 · 부족한 근거 | 경고·오류 |", "| --- | --- | --- | --- | --- | --- | --- | --- | --- |");
   for (const r of results) {
     const o = OUTCOME_LABEL[classify(r.label, r.v3?.verdict ?? null)];
     const cand = r.candidates ? `${r.candidates.verified}/${r.candidates.matched}/${r.candidates.trusted}` : "—";
     const detail = r.v3 ? [r.v3.headlineFinding?.text, ...r.v3.missing].filter(Boolean).join(" · ") : "—";
-    lines.push(`| ${r.id} | ${v(r.label)} | ${v(r.v3?.verdict)} | ${o} | ${r.v3?.strength ? STRENGTH_LABEL[r.v3.strength] : "—"} | ${cand} | ${cell(detail)} | ${cell(r.error ?? (r.warnings ?? []).join(" · "))} |`);
+    lines.push(`| ${r.id} | ${v(r.label)} | ${v(r.v3?.verdict)} | ${o} | ${r.v3?.strength ? STRENGTH_LABEL[r.v3.strength] : "—"} | ${r.candidateSource ? CANDIDATE_SOURCE_LABEL[r.candidateSource] : "—"} | ${cand} | ${cell(detail)} | ${cell(r.error ?? (r.warnings ?? []).join(" · "))} |`);
   }
   lines.push("", "혼동 행렬(행=정답, 열=판정)은 results.json의 `summary.v3.confusion`에 있어요.");
   return { markdown: lines.join("\n") + "\n", s2, s3 };

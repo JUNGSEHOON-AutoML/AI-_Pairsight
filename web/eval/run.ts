@@ -10,7 +10,7 @@ import { decideVerdict, sortEvidence } from "../lib/verdict";
 import { collectEvidence, compareContext } from "../lib/verification/engine";
 import { EMPTY_TRUSTED_LIST, findTrustedSource, loadTrustedSources, type TrustedSourceList } from "../lib/verification/trusted-sources";
 import { type EvalCase, LABELS, type Label, parseCases } from "./metrics";
-import { pickProviders } from "./providers";
+import { CANDIDATE_SOURCE_LABEL, pickProviders, type ProviderChoice, providersForCase } from "./providers";
 import { buildReport, type CaseResult } from "./report";
 
 const MIME: Record<string, string> = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".heic": "image/heic" };
@@ -48,11 +48,12 @@ function validate(cases: EvalCase[], baseDir: string) {
     if (c.label === "miscontextualized" && !c.claimedDate) problems.push(`${c.id}: 맥락 조작 사례에 claimedDate가 없어요. 날짜가 없으면 v3 맥락 규칙이 동작할 수 없어요.`);
     if (!c.source) problems.push(`${c.id}: source(정답 근거)가 비어 있어요.`);
   }
-  return { problems, counts };
+  return { problems, counts, manual: cases.filter((c) => c.sourceUrls.length).length };
 }
 
-async function runCase(c: EvalCase, baseDir: string, providers: ReturnType<typeof pickProviders>["providers"], trusted: TrustedSourceList): Promise<CaseResult> {
-  const base: CaseResult = { id: c.id, label: c.label, source: c.source, claim: c.claim, claimedDate: c.claimedDate };
+async function runCase(c: EvalCase, baseDir: string, choice: ProviderChoice, trusted: TrustedSourceList): Promise<CaseResult> {
+  const { providers, source: candidateSource } = providersForCase(choice, c);
+  const base: CaseResult = { id: c.id, label: c.label, source: c.source, claim: c.claim, claimedDate: c.claimedDate, candidateSource, sourceUrls: c.sourceUrls.map((s) => s.url) };
   const path = imagePath(c, baseDir);
   const mime = MIME[extname(path).toLowerCase()];
   if (!mime) return { ...base, error: `unsupported image type: ${extname(path)}` };
@@ -104,24 +105,26 @@ async function main() {
   const baseDir = dirname(resolve(opt.cases));
 
   if (opt.validate) {
-    const { problems, counts } = validate(cases, baseDir);
+    const { problems, counts, manual } = validate(cases, baseDir);
     console.log(`[eval] ${cases.length}건: ` + LABELS.map((l) => `${VERDICT_LABEL[l]} ${counts[l]}/${PILOT_MIX[l]}`).join(" · ") + " (파일럿 권장 구성 대비)");
+    console.log(`[eval] 수동 후보(sourceUrls)가 있는 사례 ${manual}건 · 없는 사례 ${cases.length - manual}건 (없는 사례는 색인 또는 '검색 안 함'으로 평가)`);
     for (const p of problems) console.log(`[eval] 확인 필요: ${p}`);
     console.log(problems.length ? `[eval] 문제 ${problems.length}건` : "[eval] 문제 없음");
     process.exit(problems.some((p) => p.includes("이미지")) ? 1 : 0);
   }
 
   const selected = cases.filter((c) => !opt.only || c.id === opt.only).slice(0, opt.limit);
-  const { mode, providers } = pickProviders({ forceMock: opt.forceMock });
+  const choice = pickProviders({ forceMock: opt.forceMock });
+  const { mode } = choice;
   const trusted = loadTrustedSources({ includeMock: mode === "mock" });
-  console.log(`[eval] mode=${mode} cases=${selected.length} trusted=${trusted.version}`);
-  if (mode === "mock") console.log("[eval] GOOGLE_VISION_API_KEY not set (or --mock): results on real photos will all be 판단 불가.");
+  console.log(`[eval] mode=${mode} cases=${selected.length} trusted=${trusted.version} 기본 후보 출처=${CANDIDATE_SOURCE_LABEL[choice.defaultSource]}`);
+  if (mode === "mock") console.log("[eval] --mock: 합성 fixture 전용 모드예요. 실제 사진에는 의미가 없어요.");
 
   const results: CaseResult[] = [];
   for (const [i, c] of selected.entries()) {
-    const r = await runCase(c, baseDir, providers, trusted);
+    const r = await runCase(c, baseDir, choice, trusted);
     results.push(r);
-    console.log(`[eval] ${i + 1}/${selected.length} ${c.id}: label=${c.label} v2=${r.v2?.verdict ?? "-"} v3=${r.v3?.verdict ?? "-"} ${r.error ? "ERROR " + r.error : ""}`);
+    console.log(`[eval] ${i + 1}/${selected.length} ${c.id} [${r.candidateSource}]: label=${c.label} v2=${r.v2?.verdict ?? "-"} v3=${r.v3?.verdict ?? "-"} ${r.error ? "ERROR " + r.error : ""}`);
   }
   const { markdown, s2, s3 } = buildReport(mode, trusted.version, results);
   mkdirSync(opt.out, { recursive: true });
