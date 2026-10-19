@@ -47,6 +47,15 @@ export const mockTransport: Transport = async (raw, signal) => {
     return response(200, pageHtml(s).replaceAll(imageUrl(s), "https://demo.pairsight.test/img/" + s + ".png"));
   }
   if (raw === reviewUrl) return response(200, pageHtml("miscontextualized", true));
+  // RSS for the hash-index fixtures: two items with images, one third-party link, one item without an image.
+  if (url.hostname === "wire.example.test" && url.pathname === "/rss.xml") {
+    return response(200, `<?xml version="1.0"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>예시 통신사 (가상)</title>
+<item><title>골목 주택</title><link>https://wire.example.test/2021/04/old-house</link><pubDate>Mon, 12 Apr 2021 09:00:00 +0900</pubDate><media:content url="https://assets.example.test/originals/trusted_edited.png" medium="image"/></item>
+<item><title>공원 축제</title><link>https://wire.example.test/2018/07/park-festival</link><pubDate>Sat, 21 Jul 2018 10:00:00 +0900</pubDate><enclosure url="https://assets.example.test/originals/trusted_context.png" type="image/png"/></item>
+<item><title>외부 블로그</title><link>https://blog.example.test/park-walk</link><media:content url="https://assets.example.test/originals/inconclusive.png" medium="image"/></item>
+<item><title>사진 없는 기사</title><link>https://wire.example.test/2021/05/no-photo</link><description>본문만 있어요</description></item>
+</channel></rss>`, "application/rss+xml");
+  }
   for (const s of SCENARIOS) {
     if (SCENARIO_DATA[s].matches.some(m => m.url === raw)) return response(200, pageHtml(s));
   }

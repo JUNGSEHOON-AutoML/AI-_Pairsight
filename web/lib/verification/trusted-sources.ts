@@ -8,12 +8,23 @@ import { join } from "node:path";
 export type TrustedCategory = "kr_wire" | "kr_press" | "kr_broadcast" | "intl_wire" | "government";
 const CATEGORIES: TrustedCategory[] = ["kr_wire", "kr_press", "kr_broadcast", "intl_wire", "government"];
 
+/** An official RSS feed and whether we may collect it (replica/rss-collection-checklist.md). */
+export type FeedStatus = "allowed" | "excluded" | "pending";
+export interface TrustedFeed {
+  url: string;
+  status: FeedStatus; // only "allowed" feeds are ever fetched by the collector
+  reason: string;
+  evidence: string | null; // URL of the terms/RSS guide the decision is based on
+  checkedAt: string | null; // YYYY-MM-DD
+}
+
 export interface TrustedSource {
   id: string;
   name: string;
   domains: string[]; // registrable domains or public suffixes such as go.kr; subdomains match too
   category: TrustedCategory;
   basis: string;
+  feeds: TrustedFeed[];
 }
 
 export interface TrustedSourceList {
@@ -45,7 +56,21 @@ export function parseTrustedList(raw: unknown, origin = "trusted-sources"): Trus
       if (!DOMAIN.test(v)) fail(`sources[${i}]: invalid domain ${String(d)}`);
       return v;
     });
-    return { id: e.id!, name: e.name!, domains, category: e.category as TrustedCategory, basis: typeof e.basis === "string" ? e.basis : "" };
+    const rawFeeds = (s as { feeds?: unknown }).feeds ?? [];
+    if (!Array.isArray(rawFeeds)) fail(`sources[${i}]: feeds must be an array`);
+    const feeds = (rawFeeds as unknown[]).map((f, j) => {
+      const x = f as Partial<TrustedFeed>;
+      let url: URL | null = null;
+      try {
+        url = new URL(String(x.url));
+      } catch {}
+      if (!url || !["http:", "https:"].includes(url.protocol)) fail(`sources[${i}].feeds[${j}]: invalid url`);
+      if (!["allowed", "excluded", "pending"].includes(String(x.status))) fail(`sources[${i}].feeds[${j}]: status must be allowed, excluded or pending`);
+      if (x.status === "allowed" && (!x.evidence || !x.checkedAt)) fail(`sources[${i}].feeds[${j}]: an allowed feed needs evidence and checkedAt`);
+      return { url: url!.href, status: x.status as FeedStatus, reason: typeof x.reason === "string" ? x.reason : "",
+        evidence: typeof x.evidence === "string" ? x.evidence : null, checkedAt: typeof x.checkedAt === "string" ? x.checkedAt : null };
+    });
+    return { id: e.id!, name: e.name!, domains, category: e.category as TrustedCategory, basis: typeof e.basis === "string" ? e.basis : "", feeds };
   });
   return { version: obj.version as string, sources };
 }

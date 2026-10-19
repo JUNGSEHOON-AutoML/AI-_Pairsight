@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "fixtures": "python3 scripts/make-fixtures.py && node scripts/make-comparison-fixtures.mjs",
-    "eval": "tsx eval/run.ts"
+    "eval": "tsx eval/run.ts",
+    "index:collect": "tsx scripts/index-collect.ts"
   },
   "dependencies": {
     "cheerio": "1.2.0",

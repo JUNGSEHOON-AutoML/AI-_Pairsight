@@ -1,24 +1,224 @@
 {
-  "_about": "Trusted sources for verdict rules v3. Edit this file to change the list; no code change or rebuild is needed (the server re-reads it when the file changes). Criteria and review process: replica/trusted-sources.md. A source on this list is never treated as 'the truth'; it only lets a verified image comparison or page date count as medium-to-strong evidence.",
-  "version": "2026-10-19.1",
+  "_about": "Trusted sources for verdict rules v3. Edit this file to change the list; no code change or rebuild is needed (the server re-reads it when the file changes). Criteria and review process: replica/trusted-sources.md. A source on this list is never treated as 'the truth'; it only lets a verified image comparison or page date count as medium-to-strong evidence. feeds[].status: only 'allowed' feeds are collected by the RSS index (replica/rss-collection-checklist.md). No feed is allowed as of 2026-10-19.",
+  "version": "2026-10-19.2",
   "reviewedBy": "초안: 편집 검토 전 (replica/trusted-sources.md 참고)",
   "sources": [
-    { "id": "yonhap", "name": "연합뉴스", "domains": ["yna.co.kr"], "category": "kr_wire", "basis": "국가기간뉴스통신사" },
-    { "id": "newsis", "name": "뉴시스", "domains": ["newsis.com"], "category": "kr_wire", "basis": "국내 통신사" },
-    { "id": "news1", "name": "뉴스1", "domains": ["news1.kr"], "category": "kr_wire", "basis": "국내 통신사" },
-    { "id": "kbs", "name": "KBS", "domains": ["kbs.co.kr"], "category": "kr_broadcast", "basis": "지상파 공영방송" },
-    { "id": "mbc", "name": "MBC", "domains": ["imbc.com"], "category": "kr_broadcast", "basis": "지상파 방송" },
-    { "id": "sbs", "name": "SBS", "domains": ["sbs.co.kr"], "category": "kr_broadcast", "basis": "지상파 방송" },
-    { "id": "ytn", "name": "YTN", "domains": ["ytn.co.kr"], "category": "kr_broadcast", "basis": "보도전문채널" },
-    { "id": "chosun", "name": "조선일보", "domains": ["chosun.com"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "joongang", "name": "중앙일보", "domains": ["joongang.co.kr"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "donga", "name": "동아일보", "domains": ["donga.com"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "hani", "name": "한겨레", "domains": ["hani.co.kr"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "khan", "name": "경향신문", "domains": ["khan.co.kr"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "hankook", "name": "한국일보", "domains": ["hankookilbo.com"], "category": "kr_press", "basis": "전국 종합일간지" },
-    { "id": "ap", "name": "AP", "domains": ["apnews.com"], "category": "intl_wire", "basis": "국제 통신사" },
-    { "id": "reuters", "name": "Reuters", "domains": ["reuters.com"], "category": "intl_wire", "basis": "국제 통신사" },
-    { "id": "afp", "name": "AFP", "domains": ["afp.com"], "category": "intl_wire", "basis": "국제 통신사 (AFP 팩트체크 하위 도메인 포함)" },
-    { "id": "kr_gov", "name": "대한민국 정부·공공기관", "domains": ["go.kr", "korea.kr"], "category": "government", "basis": "정부 기관 전용 도메인(go.kr) 및 정책브리핑(korea.kr)" }
+    {
+      "id": "yonhap",
+      "name": "연합뉴스",
+      "domains": [
+        "yna.co.kr"
+      ],
+      "category": "kr_wire",
+      "basis": "국가기간뉴스통신사",
+      "feeds": [
+        {
+          "url": "https://www.yna.co.kr/rss/index",
+          "status": "excluded",
+          "reason": "RSS는 비상업적 블로그·개인 용도로만 허용. (url은 RSS 안내 페이지, 개별 피드 주소는 확인하지 않음)",
+          "evidence": "https://www.yna.co.kr/rss/index",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "newsis",
+      "name": "뉴시스",
+      "domains": [
+        "newsis.com"
+      ],
+      "category": "kr_wire",
+      "basis": "국내 통신사",
+      "feeds": [
+        {
+          "url": "https://www.newsis.com/RSS/",
+          "status": "pending",
+          "reason": "RSS 안내에서 이용 조건 미확인. (url은 RSS 안내 페이지)",
+          "evidence": "https://www.newsis.com/RSS/",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "news1",
+      "name": "뉴스1",
+      "domains": [
+        "news1.kr"
+      ],
+      "category": "kr_wire",
+      "basis": "국내 통신사"
+    },
+    {
+      "id": "kbs",
+      "name": "KBS",
+      "domains": [
+        "kbs.co.kr"
+      ],
+      "category": "kr_broadcast",
+      "basis": "지상파 공영방송"
+    },
+    {
+      "id": "mbc",
+      "name": "MBC",
+      "domains": [
+        "imbc.com"
+      ],
+      "category": "kr_broadcast",
+      "basis": "지상파 방송"
+    },
+    {
+      "id": "sbs",
+      "name": "SBS",
+      "domains": [
+        "sbs.co.kr"
+      ],
+      "category": "kr_broadcast",
+      "basis": "지상파 방송",
+      "feeds": [
+        {
+          "url": "https://news.sbs.co.kr/news/rss.do",
+          "status": "excluded",
+          "reason": "RSS는 개인 이용자의 비상업적 사용에만. (url은 RSS 안내 페이지)",
+          "evidence": "https://news.sbs.co.kr/news/rss.do",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "ytn",
+      "name": "YTN",
+      "domains": [
+        "ytn.co.kr"
+      ],
+      "category": "kr_broadcast",
+      "basis": "보도전문채널"
+    },
+    {
+      "id": "chosun",
+      "name": "조선일보",
+      "domains": [
+        "chosun.com"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지"
+    },
+    {
+      "id": "joongang",
+      "name": "중앙일보",
+      "domains": [
+        "joongang.co.kr"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지"
+    },
+    {
+      "id": "donga",
+      "name": "동아일보",
+      "domains": [
+        "donga.com"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지",
+      "feeds": [
+        {
+          "url": "https://rss.donga.com/total.xml",
+          "status": "excluded",
+          "reason": "RSS는 개인 이용자의 비상업적 사용에만 허용",
+          "evidence": "https://rss.donga.com/",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "hani",
+      "name": "한겨레",
+      "domains": [
+        "hani.co.kr"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지",
+      "feeds": [
+        {
+          "url": "https://www.hani.co.kr/rss",
+          "status": "pending",
+          "reason": "피드는 있으나 이용 조건 미확인",
+          "evidence": null,
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "khan",
+      "name": "경향신문",
+      "domains": [
+        "khan.co.kr"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지",
+      "feeds": [
+        {
+          "url": "https://www.khan.co.kr/help/help_rss.html",
+          "status": "excluded",
+          "reason": "개인적인 구독 목적으로만 지원. (url은 RSS 안내 페이지)",
+          "evidence": "https://www.khan.co.kr/help/help_rss.html",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "hankook",
+      "name": "한국일보",
+      "domains": [
+        "hankookilbo.com"
+      ],
+      "category": "kr_press",
+      "basis": "전국 종합일간지"
+    },
+    {
+      "id": "ap",
+      "name": "AP",
+      "domains": [
+        "apnews.com"
+      ],
+      "category": "intl_wire",
+      "basis": "국제 통신사",
+      "feeds": [
+        {
+          "url": "https://apnews.com/index.rss",
+          "status": "excluded",
+          "reason": "robots.txt: Disallow /*.rss",
+          "evidence": "https://apnews.com/robots.txt",
+          "checkedAt": "2026-10-19"
+        }
+      ]
+    },
+    {
+      "id": "reuters",
+      "name": "Reuters",
+      "domains": [
+        "reuters.com"
+      ],
+      "category": "intl_wire",
+      "basis": "국제 통신사"
+    },
+    {
+      "id": "afp",
+      "name": "AFP",
+      "domains": [
+        "afp.com"
+      ],
+      "category": "intl_wire",
+      "basis": "국제 통신사 (AFP 팩트체크 하위 도메인 포함)"
+    },
+    {
+      "id": "kr_gov",
+      "name": "대한민국 정부·공공기관",
+      "domains": [
+        "go.kr",
+        "korea.kr"
+      ],
+      "category": "government",
+      "basis": "정부 기관 전용 도메인(go.kr) 및 정책브리핑(korea.kr)"
+    }
   ]
 }
