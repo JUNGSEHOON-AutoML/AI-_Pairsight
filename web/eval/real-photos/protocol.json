@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "registeredAt": "2026-10-19",
+  "source": "https://zenodo.org/records/5884485",
+  "selection": "12 smallest camera ZIPs by published size; resource-bounded pilot, not representative sampling",
+  "splitUnit": "camera; all dates and derivatives of a camera stay in its split",
+  "calibration": [
+    "4801",
+    "5021",
+    "858",
+    "1093",
+    "8438",
+    "4232"
+  ],
+  "validation": [
+    "21444",
+    "19106",
+    "3297",
+    "3888",
+    "4795",
+    "9730"
+  ],
+  "frameSelection": "Sort timestamped JPEGs. Keep at most one per day with grayscale mean 45..220 and stddev >=15. Select dates at 10%, 50%, 90% of eligible ordered dates, first usable frame per date. No selection based on detector outcomes.",
+  "retention": "Only max-512px PNG derivatives, URL/date/hash/license metadata; source ZIP and full-resolution frames only in memory.",
+  "pairs": {
+    "recompressed": "each of 3 frames x JPEG quality 40/60/80/90",
+    "edited": "each frame x 3 deterministic edits: opaque patch, copy-move patch, two opaque patches; JPEG 80 output; documented masks",
+    "temporal": "all 3 choose 2 date pairs, both directions",
+    "unrelated": "first frame between different cameras within each split; both directions"
+  },
+  "metrics": "False positive = edited verdict on non-edit pairs. Miss = edited pair not classified edited, including abstentions. Also report same-image acceptance for JPEG and temporal same-photo acceptance separately. v3 trusted+earlier-source is an explicit evaluation assumption; v2 without provenance and v2 with controlled edit provenance reported separately.",
+  "search": {
+    "scene": [
+      0.74,
+      0.76,
+      0.78,
+      0.8
+    ],
+    "residual": [
+      0.004,
+      0.006,
+      0.008,
+      0.01,
+      0.012,
+      0.016,
+      0.02
+    ],
+    "area": [
+      0.04,
+      0.06,
+      0.08,
+      0.1,
+      0.12
+    ],
+    "count": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "selectionRule": "Calibration only: require 0 false edited verdicts on negatives and keep all existing synthetic regression tests; maximize edit recall, then JPEG same-photo acceptance, then minimize temporal same-photo acceptance; prefer smaller residual/area/count then scene closest to baseline on ties. Freeze chosen profile before evaluating validation. Report baseline and chosen on the same locked validation once, no holdout retuning.",
+  "limitations": [
+    "Twelve webcams only, max512 thumbnails, not representative of press/social photos.",
+    "Constructed controlled pixel edits on real photographs, not independently collected real-world misinformation.",
+    "Repeated frames/derivatives correlated: pair rates are descriptive, not population accuracy."
+  ]
+}

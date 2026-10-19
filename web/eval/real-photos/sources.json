@@ -1,0 +1,945 @@
+{
+  "dataset": "SkyFinder v1",
+  "sourcePage": "https://zenodo.org/records/5884485",
+  "doi": "10.5281/zenodo.5884485",
+  "authors": [
+    "Nathan Jacobs",
+    "Radu Paul Mihail"
+  ],
+  "citation": "Mihail RP, Workman S, Bessinger Z, Jacobs N (2016). Sky Segmentation in the Wild: An Empirical Study. WACV. DOI:10.1109/WACV.2016.7477637.",
+  "license": "CC-BY-4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/legalcode",
+  "licenseCheckedAt": "2026-10-19",
+  "licenseEvidence": "Creative Commons Attribution 4.0 International",
+  "changes": "Decoded, EXIF orientation applied, RGB converted, aspect-preserving resize to max 512px, lossless PNG; EXIF stripped. Controlled evaluation edits described separately.",
+  "protocolSha256": "f7d0223be88a546593e88966c590a13d2d5c023889e1c0fe19ab9ef0a26e2903",
+  "images": [
+    {
+      "id": "858-20140519_040257",
+      "camera": "858",
+      "split": "calibration",
+      "file": "images/858-20140519_040257.png",
+      "date": "2014-05-19",
+      "captureTimestamp": "20140519_040257",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/858.zip?download=1",
+      "archiveMember": "858/20140519_040257.jpg",
+      "archiveMd5": "c69bea20bb8791161f44c426e23860d3",
+      "sourceSha256": "db54f993c0ee344d818dc7d22b08b0950345c48e0d8c16daab99a8e03accac1d",
+      "sha256": "07a1c489a340f4dfcc9c87aa5b01f8e9922715ba7bf40308a1c33e935d4089c0",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 41,
+      "quantile": 0.1
+    },
+    {
+      "id": "858-20140604_070303",
+      "camera": "858",
+      "split": "calibration",
+      "file": "images/858-20140604_070303.png",
+      "date": "2014-06-04",
+      "captureTimestamp": "20140604_070303",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/858.zip?download=1",
+      "archiveMember": "858/20140604_070303.jpg",
+      "archiveMd5": "c69bea20bb8791161f44c426e23860d3",
+      "sourceSha256": "6915dba9a5a5a3cea9cfa2fb581331a3abc3f7e2395839a83c57b1f181344b41",
+      "sha256": "40b563b1eb6ea10f6ebf7cdb051fd2d309884cb11d2f4e38775e9221417d285c",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 41,
+      "quantile": 0.5
+    },
+    {
+      "id": "858-20140620_043257",
+      "camera": "858",
+      "split": "calibration",
+      "file": "images/858-20140620_043257.png",
+      "date": "2014-06-20",
+      "captureTimestamp": "20140620_043257",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/858.zip?download=1",
+      "archiveMember": "858/20140620_043257.jpg",
+      "archiveMd5": "c69bea20bb8791161f44c426e23860d3",
+      "sourceSha256": "9071eb316550f4fe8420c556bf7f834e6a815fc3e969eb68ce5d483b21a4d3c1",
+      "sha256": "149096ffce0ab62f8dd5d1729e2726b848ba1ba93363552c80b99c66ab81dc66",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 41,
+      "quantile": 0.9
+    },
+    {
+      "id": "1093-20140505_005403",
+      "camera": "1093",
+      "split": "calibration",
+      "file": "images/1093-20140505_005403.png",
+      "date": "2014-05-05",
+      "captureTimestamp": "20140505_005403",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/1093.zip?download=1",
+      "archiveMember": "1093/20140505_005403.jpg",
+      "archiveMd5": "a920656e16582d2c5707242cfbd42471",
+      "sourceSha256": "ece1b4e2d5ea6a4ad3cc2af083102554897f309cf5fc6b7269ab692b3d7165b3",
+      "sha256": "30f57bd7d1529125def5d00a853d000e75050c91c6a6074131c005a710dcc24b",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 175,
+      "quantile": 0.1
+    },
+    {
+      "id": "1093-20140714_022359",
+      "camera": "1093",
+      "split": "calibration",
+      "file": "images/1093-20140714_022359.png",
+      "date": "2014-07-14",
+      "captureTimestamp": "20140714_022359",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/1093.zip?download=1",
+      "archiveMember": "1093/20140714_022359.jpg",
+      "archiveMd5": "a920656e16582d2c5707242cfbd42471",
+      "sourceSha256": "03675c473fb85069eb3b1c663623fe12fc6ed08b7c843de0ccbbd5a54a9c02b3",
+      "sha256": "9869edf162fbecbf4a0611a3df9825e6df3b8c676466f52bd34962b65084f639",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 175,
+      "quantile": 0.5
+    },
+    {
+      "id": "1093-20140922_035401",
+      "camera": "1093",
+      "split": "calibration",
+      "file": "images/1093-20140922_035401.png",
+      "date": "2014-09-22",
+      "captureTimestamp": "20140922_035401",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/1093.zip?download=1",
+      "archiveMember": "1093/20140922_035401.jpg",
+      "archiveMd5": "a920656e16582d2c5707242cfbd42471",
+      "sourceSha256": "7eb484cfa4801e44d3a6fdd51a6f39c8ff44900be8e663e0c36f01c5251ece9d",
+      "sha256": "63a160b3fc3c7eab85e2c58c9701408d2d5324d37a7efc6ce381b590afa463c6",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 175,
+      "quantile": 0.9
+    },
+    {
+      "id": "3297-20130208_003113",
+      "camera": "3297",
+      "split": "validation",
+      "file": "images/3297-20130208_003113.png",
+      "date": "2013-02-08",
+      "captureTimestamp": "20130208_003113",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3297.zip?download=1",
+      "archiveMember": "3297/20130208_003113.jpg",
+      "archiveMd5": "3a2878a1cf668f86a4655fa4c91ae519",
+      "sourceSha256": "b8ba1fadfd3d43554c125cf4f3054a2359fb4ac23826dfa9dc06a4fe612f9d84",
+      "sha256": "a433f14f437c3765c7c6c2d23c051a4bdee7499985f991c51e6016dca56315cb",
+      "originalDimensions": [
+        550,
+        412
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 334,
+      "quantile": 0.1
+    },
+    {
+      "id": "3297-20130704_050116",
+      "camera": "3297",
+      "split": "validation",
+      "file": "images/3297-20130704_050116.png",
+      "date": "2013-07-04",
+      "captureTimestamp": "20130704_050116",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3297.zip?download=1",
+      "archiveMember": "3297/20130704_050116.jpg",
+      "archiveMd5": "3a2878a1cf668f86a4655fa4c91ae519",
+      "sourceSha256": "1219b40438cebb0aac1ec62250cec681daf0773c387c43c47be2ff48d7c6a1ab",
+      "sha256": "2427eaa692b12bcc13d51494c22fd9857e23006f341c4835d1b56bb7674f8a2c",
+      "originalDimensions": [
+        550,
+        412
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 334,
+      "quantile": 0.5
+    },
+    {
+      "id": "3297-20131125_163112",
+      "camera": "3297",
+      "split": "validation",
+      "file": "images/3297-20131125_163112.png",
+      "date": "2013-11-25",
+      "captureTimestamp": "20131125_163112",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3297.zip?download=1",
+      "archiveMember": "3297/20131125_163112.jpg",
+      "archiveMd5": "3a2878a1cf668f86a4655fa4c91ae519",
+      "sourceSha256": "77c035ff6c58b9dab7855490a8972f56874e3417479cb091dad4057414b94845",
+      "sha256": "9c2e1a89ceec064be95ece4547d018aa939fa73173226e86e51f6a25cedaba54",
+      "originalDimensions": [
+        550,
+        412
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 334,
+      "quantile": 0.9
+    },
+    {
+      "id": "3888-20130202_011350",
+      "camera": "3888",
+      "split": "validation",
+      "file": "images/3888-20130202_011350.png",
+      "date": "2013-02-02",
+      "captureTimestamp": "20130202_011350",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3888.zip?download=1",
+      "archiveMember": "3888/20130202_011350.jpg",
+      "archiveMd5": "1373f5263dfd89c360d883684f840f78",
+      "sourceSha256": "f969888084fd2c36c4ad951e2b22490d7e5bebfcf207cf303baf2054ed0d6166",
+      "sha256": "206b8785e4bb97de9a48754e6c66b7a54f4b8a27744f2d64d7fe919c8df74622",
+      "originalDimensions": [
+        320,
+        240
+      ],
+      "retainedDimensions": [
+        320,
+        240
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.1
+    },
+    {
+      "id": "3888-20130619_001507",
+      "camera": "3888",
+      "split": "validation",
+      "file": "images/3888-20130619_001507.png",
+      "date": "2013-06-19",
+      "captureTimestamp": "20130619_001507",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3888.zip?download=1",
+      "archiveMember": "3888/20130619_001507.jpg",
+      "archiveMd5": "1373f5263dfd89c360d883684f840f78",
+      "sourceSha256": "ebda528c9eaed7d1939f24850b4f1082e3fa334046006c6c101b2761622dee7c",
+      "sha256": "d6b03f0e33a610bb53cca83da70b63590b8a586e988e83d8b507ad3cf3263e78",
+      "originalDimensions": [
+        320,
+        240
+      ],
+      "retainedDimensions": [
+        320,
+        240
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.5
+    },
+    {
+      "id": "3888-20131129_081227",
+      "camera": "3888",
+      "split": "validation",
+      "file": "images/3888-20131129_081227.png",
+      "date": "2013-11-29",
+      "captureTimestamp": "20131129_081227",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/3888.zip?download=1",
+      "archiveMember": "3888/20131129_081227.jpg",
+      "archiveMd5": "1373f5263dfd89c360d883684f840f78",
+      "sourceSha256": "3544fd13921d705b667e4966c43380f4b1ccdca48e102607fc166dc53716a5fc",
+      "sha256": "b357164de9bbb5943728f4e2420db1a7c8c34d49fea6c9c7f0d8a33fc01f158c",
+      "originalDimensions": [
+        320,
+        240
+      ],
+      "retainedDimensions": [
+        320,
+        240
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.9
+    },
+    {
+      "id": "4232-20140911_022038",
+      "camera": "4232",
+      "split": "calibration",
+      "file": "images/4232-20140911_022038.png",
+      "date": "2014-09-11",
+      "captureTimestamp": "20140911_022038",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4232.zip?download=1",
+      "archiveMember": "4232/20140911_022038.jpg",
+      "archiveMd5": "9d8c1d46275d2064f281ba5e01e257b4",
+      "sourceSha256": "91ae80b15329c0da8a918351e4ca7a18beb3965ec2353fdaafa6116935e5a28b",
+      "sha256": "30dcb06b58fa6f6c89c19082618409f8fad24c108f8b999acd0c8d1868ed2b04",
+      "originalDimensions": [
+        800,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        307
+      ],
+      "eligibleDates": 35,
+      "quantile": 0.1
+    },
+    {
+      "id": "4232-20140925_005040",
+      "camera": "4232",
+      "split": "calibration",
+      "file": "images/4232-20140925_005040.png",
+      "date": "2014-09-25",
+      "captureTimestamp": "20140925_005040",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4232.zip?download=1",
+      "archiveMember": "4232/20140925_005040.jpg",
+      "archiveMd5": "9d8c1d46275d2064f281ba5e01e257b4",
+      "sourceSha256": "45854acc3bab12077ed401d66263d8c2b9ee6b56c8ad33a0e4a9ae950012234b",
+      "sha256": "8f4f88c6bf7805898c2843296a023d06bbd4553e47e1b5dc5fa683eb35553a2e",
+      "originalDimensions": [
+        800,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        307
+      ],
+      "eligibleDates": 35,
+      "quantile": 0.5
+    },
+    {
+      "id": "4232-20141010_042036",
+      "camera": "4232",
+      "split": "calibration",
+      "file": "images/4232-20141010_042036.png",
+      "date": "2014-10-10",
+      "captureTimestamp": "20141010_042036",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4232.zip?download=1",
+      "archiveMember": "4232/20141010_042036.jpg",
+      "archiveMd5": "9d8c1d46275d2064f281ba5e01e257b4",
+      "sourceSha256": "009e7df4d987fc2046d0c2988499352eef6c273dd40dcb611fbe6d4d57beee8e",
+      "sha256": "7489f82228a5e6e4c944a171ed4d2f6f8d2d045cf9abad44afa1a5c9a58b4e6d",
+      "originalDimensions": [
+        800,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        307
+      ],
+      "eligibleDates": 35,
+      "quantile": 0.9
+    },
+    {
+      "id": "4795-20121115_143423",
+      "camera": "4795",
+      "split": "validation",
+      "file": "images/4795-20121115_143423.png",
+      "date": "2012-11-15",
+      "captureTimestamp": "20121115_143423",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4795.zip?download=1",
+      "archiveMember": "4795/20121115_143423.jpg",
+      "archiveMd5": "f95b599f27a871ace482ea6d3d0bc81d",
+      "sourceSha256": "21ef4753fe24f2dba2359722436a5458db09e3478825c1f5c3f5b96187021b89",
+      "sha256": "5346e4d90ca82e309e27c0ad9a7590d9dd8512490491efe38c1f2ee4177e9444",
+      "originalDimensions": [
+        508,
+        381
+      ],
+      "retainedDimensions": [
+        508,
+        381
+      ],
+      "eligibleDates": 145,
+      "quantile": 0.1
+    },
+    {
+      "id": "4795-20130112_053421",
+      "camera": "4795",
+      "split": "validation",
+      "file": "images/4795-20130112_053421.png",
+      "date": "2013-01-12",
+      "captureTimestamp": "20130112_053421",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4795.zip?download=1",
+      "archiveMember": "4795/20130112_053421.jpg",
+      "archiveMd5": "f95b599f27a871ace482ea6d3d0bc81d",
+      "sourceSha256": "6a29dc641c4a68aac5df3862d46b9cd538a17d67147968957424cce00d20b789",
+      "sha256": "700ae066b0480b3b8f41f88e35225050d40087642ec614c0b560e2f475182896",
+      "originalDimensions": [
+        508,
+        381
+      ],
+      "retainedDimensions": [
+        508,
+        381
+      ],
+      "eligibleDates": 145,
+      "quantile": 0.5
+    },
+    {
+      "id": "4795-20130311_000505",
+      "camera": "4795",
+      "split": "validation",
+      "file": "images/4795-20130311_000505.png",
+      "date": "2013-03-11",
+      "captureTimestamp": "20130311_000505",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4795.zip?download=1",
+      "archiveMember": "4795/20130311_000505.jpg",
+      "archiveMd5": "f95b599f27a871ace482ea6d3d0bc81d",
+      "sourceSha256": "9578e92e2e598773a76aef90dc85a7f9b90fa22e1ad8c88fa42c82ac434191aa",
+      "sha256": "111f88a8589559f996d4ae9f02e6ea3e2fe0713f22df06ae1419f5802a15a5fa",
+      "originalDimensions": [
+        508,
+        381
+      ],
+      "retainedDimensions": [
+        508,
+        381
+      ],
+      "eligibleDates": 145,
+      "quantile": 0.9
+    },
+    {
+      "id": "4801-20110213_094002",
+      "camera": "4801",
+      "split": "calibration",
+      "file": "images/4801-20110213_094002.png",
+      "date": "2011-02-13",
+      "captureTimestamp": "20110213_094002",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4801.zip?download=1",
+      "archiveMember": "4801/20110213_094002.jpg",
+      "archiveMd5": "dd6df0e0550032c25292df71758ce747",
+      "sourceSha256": "5f270b09d2080f1ddbf794ada3e713e255659e31feec280bd0e30cafe3259641",
+      "sha256": "bdab82d031533da8a6de7a07ddb6c3447394e0994e76fd8ba18bb354fed7dd82",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.1
+    },
+    {
+      "id": "4801-20110626_071002",
+      "camera": "4801",
+      "split": "calibration",
+      "file": "images/4801-20110626_071002.png",
+      "date": "2011-06-26",
+      "captureTimestamp": "20110626_071002",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4801.zip?download=1",
+      "archiveMember": "4801/20110626_071002.jpg",
+      "archiveMd5": "dd6df0e0550032c25292df71758ce747",
+      "sourceSha256": "94ccd0940e79b7f5e9d416c808630edfa72450aabe843c6be256edd6ef9822f0",
+      "sha256": "ace2cfe4338b0a8692c86c2887cc9312fb7bc311f66d0cea9c0fb11d57e9de5e",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.5
+    },
+    {
+      "id": "4801-20111129_084001",
+      "camera": "4801",
+      "split": "calibration",
+      "file": "images/4801-20111129_084001.png",
+      "date": "2011-11-29",
+      "captureTimestamp": "20111129_084001",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/4801.zip?download=1",
+      "archiveMember": "4801/20111129_084001.jpg",
+      "archiveMd5": "dd6df0e0550032c25292df71758ce747",
+      "sourceSha256": "ffb241f6b9724fa676246f05e71502ad88acfd7aa680841aa5d65a3630f9ddc0",
+      "sha256": "0dfe925717e678cbf6b58054ecdc0b0e130a31a00e75b6da76deecb31988461a",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 322,
+      "quantile": 0.9
+    },
+    {
+      "id": "5021-20130508_111631",
+      "camera": "5021",
+      "split": "calibration",
+      "file": "images/5021-20130508_111631.png",
+      "date": "2013-05-08",
+      "captureTimestamp": "20130508_111631",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/5021.zip?download=1",
+      "archiveMember": "5021/20130508_111631.jpg",
+      "archiveMd5": "5a5abe3fee90f8035f0eb1ced832c810",
+      "sourceSha256": "5a073e0dd7a6030d5130693c22c0cc746632697887db199325508c640eb7f2cf",
+      "sha256": "1213916d7c6b00df1dc36bf9ba1181e47be196400bb2ad57c00941ebc76e896c",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 197,
+      "quantile": 0.1
+    },
+    {
+      "id": "5021-20130801_144627",
+      "camera": "5021",
+      "split": "calibration",
+      "file": "images/5021-20130801_144627.png",
+      "date": "2013-08-01",
+      "captureTimestamp": "20130801_144627",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/5021.zip?download=1",
+      "archiveMember": "5021/20130801_144627.jpg",
+      "archiveMd5": "5a5abe3fee90f8035f0eb1ced832c810",
+      "sourceSha256": "0451fe6229e4d8720e992f5b40aa66dc0edd2092a7951cfcab9c6c3546d143c9",
+      "sha256": "8037ca076b1d32ae9cb187c6cf259664d3a77b5f2b51c5fd0ffdd5d9ccde4531",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 197,
+      "quantile": 0.5
+    },
+    {
+      "id": "5021-20131022_091633",
+      "camera": "5021",
+      "split": "calibration",
+      "file": "images/5021-20131022_091633.png",
+      "date": "2013-10-22",
+      "captureTimestamp": "20131022_091633",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/5021.zip?download=1",
+      "archiveMember": "5021/20131022_091633.jpg",
+      "archiveMd5": "5a5abe3fee90f8035f0eb1ced832c810",
+      "sourceSha256": "396911d3c6773cf5cd345f142fe5577fa38048a9955bee98fcb058fdb8eeb259",
+      "sha256": "83b2f00a6f8b343684e95f32f46abe7b94f19a243f5d2c59c87095af3574cfc9",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 197,
+      "quantile": 0.9
+    },
+    {
+      "id": "8438-20130124_001640",
+      "camera": "8438",
+      "split": "calibration",
+      "file": "images/8438-20130124_001640.png",
+      "date": "2013-01-24",
+      "captureTimestamp": "20130124_001640",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/8438.zip?download=1",
+      "archiveMember": "8438/20130124_001640.jpg",
+      "archiveMd5": "f765203054eeae2bb7c804fb09baacb6",
+      "sourceSha256": "8a31ed53eaa2c4f5bf2f1d7306e579be3553f37e9ac242bee43d1f4f5337a2e1",
+      "sha256": "b639a7b0ae4fbc0a5b13a4f0020f08cf200d0c0b8a939b78082c95b5f418c3bd",
+      "originalDimensions": [
+        800,
+        600
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 212,
+      "quantile": 0.1
+    },
+    {
+      "id": "8438-20130428_001645",
+      "camera": "8438",
+      "split": "calibration",
+      "file": "images/8438-20130428_001645.png",
+      "date": "2013-04-28",
+      "captureTimestamp": "20130428_001645",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/8438.zip?download=1",
+      "archiveMember": "8438/20130428_001645.jpg",
+      "archiveMd5": "f765203054eeae2bb7c804fb09baacb6",
+      "sourceSha256": "9bfbe1a50b1873e75e052dfc99cad878b69a283b0097ad77dec261510bf52418",
+      "sha256": "bb02afebde75ecd3312131e2a1d09957ded4630ef27ba1d4610874d827fe832c",
+      "originalDimensions": [
+        800,
+        600
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 212,
+      "quantile": 0.5
+    },
+    {
+      "id": "8438-20130725_041637",
+      "camera": "8438",
+      "split": "calibration",
+      "file": "images/8438-20130725_041637.png",
+      "date": "2013-07-25",
+      "captureTimestamp": "20130725_041637",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/8438.zip?download=1",
+      "archiveMember": "8438/20130725_041637.jpg",
+      "archiveMd5": "f765203054eeae2bb7c804fb09baacb6",
+      "sourceSha256": "b063ed81636422ce7cb09c432c7e97eaef5eb9a332f2fbb98851cf98598962da",
+      "sha256": "ff3612d241b6e1b39df82441c34e3975413e270ced9c8bc90075a279312b5bcc",
+      "originalDimensions": [
+        800,
+        600
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 212,
+      "quantile": 0.9
+    },
+    {
+      "id": "9730-20130206_032705",
+      "camera": "9730",
+      "split": "validation",
+      "file": "images/9730-20130206_032705.png",
+      "date": "2013-02-06",
+      "captureTimestamp": "20130206_032705",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/9730.zip?download=1",
+      "archiveMember": "9730/20130206_032705.jpg",
+      "archiveMd5": "c934717cdfcfcae45ded83d9cfc8ddb0",
+      "sourceSha256": "cf2ac9f67718e2747368ec3731b24e26db62229f0bfc92a5f36027161d8d5ecc",
+      "sha256": "d2d291c78b02e0dcce9c6ff1ab0342566ea3c9f7b727e948a179ff85c8c2fdb9",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 361,
+      "quantile": 0.1
+    },
+    {
+      "id": "9730-20130704_012706",
+      "camera": "9730",
+      "split": "validation",
+      "file": "images/9730-20130704_012706.png",
+      "date": "2013-07-04",
+      "captureTimestamp": "20130704_012706",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/9730.zip?download=1",
+      "archiveMember": "9730/20130704_012706.jpg",
+      "archiveMd5": "c934717cdfcfcae45ded83d9cfc8ddb0",
+      "sourceSha256": "1ac88d26ef4e6d5af3667077c1ebbcecac133a6f8273fa8a06bfb70d8778f3e5",
+      "sha256": "4a4f284bf25886f8a48fe8ac1cee943c1adfce9d5627c4bda1528f24299f55dd",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 361,
+      "quantile": 0.5
+    },
+    {
+      "id": "9730-20131125_042700",
+      "camera": "9730",
+      "split": "validation",
+      "file": "images/9730-20131125_042700.png",
+      "date": "2013-11-25",
+      "captureTimestamp": "20131125_042700",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/9730.zip?download=1",
+      "archiveMember": "9730/20131125_042700.jpg",
+      "archiveMd5": "c934717cdfcfcae45ded83d9cfc8ddb0",
+      "sourceSha256": "8ee355fba831d8a96937e5abe99e01d33f27281a2c5dc1355cde79e1375f530d",
+      "sha256": "0766756fc578225b0f068f7f222ea28c26d10b199f980f2a22aeed33f7f6c50d",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 361,
+      "quantile": 0.9
+    },
+    {
+      "id": "19106-20130512_083643",
+      "camera": "19106",
+      "split": "validation",
+      "file": "images/19106-20130512_083643.png",
+      "date": "2013-05-12",
+      "captureTimestamp": "20130512_083643",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/19106.zip?download=1",
+      "archiveMember": "19106/20130512_083643.jpg",
+      "archiveMd5": "ad68c4b420236000e456949628b83599",
+      "sourceSha256": "c784a58298ca49e51c4b80440db421e0674053c1e14a0f3cb01f30c907885701",
+      "sha256": "a9ab4ba8b1048ad05bf8d47f0c48410ac8a199b7a75a930c06af54deaba14acd",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 171,
+      "quantile": 0.1
+    },
+    {
+      "id": "19106-20130719_000701",
+      "camera": "19106",
+      "split": "validation",
+      "file": "images/19106-20130719_000701.png",
+      "date": "2013-07-19",
+      "captureTimestamp": "20130719_000701",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/19106.zip?download=1",
+      "archiveMember": "19106/20130719_000701.jpg",
+      "archiveMd5": "ad68c4b420236000e456949628b83599",
+      "sourceSha256": "8ce77ec419db466f6aba704b06e50dce3b82b4cbf1bcd83588beecf4b74dd3f5",
+      "sha256": "60d58b81697cd6f97228c8c4628b16347ce18d0b4628cee84689886ab3b39e8d",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 171,
+      "quantile": 0.5
+    },
+    {
+      "id": "19106-20130926_143655",
+      "camera": "19106",
+      "split": "validation",
+      "file": "images/19106-20130926_143655.png",
+      "date": "2013-09-26",
+      "captureTimestamp": "20130926_143655",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/19106.zip?download=1",
+      "archiveMember": "19106/20130926_143655.jpg",
+      "archiveMd5": "ad68c4b420236000e456949628b83599",
+      "sourceSha256": "80304070003abbeed2a721938d90d8b2cc3d12b6450bc354822cd6badbc5bd71",
+      "sha256": "f0bf15a4bed2888bff5f63bc0e034c3fd3e9c1f659718436e86ab24893738b64",
+      "originalDimensions": [
+        640,
+        480
+      ],
+      "retainedDimensions": [
+        512,
+        384
+      ],
+      "eligibleDates": 171,
+      "quantile": 0.9
+    },
+    {
+      "id": "21444-20140702_113227",
+      "camera": "21444",
+      "split": "validation",
+      "file": "images/21444-20140702_113227.png",
+      "date": "2014-07-02",
+      "captureTimestamp": "20140702_113227",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/21444.zip?download=1",
+      "archiveMember": "21444/20140702_113227.jpg",
+      "archiveMd5": "2bf7f86e35862081072d91206075788a",
+      "sourceSha256": "2ea6dfbd9a3b5f4aae50cf4c2b9a1f418bd6a950cddcefc60df962602fd8257b",
+      "sha256": "d922165a955eb651cb69f17ec18758aa00a20c3725f0cb85f802d0fdd625a65b",
+      "originalDimensions": [
+        1728,
+        1154
+      ],
+      "retainedDimensions": [
+        512,
+        342
+      ],
+      "eligibleDates": 61,
+      "quantile": 0.1
+    },
+    {
+      "id": "21444-20140726_043230",
+      "camera": "21444",
+      "split": "validation",
+      "file": "images/21444-20140726_043230.png",
+      "date": "2014-07-26",
+      "captureTimestamp": "20140726_043230",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/21444.zip?download=1",
+      "archiveMember": "21444/20140726_043230.jpg",
+      "archiveMd5": "2bf7f86e35862081072d91206075788a",
+      "sourceSha256": "886e9f3b75aca8bfd30c8c7c3175068f439b8f52e7699a5915d26fb04bf60c2c",
+      "sha256": "c0d4ebbf0a5e62cee2d7d9c05e43d7c82c9d2918260cfbb9c3d0c372b3c8170e",
+      "originalDimensions": [
+        1728,
+        1154
+      ],
+      "retainedDimensions": [
+        512,
+        342
+      ],
+      "eligibleDates": 61,
+      "quantile": 0.5
+    },
+    {
+      "id": "21444-20140819_100250",
+      "camera": "21444",
+      "split": "validation",
+      "file": "images/21444-20140819_100250.png",
+      "date": "2014-08-19",
+      "captureTimestamp": "20140819_100250",
+      "timestampMeaning": "archive filename; timezone not supplied",
+      "sourceUrl": "https://zenodo.org/records/5884485/files/21444.zip?download=1",
+      "archiveMember": "21444/20140819_100250.jpg",
+      "archiveMd5": "2bf7f86e35862081072d91206075788a",
+      "sourceSha256": "dadf6b557fbe9fc9d3e89b43b0b719dc70a0b3b07342d50d7fb0f3651e69d525",
+      "sha256": "2419c3e06bf66f9ef612557ef1175f68f61edded970d6de4a19ef95d4d87482f",
+      "originalDimensions": [
+        1728,
+        1154
+      ],
+      "retainedDimensions": [
+        512,
+        342
+      ],
+      "eligibleDates": 61,
+      "quantile": 0.9
+    }
+  ],
+  "decodeFailures": {
+    "8438": [
+      {
+        "archiveMember": "8438/20130107_104642.jpg",
+        "reason": "image file is truncated (8 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130110_051642.jpg",
+        "reason": "image file is truncated (2 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130117_014641.jpg",
+        "reason": "image file is truncated (9 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130130_011643.jpg",
+        "reason": "image file is truncated (56 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130317_011638.jpg",
+        "reason": "image file is truncated (4 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130319_001639.jpg",
+        "reason": "image file is truncated (25 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130321_044638.jpg",
+        "reason": "image file is truncated (0 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130326_021639.jpg",
+        "reason": "image file is truncated (6 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130328_034640.jpg",
+        "reason": "image file is truncated (0 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130403_024641.jpg",
+        "reason": "image file is truncated (18 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130403_051640.jpg",
+        "reason": "image file is truncated (2 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130403_114638.jpg",
+        "reason": "image file is truncated (8 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130409_091641.jpg",
+        "reason": "image file is truncated (17 bytes not processed)"
+      },
+      {
+        "archiveMember": "8438/20130717_004648.jpg",
+        "reason": "image file is truncated (18 bytes not processed)"
+      }
+    ],
+    "9730": [],
+    "19106": [],
+    "21444": []
+  }
+}

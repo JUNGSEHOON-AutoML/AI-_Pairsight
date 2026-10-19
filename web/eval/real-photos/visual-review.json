@@ -1,0 +1,18 @@
+{
+  "reviewedAt": "2026-10-19",
+  "scope": "Visual inspection of all 36 retained thumbnails, no detector-driven exclusions or replacements. Dates and separate exposures follow the dataset archive; not cryptographic capture authentication.",
+  "cameras": {
+    "858": "Fixed road/campus view; distinct clouds, vehicles and light. Timestamp overlay retained.",
+    "1093": "Same office building at dusk/night; visible sensor noise and illumination changes retained.",
+    "3297": "Same mountain/ski slope, seasonal snow and cloud/fog differences; watermark retained.",
+    "3888": "Same beach/road at night and day; traffic/light variation and timestamp retained.",
+    "4232": "Same urban skyline at dusk/day/night; tower alignment preserved.",
+    "4795": "Same city-square webcam; two frames have severe rain/lens blur. Kept as preselected difficult images, not replaced based on performance.",
+    "4801": "Same harbor/dive-tower viewpoint; fog/cloud/light and water changes.",
+    "5021": "Same city rooftops; cloud and shadow differences. Timestamp strip retained.",
+    "8438": "Same garden/building viewpoint, day/night and lens spots. Fourteen undecodable archive frames excluded before sampling.",
+    "9730": "Same street at night, illumination/noise/cloud differences; visible date strip retained.",
+    "19106": "Same campus rooftops; dawn/day and cloud changes.",
+    "21444": "Same Statue of Liberty webcam in a rotated camera orientation; day/night differences. Kept at supplied orientation except EXIF handling."
+  }
+}
