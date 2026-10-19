@@ -13,7 +13,7 @@ export type ReportFact = { id: string; text: string; section: string; cite: stri
 export const safeReportText = (s:string) => maskLLMSecrets(s).replace(/https?:\/\/\S+|data:\S+|blob:\S+/gi,"[주소 생략]").replace(/[<>\n\r`\[\]]/g," ").slice(0,200);
 export function evidenceIds(c: CaseRecord) {
  const a=c.sections.ai_data?.data as AnalysisData|undefined;
- return [...(a?.collected.evidence??[]).map((_,i)=>`E${i+1}`),...(a?.collected.matches??[]).map((_,i)=>`S${i+1}`)];
+ return [...(a?.collected?.evidence??[]).map((_,i)=>`E${i+1}`),...(a?.collected?.matches??[]).map((_,i)=>`S${i+1}`)];
 }
 export function deskFacts(c:CaseRecord,desk:Desk):ReportFact[] {
  const facts:ReportFact[]=[];
@@ -25,8 +25,8 @@ export function deskFacts(c:CaseRecord,desk:Desk):ReportFact[] {
  }
  if(desk==="research"){
   const o=c.sections.osint?.data as OsintData|undefined,a=c.sections.ai_data?.data as AnalysisData|undefined;
-  add("작업 결과",`조회한 후보 페이지 ${o?.candidates.length??0}개. 이미지 선택 상태: ${o?.selection??"none"}. 페이지 지시문 신호 ${o?.signals.length??0}개.`);
-  for(const [i,e] of (a?.collected.evidence??[]).entries())add("작업 결과",e.summary,[`E${i+1}`]);
+  add("작업 결과",`조회한 후보 페이지 ${o?.candidates?.length??0}개. 이미지 선택 상태: ${o?.selection??"none"}. 페이지 지시문 신호 ${o?.signals?.length??0}개.`);
+  for(const [i,e] of (a?.collected?.evidence??[]).entries())add("작업 결과",e.summary,[`E${i+1}`]);
   for(const w of a?.warnings??[])add("자기 검증",w);
  }
  if(desk==="judgment"){
@@ -49,7 +49,7 @@ export function deskFacts(c:CaseRecord,desk:Desk):ReportFact[] {
 export const reportingLLM = () => {
  const selection=process.env.PAIRSIGHT_LLM??"ollama";
  if(selection==="mock")throw new CaseError("mock_forbidden","실제 사건의 보고서에 mock LLM을 사용할 수 없어요.");
- return createLLMProvider(selection,{baseUrl:process.env.PAIRSIGHT_OLLAMA_URL??"http://127.0.0.1:11500",numThread:4});
+ return createLLMProvider(selection,{baseUrl:process.env.PAIRSIGHT_OLLAMA_URL??"http://127.0.0.1:11500",numThread:4,model:process.env.PAIRSIGHT_REPORT_MODEL??"qwen2.5:1.5b"});
 };
 /** Extractive report writing, like the court: models select/order known facts; their free prose is discarded. */
 export async function composeFacts(facts:ReportFact[],instruction:string,llm:LLMProvider,signal:AbortSignal) {
@@ -70,4 +70,15 @@ export async function writeDeskReport(c:CaseRecord,desk:Desk,status:ReportMeta["
  const bodies=Object.fromEntries(REPORT_SECTIONS.map(h=>[h,facts.filter(f=>f.section===h).map(f=>f.text+(f.cite.length?` [근거:${f.cite.join(",")}]`:""))])) as Record<typeof REPORT_SECTIONS[number],string[]>;
  const next=DESKS[DESKS.findIndex(d=>d.id===desk)+1]?.id??"editor";
  return renderReport({version:1,caseId:c.id,desk,status,evidenceIds:evidenceIds(c),nextDesk:status==="pass"?next:null,durationMs:durationMs+Date.now()-reportStart,instructionHash:digest(instruction),createdAt:new Date().toISOString(),author:"llm"},bodies);
+}
+
+/** Failed work still gets a readable record; it is never attributed to an LLM or passed on. */
+export function stoppedReport(c:CaseRecord,desk:Desk,reason:string,durationMs:number){
+ const instruction=readFileSync(join(projectRoot(),"newsroom/desks",DESKS.find(d=>d.id===desk)!.instruction),"utf8");
+ return renderReport({version:1,caseId:c.id,desk,status:"stopped",evidenceIds:evidenceIds(c),nextDesk:null,durationMs,instructionHash:digest(instruction),createdAt:new Date().toISOString(),author:"code-fallback"},{
+  "접수 확인":["이 데스크에서 처리가 중단되었습니다. 다음 데스크로 인계하지 않았습니다."],
+  "작업 결과":[safeReportText(reason)],
+  "자기 검증":["완성된 LLM 보고서가 아닙니다. 코드가 중단 이유만 기록했습니다. 기존 판정과 승인 기록은 변경하지 않았습니다."],
+  "인계":["운영자가 중단 이유를 확인한 뒤 보충 또는 재시도해야 합니다. 편집장 브리핑에서 할 일을 확인하세요."],
+ });
 }

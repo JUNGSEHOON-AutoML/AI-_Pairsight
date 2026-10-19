@@ -42,12 +42,14 @@ export function NewsroomBoard({ initial, operator }: {initial:LiveSnapshot;opera
     };
     window.addEventListener("message",receive);return()=>window.removeEventListener("message",receive);
   },[]);
+  const briefSummary=data.briefing?.markdown.split("## 요약 3줄\n")[1]?.split("\n\n## ")[0]??"";
   return <div className="newsroom-workspace">
     <header className="nw-heading"><div><p className="nw-eyebrow">PAIRSIGHT / NEWSROOM</p><h1>편집장에게 듣는 오늘의 소식</h1><p className="nw-muted">{operator} · 운영자 전용</p></div><div className="nw-heading-actions"><Link className="nw-primary" href="/newsroom/new">사건 접수</Link><Logout /></div></header>
     <div className="nw-shell">
       <aside className="nw-dashboard" aria-label="편집장 브리핑과 할 일">
-        <section className="editor-brief"><p className="nw-eyebrow">EDITOR’S BRIEF</p><h2>최신 브리핑</h2>{data.briefing?<MarkdownDocument text={data.briefing.markdown}/>:<p className="nw-note">편집장이 첫 브리핑을 준비하고 있습니다. 아래에는 현재 필요한 조치를 바로 표시합니다.</p>}</section>
+        <section className="editor-brief"><p className="nw-eyebrow">EDITOR’S BRIEF</p><h2>최신 브리핑</h2>{data.briefing?<><p className="report-meta">{new Date(data.briefing.at).toLocaleString("ko-KR",{timeZone:"Asia/Seoul",hour12:false})} KST</p><MarkdownDocument text={briefSummary}/>{data.briefing.markdown.includes("비상 현황")&&<p className="nw-note">편집장 LLM 연결을 확인하지 못해 코드가 현재 상태를 정리했습니다.</p>}</>:<p className="nw-note">편집장이 첫 브리핑을 준비하고 있습니다. 아래에는 현재 필요한 조치를 바로 표시합니다.</p>}</section>
         <section className="editor-tasks"><h2>운영자가 할 일 <span>{data.tasks.length}</span></h2><ul>{data.tasks.map(t=><li key={t.caseId}><Link href={"/newsroom/"+t.caseId+"#review"}>{t.label}</Link><p>{t.reason}</p><small>사건 #{t.caseId.slice(0,8)}</small></li>)}</ul>{!data.tasks.length&&<p className="nw-note">지금 필요한 조치가 없습니다.</p>}</section>
+        {data.briefing&&<details className="editor-full-brief"><summary>브리핑 전문 읽기</summary><MarkdownDocument text={data.briefing.markdown}/></details>}
         <details className="editor-case-list" open><summary>사건 목록 · {data.cases.length}건</summary><ul className="nw-case-list">{data.cases.map(c=><li key={c.id}><button className="nw-case-card" data-case-id={c.id} aria-pressed={selected===c.id} onClick={()=>setSelected(c.id)}><strong>{c.published?.truthTitle??c.claim}</strong><span className="nw-card-bottom"><span>{c.displayStatus}</span><span>#{c.id.slice(0,6)}</span></span></button><Link className="nw-detail-link" href={"/newsroom/"+c.id}>보고서 읽기 →</Link></li>)}</ul></details>
       </aside>
       <section className="nw-control" aria-label="실시간 편집국">

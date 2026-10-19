@@ -14,9 +14,9 @@ describe("unified operator live view",()=>{
   it("streams a running or failed court before a verdict exists",()=>{
     const r=store(),c=r.create(input);
     r.mutate(c.id,x=>{x.stage="factcheck";x.status="running";x.sections.factcheck={department:"factcheck",state:"running",attempt:1,startedAt:new Date().toISOString(),finishedAt:null,durationMs:null,data:{},error:null};});
-    expect(liveSnapshot(r).cases[0].verdict).toBeNull();expect(liveSnapshot(r).room.departments[4].state).toBe("working");
+    expect(liveSnapshot(r).cases[0].verdict).toBeNull();expect(liveSnapshot(r).room.departments[2].state).toBe("working");
     r.mutate(c.id,x=>{x.status="failed";x.sections.factcheck!.state="failed";});
-    expect(liveSnapshot(r).cases[0].verdict).toBeNull();expect(liveSnapshot(r).room.departments[4].state).toBe("blocked");
+    expect(liveSnapshot(r).cases[0].verdict).toBeNull();expect(liveSnapshot(r).room.departments[2].state).toBe("blocked");
   });
   it("excludes fixtures, private images, run tokens and unapproved publication drafts",()=>{
     const r=store(),c=r.create(input);r.create({...input,origin:"fixture"});
