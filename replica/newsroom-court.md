@@ -5,8 +5,8 @@
 - 외부 서비스는 무료 등급이나 로컬 실행만 씁니다.
 
 **이번 범위:** 이 문서, 법정 레이어 최소 구현(`web/lib/court/`, `web/lib/llm/`), mock LLM 테스트(`web/tests/court.test.ts`).
-- 공개 대시보드의 2D 기록과 Claw3D mock 재생은 후속 작업으로 구현했습니다. 실제 웹 검사 후처리·공방 DB 저장·사람 승인 화면은 미연결입니다.
-- 편집국 부서 설계는 문서만 있습니다. 9개 부서와 현재 법정 7좌석의 관계·권한·인계 계약은 [newsroom-departments.md](newsroom-departments.md)를 따릅니다.
+- 후속 [Case 통합](case-newsroom.md)에서 실제 사건 워커·공방 저장·사람 승인 화면·공개 대시보드·Claw3D를 연결했습니다.
+- 법정 7좌석은 팩트체크 부서 내부 역할입니다. 현재 9개 순차 부서와 별도 신뢰성 관찰자의 계약은 [case-newsroom.md](case-newsroom.md)를 따릅니다.
 
 ## 1. 한 줄 요약
 

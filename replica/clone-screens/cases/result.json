@@ -1,0 +1,11 @@
+{
+  "operatorAuth": true,
+  "csrf": true,
+  "realCases": 3,
+  "unapprovedHidden": true,
+  "fixturesHidden": true,
+  "mobileOverflow": false,
+  "departments": 9,
+  "viewerMutationsBlocked": true,
+  "browserErrors": 0
+}
