@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t border-border px-4 py-6 text-center text-sm text-text-muted">
           Pairsight · 자동 분석에는 오류가 있을 수 있어요.{" "}
           <a href="/how-it-works" className="underline">
-            판정 방법
+            판정·게재 기준
           </a>
         </footer>
       </body>

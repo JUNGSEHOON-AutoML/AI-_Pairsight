@@ -52,7 +52,7 @@ function CheckPoller({ id }: { id: string }) {
       <div className="grid max-w-reading gap-3">
         <h1 className="text-xl">검사를 찾을 수 없어요</h1>
         <p className="text-text-muted">다른 브라우저에서 만든 검사이거나, 삭제된 검사일 수 있어요.</p>
-        <ButtonLink href="/" className="w-fit">
+        <ButtonLink href="/check" className="w-fit">
           새로 검사하기
         </ButtonLink>
       </div>
@@ -65,7 +65,7 @@ function CheckPoller({ id }: { id: string }) {
       {!view && <div aria-hidden="true" className="h-40 animate-pulse rounded-lg bg-surface" />}
       {quotaHit && <QuotaExhausted />}
       {view && (view.status === "pending" || view.status === "running") && (
-        <AnalyzingPanel steps={view.steps} slow={slow} onCancel={() => router.push("/")} />
+        <AnalyzingPanel steps={view.steps} slow={slow} onCancel={() => router.push("/check")} />
       )}
       {view?.status === "failed" && (
         <AnalysisFailed

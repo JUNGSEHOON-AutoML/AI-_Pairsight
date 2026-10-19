@@ -66,7 +66,7 @@ export function AnalysisFailed({ code, charged, onRetry }: { code: ErrorCode | n
       <p className="mt-1 text-sm text-text-muted">이유: {ERROR_COPY[code ?? "internal"]}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {onRetry && <Button onClick={onRetry}>다시 시도</Button>}
-        <ButtonLink href="/" variant="secondary">
+        <ButtonLink href="/check" variant="secondary">
           다른 이미지 검사
         </ButtonLink>
       </div>

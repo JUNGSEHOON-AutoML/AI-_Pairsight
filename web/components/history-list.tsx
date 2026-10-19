@@ -47,7 +47,7 @@ export function HistoryList() {
       {items?.length === 0 && (
         <div className="grid gap-3 rounded-lg border border-border p-6 text-center">
           <p>아직 검사한 이미지가 없어요. 처음 하나를 넣어 보세요.</p>
-          <ButtonLink href="/" className="mx-auto w-fit">
+          <ButtonLink href="/check" className="mx-auto w-fit">
             검사하러 가기
           </ButtonLink>
         </div>

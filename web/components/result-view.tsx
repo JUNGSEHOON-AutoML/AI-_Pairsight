@@ -62,7 +62,7 @@ export function NoSourceBlock({ view }: { view: CheckView }) {
         <p className="mt-1 text-sm text-text-muted">{INDEX_COVERAGE_NOTE}</p>
       )}
       <div className="mt-3 flex flex-wrap gap-2">
-        <ButtonLink href="/" variant="secondary" size="sm">
+        <ButtonLink href="/check" variant="secondary" size="sm">
           <Upload aria-hidden="true" className="size-4" />
           잘리지 않은 원본으로 다시 검사
         </ButtonLink>
@@ -202,7 +202,7 @@ export function ResultView({ view }: { view: CheckView }) {
           </Block>
           <Block title="할 수 있는 일">
             <div className="flex flex-wrap gap-2">
-              <ButtonLink href="/" size="md">
+              <ButtonLink href="/check" size="md">
                 <Upload aria-hidden="true" className="size-4" />
                 원본 파일로 다시 검사
               </ButtonLink>

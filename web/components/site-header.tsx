@@ -14,13 +14,13 @@ export function SiteHeader() {
         </Link>
         <ul className="flex items-center gap-1 text-sm">
           <li>
-            <Link href="/" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
-              검사
+            <Link href="/cases" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
+              공개 사례
             </Link>
           </li>
           <li>
-            <Link href="/cases" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
-              공개 사례
+            <Link href="/check" className="whitespace-nowrap rounded-md px-2 py-2 text-text no-underline hover:bg-surface md:px-3">
+              검사
             </Link>
           </li>
           <li>

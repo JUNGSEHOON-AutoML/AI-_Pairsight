@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { CaseCard, FilterBar, TopicNav, type Filters } from "@/components/public-cases";
 import { VERDICTS, type Verdict } from "@/lib/domain";
 import { listPublicCases } from "@/lib/public/store";
@@ -29,6 +30,7 @@ async function Dashboard({ searchParams }: { searchParams: PageProps<"/cases">["
             운영자가 검토하고 승인한 결과만 보여줘요. 제목은 사실 문장이고, 가짜이거나 확인되지 않은 이미지는 흐리게 보여줘요. 유포 경로는
             제보로 받은 정보이고, 플랫폼에서 수집하지 않아요.
           </p>
+          <Link href="/how-it-works" className="w-fit text-sm">선정·게재 기준 보기</Link>
         </div>
         <FilterBar filters={filters} />
         <p className="text-sm" aria-live="polite">사례 {cases.length}건</p>

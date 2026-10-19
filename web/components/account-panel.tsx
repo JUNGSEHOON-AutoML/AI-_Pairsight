@@ -19,7 +19,7 @@ export function AccountPanel() {
     return (
       <Panel role="status" className="p-4 md:p-5">
         <p>{done === "delete" ? "계정과 검사 기록, 올린 이미지를 모두 삭제했어요." : "로그아웃했어요."}</p>
-        <ButtonLink href="/" variant="secondary" className="mt-3 w-fit">
+        <ButtonLink href="/check" variant="secondary" className="mt-3 w-fit">
           검사하러 가기
         </ButtonLink>
       </Panel>
