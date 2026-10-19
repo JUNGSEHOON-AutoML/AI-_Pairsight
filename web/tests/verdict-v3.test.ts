@@ -24,7 +24,7 @@ const TRUSTED = "https://wire.example.test/2019/03/market";
 const OTHER = "https://blog.example.test/post";
 
 const cmp = (o: Partial<ComparisonResult> = {}): ComparisonResult => ({
-  matched: true, pHashDistance: 4, alignedDistance: 4, alignmentScore: 0.97, changedFraction: 0.06,
+  matched: true, sceneSimilarity: 0.9, sceneRejected: false, pHashDistance: 4, alignedDistance: 4, alignmentScore: 0.97, changedFraction: 0.06,
   crop: null, flip: null, colorAdjusted: false, heatmap: "", referenceHash: "ref",
   diffRegions: [{ x: 0.7, y: 0.7, w: 0.2, h: 0.2, note: "" }], ...o,
 });

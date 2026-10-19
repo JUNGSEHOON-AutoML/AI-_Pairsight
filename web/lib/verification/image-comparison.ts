@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import type { ComparisonResult, ImageComparisonProvider } from "./types";
 import { DECODE_LIMIT, hash } from "./retention";
+import { defaultSceneGate, type SceneGate } from "./scene-gate";
 
 const SIZE = 96;
 type Raster = { data: Uint8Array; width: number; height: number };
@@ -61,6 +62,8 @@ function correlation(a: Raster, b: Raster, t: Transform) {
  */
 export class LocalImageComparisonProvider implements ImageComparisonProvider {
   readonly name = "local-phash-diff-v1";
+  /** sceneGate null = pixel gates only (measurement scripts and tests that isolate the pixel step). */
+  constructor(private sceneGate: SceneGate | null = defaultSceneGate()) {}
   async compare(input: Uint8Array, reference: Uint8Array, signal: AbortSignal): Promise<ComparisonResult> {
     signal.throwIfAborted();
     const [a, b] = await Promise.all([raster(input), raster(reference)]);
@@ -78,7 +81,11 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
     }
     const pHashDistance = hammingDistance(rasterHash(a), rasterHash(b));
     const alignedDistance = hammingDistance(rasterHash(a), rasterHash(b, best));
-    const matched = score >= .9 && alignedDistance <= 18;
+    const aligned = score >= .9 && alignedDistance <= 18;
+    // Pixel alignment accepts lookalikes (same backdrop, same layout). The scene gate can only exclude.
+    const sceneSimilarity = aligned && this.sceneGate ? await this.sceneGate.similarity(input, reference, signal) : null;
+    const sceneRejected = sceneSimilarity !== null && sceneSimilarity < this.sceneGate!.minSimilarity;
+    const matched = aligned && !sceneRejected;
     const channels = [0, 1, 2].map(c => {
       let ma = 0, mb = 0, va = 0, vb = 0;
       for (let i = 0; i < 4096; i++) {
@@ -136,7 +143,7 @@ export class LocalImageComparisonProvider implements ImageComparisonProvider {
     const rgba = Buffer.from(grid.flatMap(v => [230, 40, 30, Math.round(Math.min(1, v * 4) * 255)]));
     const heatmap = "data:image/png;base64," + (await sharp(rgba, { raw: { width: 16, height: 16, channels: 4 } })
       .resize(128, 128, { kernel: "nearest" }).png().toBuffer()).toString("base64");
-    return { matched, pHashDistance, alignedDistance, alignmentScore: score,
+    return { matched, sceneSimilarity, sceneRejected, pHashDistance, alignedDistance, alignmentScore: score,
       changedFraction: changed / 4096, crop: best.w < .99 || best.h < .99 ? { x: best.x, y: best.y, w: best.w, h: best.h } : null,
       flip: best.flip, colorAdjusted, diffRegions: diffRegions.slice(0, 8), heatmap, referenceHash: hash(reference) };
   }

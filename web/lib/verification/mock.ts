@@ -33,6 +33,17 @@ export const mockTransport: Transport = async (raw, signal) => {
   const knownHosts = ["news.example.test", "photos.example.test", "archive.example.test", "blog.example.test", "factcheck.example.test", "assets.example.test", "demo.pairsight.test", "wire.example.test", "gov.example.test"];
   if (!knownHosts.includes(url.hostname)) throw new ProviderError("url_blocked", "mock mode accepts only fixture pages");
   if (url.pathname === "/robots.txt") return response(200, "User-agent: *\nAllow: /\n", "text/plain");
+  // Scene fixtures (public/fixtures/scenes): one dated page per scene on the fictional trusted wire.
+  const scene = url.pathname.match(/^\/scenes\/([a-z_]+?)(\.png)?$/);
+  if (scene && url.hostname === "assets.example.test" && scene[2]) {
+    try { return response(200, new Uint8Array(await readFile(join(root, "scenes", scene[1] + ".png"))), "image/png"); }
+    catch { return response(404, "not found"); }
+  }
+  if (scene && url.hostname === "wire.example.test" && !scene[2]) {
+    const img = "https://assets.example.test/scenes/" + scene[1] + ".png";
+    return response(200, '<html><head><title>모의 기사</title><meta property="article:published_time" content="2020-05-01"><meta property="og:image" content="' + img +
+      '"></head><body><article><figure><img src="' + img + '"><figcaption>2020-05-01 촬영 예시. 가상의 페이지다.</figcaption></figure></article></body></html>');
+  }
   if (url.hostname === "assets.example.test" || url.pathname.startsWith("/img/")) {
     const s = url.pathname.split("/").pop()!.replace(/\.png$/, "") as Scenario;
     if (!SCENARIOS.includes(s)) return response(404, "not found");

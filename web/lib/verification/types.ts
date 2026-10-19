@@ -88,6 +88,10 @@ export interface CandidateVerificationProvider {
 }
 export interface ComparisonResult {
   matched: boolean;
+  /** Embedding similarity, computed only when pixel alignment passed; an exclusion gate, never evidence. */
+  sceneSimilarity: number | null;
+  sceneRejected: boolean; // aligned by pixels, but the scene gate says it is a different scene
+
   pHashDistance: number;
   alignedDistance: number;
   alignmentScore: number;

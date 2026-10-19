@@ -54,11 +54,13 @@ export async function collectEvidence(input: NormalizedInput, p: Providers, sign
   }
   await progress("verification", "done");
   await progress("provenance", "running");
+  let sceneRejected = 0;
   for (const v of verified) {
     for (const image of v.images) {
       let comparison;
       try { comparison = await p.images.compare(input.image.bytes, image.bytes, signal); }
       catch { signal.throwIfAborted(); comparisonComplete = false; warnings.push("후보 이미지 하나를 비교하지 못했어요."); continue; }
+      if (comparison.sceneRejected) sceneRejected++;
       if (!comparison.matched) continue;
       const dates = selectDate(v.dates.map(d => ({ ...d, imageBound: d.imageBound && d.imageHash === comparison.referenceHash })));
       const match: SourceMatch = {
@@ -82,6 +84,8 @@ export async function collectEvidence(input: NormalizedInput, p: Providers, sign
       break; // at most one retained match/thumbnail per candidate page
     }
   }
+  // A completed comparison that says "different scene" is a result, not a failure: verification stays complete.
+  if (sceneRejected) warnings.push(`픽셀 배치는 비슷하지만 다른 장면으로 보이는 후보 ${sceneRejected}개는 원본 비교에서 뺐어요.`);
   matches.sort((a, b) => (a.firstSeenAt ?? "9999").localeCompare(b.firstSeenAt ?? "9999"));
   if (matches[0]) matches[0].isEarliest = true; // earliest among this request's verified candidates, never an original-author claim
   if (input.thumbnailOnly) warnings.push("보관된 썸네일로 재검사했어요. 원본 파일의 EXIF·C2PA는 다시 확인할 수 없어요.");
