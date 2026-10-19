@@ -62,6 +62,15 @@ describe("v3 편집 조작: trusted earlier original with local differences", ()
     expect(r.headlineFinding?.sourceUrl).toBe(TRUSTED);
   });
 
+  it("counterexample: the uploaded picture itself is on a trusted page, so a difference to another trusted photo is not an edit", () => {
+    const exactOnTrusted = match("https://wire.example.test/2021/04/old-house", { firstSeenAt: "2021-04-12" }, same);
+    const similarOtherTrusted = match(TRUSTED, { firstSeenAt: "2018-07-21" });
+    const r = run([exactOnTrusted, similarOtherTrusted]);
+    expect(r.verdict).toBe("inconclusive");
+    expect(r.missing).toContain("신뢰 출처 두 곳의 사진이 서로 달라요");
+    expect(r.headlineFinding?.kind).toBe("trusted_same");
+  });
+
   it("is strong when a copy of the uploaded image is dated later than the trusted page", () => {
     const copy = match(OTHER, { firstSeenAt: "2024-01-01" }, same);
     expect(run([match(TRUSTED), copy])).toMatchObject({ verdict: "edited", strength: "strong" });

@@ -138,10 +138,11 @@ export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], tr
   };
   const closest = (pred: (m: SourceMatch, t: TrustedSource | null) => boolean) =>
     matches.filter((m) => pred(m, findTrustedSource(m.url, trusted))).sort(closestFirst)[0];
-  const m1 = closest((m, t) => !!t && localDifference(m));
-  if (m1) return build(m1, "trusted_difference");
+  // The uploaded picture itself on a trusted page is the strongest single observation.
   const m2 = pick((m, t) => !!t && sameImage(m));
   if (m2) return build(m2, "trusted_same");
+  const m1 = closest((m, t) => !!t && localDifference(m));
+  if (m1) return build(m1, "trusted_difference");
   const m3 = closest((m) => localDifference(m));
   if (m3) return build(m3, "difference");
   const m4 = pick((m) => sameImage(m) && !!m.firstSeenAt);
@@ -165,6 +166,10 @@ const closestFirst = (a: SourceMatch, b: SourceMatch) =>
 
 /** 편집 조작 (v3): a trusted page published earlier shows the same scene with local differences. */
 function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList) {
+  // If a trusted source publishes the uploaded picture itself, unchanged, a difference to some *other* trusted
+  // photo of a similar scene is not evidence of an edit (found with the RSS index: an exact 2021 copy plus a
+  // similar 2018 scene was called 편집 조작).
+  if (matches.some((m) => findTrustedSource(m.url, trusted) && sameImage(m))) return null;
   // Copies of the uploaded image (same picture) with a page date: if one predates the trusted page,
   // the trusted outlet may have published the altered version later, so the rule must not fire.
   // Any date counts for blocking (even a weak search discovery or a disputed one): blocking is the cautious side.
@@ -263,6 +268,7 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
     if (trustedSame.length && !claimedDate) missing.push("알려준 촬영 날짜가 없어 신뢰 출처 게시일과 비교하지 못했어요");
     else if (trustedSame.some((m) => pageDate(m)) && claimedDate) missing.push(`신뢰 출처 게시일이 알려준 날짜보다 ${TRUSTED_RULES.contextMinDays}일 이상 이르지 않아요`);
     if (matches.some((m) => findTrustedSource(m.url, trusted) && (m.dateDisputed || (aligned(m) && !pageDate(m))))) missing.push("신뢰 출처 페이지의 게시일을 확정하지 못했어요");
+    if (trustedSame.length && matches.some((m) => findTrustedSource(m.url, trusted) && localDifference(m))) missing.push("신뢰 출처 두 곳의 사진이 서로 달라요");
   }
   return done("inconclusive", "결론을 내릴 만큼 강한 근거가 없어요.", "none", null, [...new Set(missing)]);
 }
