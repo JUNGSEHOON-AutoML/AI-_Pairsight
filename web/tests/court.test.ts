@@ -130,6 +130,12 @@ describe("변호인의 '같은 장소 다른 시점' 의심", () => {
     expect(disputed.finalVerdict).toBe("inconclusive"); // the same doubt counts once the page date is actually disputed
   });
 
+  it("회귀(qwen2.5:7b): 변호인이 조작 쪽 논리를 대안으로 내면 폐기된다", async () => {
+    const { r } = await court({ defense: () => ({ alternatives: [{ kind: "possible_manipulation", text: "오른쪽 아래가 달라 조작 가능성이 있어요.", cite: ["E1"] }] }) });
+    expect(r.defense).toEqual([]);
+    expect(r.rejected[0]).toMatchObject({ role: "변호인", reason: "'편집 조작' 판정에 대한 대안 설명이 아님(조작 가능성이 남아 있음)" });
+  });
+
   it("관계없는 카드(EXIF)만 인용한 의심은 합리적 의심이 아니다", async () => {
     const { r } = await court({ defense: () => sameTimeDefense, juror: () => ({ decision: "inconclusive", doubt: { kind: "same_place_different_time", text: "EXIF가 없어요.", cite: ["E2"] } }) }, "edited", undefined, nearLimit);
     expect(r.finalVerdict).toBe("edited");

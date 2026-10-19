@@ -122,24 +122,49 @@ export function euro(word: string) {
   return `${word}${jong === 0 || jong === 8 ? "로" : "으로"}`;
 }
 
+/** Seats in the hearing, for observers (the control room). */
+export type Seat = "judge" | "prosecutor" | "defense" | "juror-1" | "juror-2" | "juror-3" | "clerk";
+export type SeatStatus = "idle" | "working" | "speaking";
+/**
+ * What an observer may see: who is thinking or speaking, a summary of what *passed validation*, and the cards it
+ * cites. Rejected statements appear only as a count and reasons, never as accepted speech.
+ */
+export interface CourtEvent {
+  seq: number;
+  at: string;
+  seat: Seat;
+  status: SeatStatus;
+  summary: string | null;
+  cite: string[];
+  rejected: number;
+}
+export interface CourtOptions { onEvent?: (e: CourtEvent) => void }
+
 export interface CourtInput {
   verdict: VerdictResult;
   evidence: Evidence[];
   matches: SourceMatch[];
 }
 
-export async function runCourt(input: CourtInput, llm: LLMProvider, signal: AbortSignal): Promise<CourtRecord> {
+export async function runCourt(input: CourtInput, llm: LLMProvider, signal: AbortSignal, options: CourtOptions = {}): Promise<CourtRecord> {
   const docket = buildDocket(input.verdict, input.evidence, input.matches);
   const judge = input.verdict.verdict;
+  let seq = 0;
+  const emit = (seat: Seat, status: SeatStatus, summary: string | null = null, cite: string[] = [], rejected = 0) =>
+    options.onEvent?.({ seq: ++seq, at: new Date().toISOString(), seat, status, summary, cite, rejected });
+  const cardsOf = (xs: { cite: string[] }[]) => [...new Set(xs.flatMap((x) => x.cite))];
   const record: CourtRecord = {
     opened: judge !== "inconclusive", skipReason: null, judgeVerdict: judge, finalVerdict: judge, downgraded: false, docket,
     prosecution: [], defense: [], jurors: [], rejected: [], incomplete: [], judgment: null as unknown as Judgment, llmCalls: 0, llmMs: 0,
   };
+  emit("judge", "speaking", `규칙 v3 판정: ${VERDICT_LABEL[judge]}. ${sanitize(input.verdict.reason)}`, [], 0);
   if (judge === "inconclusive") {
     record.skipReason = "판사가 이미 판단 불가를 냈어요. 공방을 열지 않아요.";
     record.judgment = writeJudgment(record, null);
+    emit("judge", "idle", record.skipReason);
     return record;
   }
+  emit("judge", "idle");
 
   const ask = async (role: AgentRole, system: string, extra: Record<string, unknown> = {}): Promise<Record<string, unknown> | null> => {
     record.llmCalls++;
@@ -157,28 +182,49 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
   };
 
   // Prosecutor: the case for "fake", from cards only.
+  emit("prosecutor", "working");
   const p = await ask("prosecutor", SYSTEM.prosecutor);
+  const rejectedBefore = () => record.rejected.length;
+  let mark = rejectedBefore();
   for (const raw of (Array.isArray(p?.claims) ? p.claims : []).slice(0, 4)) {
     const c = checkStatement(raw, docket);
     if (c.ok) record.prosecution.push({ id: `P${record.prosecution.length + 1}`, ...c.value });
     else record.rejected.push({ role: "검사", text: sanitize((raw as { text?: unknown })?.text), reason: c.reason });
   }
 
+  emit("prosecutor", "speaking", record.prosecution.map((a) => `${a.id} ${a.text}`).join(" / ") || "인용 근거가 있는 주장 없음", cardsOf(record.prosecution), rejectedBefore() - mark);
+  emit("prosecutor", "idle");
+
   // Defense: alternative explanations, each tied to cards that can carry it.
+  emit("defense", "working");
+  mark = rejectedBefore();
   const d = await ask("defense", SYSTEM.defense);
   for (const raw of (Array.isArray(d?.alternatives) ? d.alternatives : []).slice(0, 4)) {
     const kind = (raw as { kind?: unknown })?.kind as DefenseKind;
     const c = checkStatement(raw, docket);
     if (!c.ok) { record.rejected.push({ role: "변호인", text: sanitize((raw as { text?: unknown })?.text), reason: c.reason }); continue; }
     if (!DEFENSE_KINDS.includes(kind)) { record.rejected.push({ role: "변호인", text: c.value.text, reason: "알 수 없는 대안 종류" }); continue; }
+    // The defense argues *against* the judge's verdict; with qwen2.5:7b it once filed "possible_manipulation"
+    // (an argument for 편집 조작) as its alternative. Only doubts that can lower this verdict, or "other", count.
+    if (kind !== "other" && !DOUBTS_FOR[judge as Exclude<Verdict, "inconclusive">].includes(kind as DoubtKind)) {
+      record.rejected.push({ role: "변호인", text: c.value.text, reason: `'${VERDICT_LABEL[judge]}' 판정에 대한 대안 설명이 아님(${DOUBT_LABEL[kind]})` });
+      continue;
+    }
     if (!relevant(kind, c.value.cite, docket)) { record.rejected.push({ role: "변호인", text: c.value.text, reason: noSignal(kind) }); continue; }
     record.defense.push({ id: `D${record.defense.length + 1}`, kind, ...c.value });
   }
+
+  emit("defense", "speaking", record.defense.map((a) => `${a.id} ${DOUBT_LABEL[a.kind]}: ${a.text}`).join(" / ") || "인용 근거가 있는 대안 없음", cardsOf(record.defense), rejectedBefore() - mark);
+  emit("defense", "idle");
 
   // Jurors: three perspectives, each may only uphold or lower to 판단 불가 with a cited, relevant doubt.
   const allowed = DOUBTS_FOR[judge];
   for (const [i, perspective] of JUROR_PERSPECTIVES.entries()) {
     const role = `배심원 ${i + 1}`;
+    const seat = `juror-${i + 1}` as Seat;
+    emit(seat, "working");
+    mark = rejectedBefore();
+    try {
     const j = await ask("juror", `${SYSTEM.juror}\n${perspective}`, { arguments: { prosecution: record.prosecution, defense: record.defense } });
     const result: JurorResult = { juror: i + 1, perspective, decision: "uphold", doubt: null };
     record.jurors.push(result);
@@ -204,18 +250,29 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
     const adopts = typeof raw?.adopts === "string" && record.defense.some((a) => a.id === raw.adopts) ? raw.adopts : null;
     result.decision = "inconclusive";
     result.doubt = { ...c.value, kind, adopts };
+    } finally {
+      const r = record.jurors[i];
+      if (r) {
+        emit(seat, "speaking", r.doubt ? `판단 불가로 낮춤 · ${DOUBT_LABEL[r.doubt.kind]}: ${r.doubt.text}` : "판정 유지", r.doubt?.cite ?? [], rejectedBefore() - mark);
+        emit(seat, "idle");
+      }
+    }
   }
 
   // Beyond reasonable doubt: one juror's cited, relevant doubt is enough to withhold a decisive verdict.
   record.downgraded = record.jurors.some((j) => j.decision === "inconclusive");
   record.finalVerdict = record.downgraded ? "inconclusive" : judge;
 
+  emit("clerk", "working");
   const k = await ask("clerk", SYSTEM.clerk, {
     finalVerdict: record.finalVerdict,
     arguments: { prosecution: record.prosecution, defense: record.defense },
     jurorDoubts: record.jurors.flatMap((j) => (j.doubt ? [j.doubt] : [])),
   });
+  mark = rejectedBefore();
   record.judgment = writeJudgment(record, k);
+  emit("clerk", "speaking", record.judgment.headline, record.judgment.keyEvidence, rejectedBefore() - mark);
+  emit("clerk", "idle");
   return record;
 }
 
