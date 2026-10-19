@@ -2,16 +2,13 @@
 // It only proposes candidates; every candidate is still fetched and compared before any verdict.
 import { DEFAULT_INDEX_PATH, IndexStore } from "../index/store";
 import { hashDistance, imageHashes } from "../index/hashes";
+import { indexLabel } from "../index/label";
 import type { ImageInput, ReverseSearchProvider, ReverseSearchResult } from "./types";
 
 export const INDEX_MAX_DISTANCE = 10; // of 63 bits; deliberately loose, the comparison step is the real gate
 export const INDEX_MAX_CANDIDATES = 5;
 
-/** "신뢰 출처 RSS 색인 (2026-10-19부터 수집)": also the hook the result screen uses for the coverage note. */
-export function indexLabel(startedAt: string | null) {
-  return startedAt ? `신뢰 출처 RSS 색인 (${startedAt.slice(0, 10)}부터 수집)` : "신뢰 출처 RSS 색인 (아직 수집 전)";
-}
-export const isIndexLabel = (label: string) => label.startsWith("신뢰 출처 RSS 색인");
+export { indexLabel, isIndexLabel } from "../index/label";
 
 export class RssIndexReverseSearch implements ReverseSearchProvider {
   readonly name = "rss-index";

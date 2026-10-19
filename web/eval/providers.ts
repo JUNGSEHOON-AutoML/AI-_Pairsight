@@ -66,7 +66,12 @@ export interface ProviderChoice {
 }
 
 export function pickProviders(opts: { forceMock: boolean; index?: ReverseSearchProvider | null }): ProviderChoice {
-  if (opts.forceMock) return { mode: "mock", providers: createMockProviders(), defaultSource: "mock-search" };
+  if (opts.forceMock) {
+    const providers = createMockProviders();
+    return opts.index
+      ? { mode: "mock", providers: { ...providers, reverseSearch: opts.index }, defaultSource: "index" }
+      : { mode: "mock", providers, defaultSource: "mock-search" };
+  }
   if (opts.index) return { mode: "live", providers: liveProviders(opts.index), defaultSource: "index" };
   const key = process.env.GOOGLE_VISION_API_KEY?.trim();
   if (key) return { mode: "live", providers: liveProviders(new GoogleVisionReverseSearch(key)), defaultSource: "vision" };

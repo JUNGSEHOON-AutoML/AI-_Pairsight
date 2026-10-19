@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { FixtureList } from "@/components/fixture-list";
-import { isMock } from "@/lib/providers";
+import { usesMockTransport } from "@/lib/providers";
 import { SCENARIO_NOTE, SCENARIOS } from "@/lib/providers/mock/fixtures";
 
 // Dev-only: one click per mock scenario, so every result screen can be reached and screenshotted.
 export default function FixturesPage() {
-  if (!isMock) notFound();
+  if (!usesMockTransport) notFound();
   return (
     <div className="grid gap-4">
       <h1 className="text-xl">모의 데이터 샘플</h1>

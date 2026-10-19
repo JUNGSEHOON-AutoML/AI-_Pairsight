@@ -1,7 +1,7 @@
 // Evaluation harness: real cases → the app's pipeline → v2 and v3 verdicts → report.
 // Usage (from web/):
 //   npm run eval -- --cases eval/cases.jsonl --validate        check the file and images, no network
-//   npm run eval -- --cases eval/cases.jsonl [--out dir] [--mock] [--limit 20] [--only id]
+//   npm run eval -- --cases eval/cases.jsonl [--out dir] [--mock] [--index [path]] [--limit 20] [--only id]
 // Live mode needs GOOGLE_VISION_API_KEY in the environment; without it the harness runs on mock providers.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, isAbsolute, join, resolve } from "node:path";
@@ -10,6 +10,8 @@ import { decideVerdict, sortEvidence } from "../lib/verdict";
 import { collectEvidence, compareContext } from "../lib/verification/engine";
 import { EMPTY_TRUSTED_LIST, findTrustedSource, loadTrustedSources, type TrustedSourceList } from "../lib/verification/trusted-sources";
 import { type EvalCase, LABELS, type Label, parseCases } from "./metrics";
+import { DEFAULT_INDEX_PATH } from "../lib/index/store";
+import { RssIndexReverseSearch } from "../lib/providers/rss-index";
 import { CANDIDATE_SOURCE_LABEL, pickProviders, type ProviderChoice, providersForCase } from "./providers";
 import { buildReport, type CaseResult } from "./report";
 
@@ -31,6 +33,7 @@ function args() {
     validate: a.includes("--validate"),
     limit: get("--limit") ? Number(get("--limit")) : Infinity,
     only: get("--only"),
+    index: a.includes("--index") ? (get("--index")?.startsWith("--") || !get("--index") ? DEFAULT_INDEX_PATH() : get("--index")!) : null,
   };
 }
 
@@ -114,7 +117,8 @@ async function main() {
   }
 
   const selected = cases.filter((c) => !opt.only || c.id === opt.only).slice(0, opt.limit);
-  const choice = pickProviders({ forceMock: opt.forceMock });
+  if (opt.index && !existsSync(opt.index)) console.log(`[eval] 색인 파일이 없어요: ${opt.index} (npm run index:collect 로 먼저 수집). 색인 후보 없이 진행해요.`);
+  const choice = pickProviders({ forceMock: opt.forceMock, index: opt.index ? new RssIndexReverseSearch(opt.index) : null });
   const { mode } = choice;
   const trusted = loadTrustedSources({ includeMock: mode === "mock" });
   console.log(`[eval] mode=${mode} cases=${selected.length} trusted=${trusted.version} 기본 후보 출처=${CANDIDATE_SOURCE_LABEL[choice.defaultSource]}`);

@@ -2,8 +2,9 @@
 import { MockReverseSearchProvider } from "./mock";
 import type { ReverseSearchProvider, UrlImageExtractor } from "./types";
 import type { InputProvider, FactCheckProvider, TemporaryImageProvider, CandidateVerificationProvider, ImageComparisonProvider, ProvenanceProvider, ContextComparisonProvider, VerdictProvider, PageFetchProvider } from "../verification/types";
-import { NormalizingInputProvider, OnDemandCandidateVerifier } from "../verification/adapters";
-import { OnDemandPageProvider, PolicyFetch } from "../verification/page-fetch";
+import { LocalMetadataProvider, NormalizingInputProvider, OnDemandCandidateVerifier } from "../verification/adapters";
+import { guardedTransport, OnDemandPageProvider, PolicyFetch, type Transport } from "../verification/page-fetch";
+import { RssIndexReverseSearch } from "./rss-index";
 import { LocalImageComparisonProvider } from "../verification/image-comparison";
 import { MockArchiveDateProvider, MockContextProvider, MockFactCheckProvider, MockProvenanceProvider, MockTemporaryImageProvider, mockTransport } from "../verification/mock";
 import { decideVerdict } from "../verdict";
@@ -11,6 +12,10 @@ import { loadTrustedSources } from "../verification/trusted-sources";
 
 export const providerMode = process.env.PAIRSIGHT_PROVIDERS ?? "mock";
 export const isMock = providerMode === "mock";
+// free: no paid search. RSS hash index for discovery + the real fetch/compare pipeline.
+// PAIRSIGHT_TRANSPORT=mock runs it on fixture feeds and pages with no network (demos, screenshots).
+export const isFree = providerMode === "free";
+export const usesMockTransport = isMock || (isFree && process.env.PAIRSIGHT_TRANSPORT === "mock");
 export interface Providers {
   input: InputProvider;
   reverseSearch: ReverseSearchProvider;
@@ -40,8 +45,28 @@ export function createMockProviders(): Providers {
       fetchImage: (url, signal) => pages.image(url, signal) },
   };
 }
+/** No paid APIs: candidates from the RSS index, then the same policy-gated fetch, comparison and v3 verdict. */
+export function createFreeProviders(transport: Transport, indexPath?: string): Providers {
+  const pages = new OnDemandPageProvider(new PolicyFetch(transport, transport === mockTransport ? 0 : 1000));
+  const demo = transport === mockTransport;
+  return {
+    input: new NormalizingInputProvider(pages),
+    reverseSearch: new RssIndexReverseSearch(indexPath),
+    factCheck: { name: "팩트체크 (미연결)", search: async () => [] },
+    temporaryImages: { name: "none", publish: async () => ({ url: "https://unused.invalid/none", expiresAt: new Date().toISOString(), revoke: async () => {} }) },
+    candidates: new OnDemandCandidateVerifier(pages, { name: "no-archive", firstCapture: async () => null }),
+    images: new LocalImageComparisonProvider(),
+    provenance: new LocalMetadataProvider(),
+    context: { name: "no-context", compare: async () => [] },
+    verdict: { name: "evidence-rules-v3", decide: (i) => decideVerdict({ ...i, trustedSources: i.trustedSources ?? loadTrustedSources({ includeMock: demo }) }) },
+    pages,
+    urls: { name: "policy-gated-pages", listImages: async (url, signal) => (await pages.page(url, signal)).images, fetchImage: (url, signal) => pages.image(url, signal) },
+  };
+}
+
 let cached: Providers | null = null;
 export function getProviders(): Providers {
-  if (!isMock) throw new Error("Only PAIRSIGHT_PROVIDERS=mock is implemented.");
+  if (isFree) return cached ??= createFreeProviders(usesMockTransport ? mockTransport : guardedTransport);
+  if (!isMock) throw new Error("PAIRSIGHT_PROVIDERS must be mock or free.");
   return cached ??= createMockProviders();
 }

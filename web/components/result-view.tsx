@@ -5,6 +5,7 @@
 import { Bell, Check as CheckIcon, ChevronDown, RefreshCw, SearchX, Share2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { INDEX_COVERAGE_NOTE, isIndexLabel } from "@/lib/index/label";
 import { COPY, EVIDENCE_LABEL, OUTCOME_LABEL } from "@/lib/domain";
 import type { CheckView } from "@/lib/view";
 import { CompareView } from "./compare-view";
@@ -56,6 +57,9 @@ export function NoSourceBlock({ view }: { view: CheckView }) {
       </ul>
       {view.searchedProviders.length > 0 && (
         <p className="mt-3 text-sm text-text-muted">검색한 곳: {view.searchedProviders.join(" · ")}</p>
+      )}
+      {view.searchedProviders.some(isIndexLabel) && (
+        <p className="mt-1 text-sm text-text-muted">{INDEX_COVERAGE_NOTE}</p>
       )}
       <div className="mt-3 flex flex-wrap gap-2">
         <ButtonLink href="/" variant="secondary" size="sm">
@@ -154,6 +158,7 @@ export function ResultView({ view }: { view: CheckView }) {
     <div className="text-sm text-text-muted">
       <p>{COPY.disclaimer}</p>
       {view.inputType === "url" && <p className="mt-1">{COPY.urlScope}</p>}
+      {view.searchedProviders.some(isIndexLabel) && <p className="mt-1">{INDEX_COVERAGE_NOTE}</p>}
     </div>
   );
 

@@ -4,8 +4,11 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { dirname, join } from "node:path";
 import type { ImageHashes } from "./hashes";
 
+/** v2 = full + multi-scale crop hashes. Lines in an older format are skipped (re-collect to rebuild). */
+export const INDEX_FORMAT = 2;
+
 export interface IndexEntry {
-  v: 1;
+  v: 2;
   sourceId: string;
   articleUrl: string;
   publishedAt: string | null;
@@ -33,6 +36,7 @@ const metaPath = (indexPath: string) => indexPath.replace(/\.jsonl$/, "") + ".me
 export class IndexStore {
   private entries: IndexEntry[] = [];
   private keys = new Set<string>();
+  skippedOldFormat = 0; // lines from an older index format, ignored
   meta: IndexMeta = { startedAt: null, runs: {} };
 
   constructor(readonly path: string) {
@@ -40,7 +44,10 @@ export class IndexStore {
       for (const line of readFileSync(path, "utf8").split("\n")) {
         if (!line.trim()) continue;
         const e = JSON.parse(line) as IndexEntry;
-        if (e.v !== 1) continue;
+        if (e.v !== INDEX_FORMAT || !Array.isArray(e.hashes?.crops)) {
+          this.skippedOldFormat++;
+          continue;
+        }
         this.entries.push(e);
         this.keys.add(this.key(e));
       }

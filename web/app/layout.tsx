@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
-import { isMock } from "@/lib/providers";
+import { usesMockTransport } from "@/lib/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           본문으로 건너뛰기
         </a>
-        {isMock && (
+        {usesMockTransport && (
           <p role="note" className="bg-verdict-edited-bg px-4 py-2 text-center text-sm text-text">
             <strong className="text-verdict-edited">개발용 모의 데이터</strong> · 지금 결과는 실제 검색이 아니라 고정된
             예시 데이터로 만들어져요.

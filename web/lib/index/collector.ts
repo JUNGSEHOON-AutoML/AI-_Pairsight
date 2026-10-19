@@ -68,7 +68,7 @@ export async function collectFeeds(opts: CollectOptions): Promise<CollectReport>
               continue;
             }
             const hashes = await imageHashes(img.bytes); // bytes are dropped after this line
-            if (store.add({ v: 1, sourceId: source.id, articleUrl: item.link, publishedAt: item.publishedAt, imageUrl: item.imageUrl, hashes, collectedAt: now().toISOString() })) run.added++;
+            if (store.add({ v: 2, sourceId: source.id, articleUrl: item.link, publishedAt: item.publishedAt, imageUrl: item.imageUrl, hashes, collectedAt: now().toISOString() })) run.added++;
           } catch (e) {
             signal.throwIfAborted();
             if (e instanceof ProviderError && BLOCKING.test(e.message)) throw e;

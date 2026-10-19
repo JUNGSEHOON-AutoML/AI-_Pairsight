@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -92,6 +92,16 @@ describe("collector", () => {
     expect(readFileSync(path, "utf8")).not.toMatch(/blog\.example\.test|본문|PNG|base64/);
     expect((await collectMock(path)).runs[0].added).toBe(0);
     expect(new IndexStore(path).meta.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("skips index lines in an older format instead of failing the search", async () => {
+    const path = tmpIndex();
+    writeFileSync(path, JSON.stringify({ v: 1, sourceId: "x", articleUrl: "https://wire.example.test/a", imageUrl: "https://assets.example.test/a.png", hashes: { full: "0".repeat(16), center: "0".repeat(16) } }) + "\n");
+    const store = new IndexStore(path);
+    expect(store.all()).toEqual([]);
+    expect(store.skippedOldFormat).toBe(1);
+    const r = await new RssIndexReverseSearch(path).search({ bytes: new Uint8Array(await readFile("public/fixtures/inputs/no_source.png")), mime: "image/png", sha256: "x", publicUrl: null }, AbortSignal.timeout(10000));
+    expect(r.candidates).toEqual([]);
   });
 
   it("stops the source when robots disallows, without fetching any image", async () => {
