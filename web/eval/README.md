@@ -101,6 +101,12 @@ cd ~/ai-verify/web && cp eval/cases.template.jsonl eval/cases.jsonl && mkdir -p 
 cd ~/ai-verify/web && PATH=$HOME/.local/node/bin:$PATH npm run -s eval -- --cases eval/cases.jsonl --out eval/out/pilot-1
 ```
 
+- 색인도 함께 쓰려면 `--index`를 붙입니다(경로 생략 시 `web/.data/rss-index.jsonl`). 색인 파일이 없으면 경고만 하고 계속합니다. `sourceUrls`가 있는 사례는 여전히 수동 후보를 씁니다.
+
+  ```bash
+  cd ~/ai-verify/web && PATH=$HOME/.local/node/bin:$PATH npm run -s eval -- --cases eval/cases.jsonl --index --out eval/out/pilot-1-index
+  ```
+
 - 결과는 `eval/out/pilot-1/report.md`(보고서)와 `results.json`(사례별 상세, 혼동 행렬)에 남습니다.
 - 사례는 하나씩 처리하고, 같은 사이트는 1초 간격으로 가져옵니다(robots의 Crawl-delay가 더 길면 그 값을 따릅니다).
 
