@@ -104,6 +104,14 @@ export class PolicyFetch {
   }
 }
 
+export function instructionSignals(text: string): string[] {
+  const signals: string[] = [];
+  if (/ignore\s+(all\s+)?(previous|prior|above)\s+instructions|이전\s*(지시|명령).*무시/i.test(text)) signals.push("override_instructions");
+  if (/system\s*prompt|시스템\s*프롬프트|<\/?(system|assistant)>/i.test(text)) signals.push("impersonated_system");
+  if (/(api.?key|비밀.?키|환경.?변수).{0,40}(send|reveal|출력|전송)/i.test(text)) signals.push("secret_exfiltration_instruction");
+  return signals;
+}
+
 export function extractArticle(html: string, url: string): Article {
   const $ = load(html);
   if ($('[class*="paywall"], [id*="paywall"], #challenge-form, #cf-challenge-running').length ||
@@ -158,7 +166,7 @@ export function extractArticle(html: string, url: string): Article {
   if (images.length === 0) $("img").each((_, el) => push($(el).attr("src"), $(el).attr("alt") ?? "", "body"));
   // Only a single combined 200-character excerpt is retained; raw HTML/body is discarded.
   const text = excerpt(images.map(i => i.caption).filter(Boolean).join(" ") || title);
-  return { url, title, excerpt: text, images, dates, ...(review ? { review } : {}) };
+  return { url, title, excerpt: text, images, dates, securitySignals: instructionSignals($.text()), ...(review ? { review } : {}) };
 }
 
 export class OnDemandPageProvider implements PageFetchProvider {

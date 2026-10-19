@@ -10,7 +10,7 @@ export const input = (): CaseInput => ({ origin: "manual", claim: "검증 요청
   thumbnail: null, imageHash: null, provenance: [], candidateUrls: [], channels: [], topic: null, contentFlags: [], rightsConfirmed: false, reportedBy: "operator-one" });
 const workers = (calls: string[] = []): Workers => Object.fromEntries(DEPARTMENTS.map(d => [d.id, { department: d.id, run: async () => {
   calls.push(d.id); return { data: { result: d.id }, waitForApproval: d.id === "trust_safety" };
-} }])) as Workers;
+} }])) as unknown as Workers;
 
 describe("single case through nine departments", () => {
   it("accumulates sections in order, stops for a human, then resumes without repeating earlier work", async () => {

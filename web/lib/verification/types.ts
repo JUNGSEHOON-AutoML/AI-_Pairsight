@@ -24,6 +24,7 @@ export interface Article {
   excerpt: string; // all retained source text, <= 200 Unicode code points per page
   images: (PageImage & { role: "representative" | "body"; caption: string })[];
   dates: DateRecord[];
+  securitySignals?: string[]; // code labels only; raw HTML is discarded
   review?: { claim: string; rating: string; publisher: string; claimComplete: boolean };
 }
 export interface RawInput {
