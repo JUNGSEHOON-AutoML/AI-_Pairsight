@@ -10,3 +10,7 @@ web/eval/out/
 replica/clone-screens/stage3/
 replica/clone-screens/stage4/
 replica/clone-screens/stage4-account/
+
+# Human-readable private case records and editor briefings
+/newsroom/cases/
+/newsroom/briefings/

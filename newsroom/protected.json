@@ -1,0 +1,8 @@
+{
+  "web/lib/newsroom/harness/validator.ts": "c5510bd43574ee4ba5bd2b61a2b07654846f5afa45d09e8fd29a727cf1d49c48",
+  "web/lib/newsroom/harness/guard.ts": "9f5e361b2125af60139a37b894760d6084eacd949dbd4220f5e74faa46c776af",
+  "web/lib/verdict.ts": "b4b102c7fa2c7bf1093b89baaa6b4241a7ac575cb216507a8fca8c83926735d5",
+  "web/lib/newsroom/review.ts": "a366ea2284532a1adf2e8c8ab08ca7f5387be012dfa0e9ae6b4426442699cec6",
+  "web/lib/court/court.ts": "c0bcb3acba3e4dc14000915fa82769caf44c4eeb66155f190ac8bf3d573dd52c",
+  "web/tests/newsroom-harness.test.ts": "6fd4e85d5bbc266a34f2fc4e80e45364db7aab6eabcb4fa7158638b7c32f43bd"
+}
