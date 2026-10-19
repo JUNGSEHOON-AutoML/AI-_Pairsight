@@ -93,3 +93,60 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 - **Fixed 2026-10-19 (follow-up):** v2's image-bound-date rule and the fact-check image match also required only <2% change; both now also require no diff region, so a lightly edited copy is no longer called 맥락 조작 or matched to a fact-check. Counterexample tests added.
 - Eval harness: `web/eval/` (README there). Mock smoke run on the example cases: 9/9 as expected, 판단 불가 55.6% → 33.3%, 반대 판정 0. No real-case run yet (needs a Vision key and cases).
 - Tests: 148 (adds v3 rules + counterexamples 41, fixtures v2/v3 3, eval + Vision adapter 7). Screens: `clone-screens/stage3-v3/`, 1280 and 390, 0 console errors.
+
+---
+
+# 인수인계 (2026-10-19, 커밋 9bb7553 기준)
+
+## 현재 상태
+
+- **앱:** `web/` (Next.js 16.4.2, App Router, Tailwind 4, TypeScript). `PAIRSIGHT_PROVIDERS=mock`만 동작합니다. 외부 서비스(Supabase, Google, TinEye, Wayback, LLM)는 앱에 연결되어 있지 않습니다.
+- **데이터:** 메모리 저장소(`web/lib/data/store.ts`). `replica/schema.sql`의 규칙을 따르지만 아직 DB에 연결하지 않았습니다.
+- **판정:** v3 = v2 + 신뢰 출처 규칙(`web/lib/verdict.ts`).
+  - 결과에 `rule`, `strength`, `headlineFinding`을 담습니다.
+  - "같은 사진"은 v2·v3 모두 **변화 2% 미만 + 차이 영역 0개**일 때만 인정합니다. 팩트체크 이미지 일치도 같은 기준입니다.
+  - 신뢰 출처 목록: `web/config/trusted-sources.json`. 편집 검토 전 초안입니다. 기준은 `replica/trusted-sources.md`에 있습니다.
+- **평가 하네스:** `web/eval/`. 라벨은 사실 4종만 받고, 결과를 맞힘 / 판단 불가 / 오판으로 나눕니다. 오판은 정답과 다른 확정 판정 전부입니다.
+  - 파일럿 30건 템플릿과 절차: `web/eval/README.md`
+  - Google Vision 어댑터는 하네스에서만 씁니다(`web/lib/providers/google-vision.ts`).
+  - 키가 없으면 mock으로 돕니다.
+- **검증:** 테스트 155개 통과(`PAIRSIGHT_MOCK_DELAY_MS=0 npm test`), `tsc`·`eslint`·`next build` 통과. 하네스 mock 실행으로 예시 8건 확인(맞힘 6, 판단 불가 2, 오판 0).
+- **문서:**
+  - 판정·파이프라인 사양: `replica/verification-pipeline.md` (§5-1이 v3)
+  - 용어: `replica/design/glossary.md`
+  - 화면·문구: `replica/design/components.md`
+  - 화면 캡처: `replica/clone-screens/stage1`, `stage2`, `stage3-v3`. `stage3`, `stage4`, `stage4-account`는 추적 해제(.gitignore).
+
+## 미완료
+
+1. **실제 사례 파일럿 미실행.** 사용자가 Vision 키와 30건(`web/eval/cases.jsonl` + `web/eval/images/`)을 준비하는 중입니다. 지금까지 측정은 모두 합성 fixture 기준이라, 실제 사진에 대한 정확도는 알 수 없습니다.
+2. **실제 모드에서 판정할 수 없는 것:**
+   - C2PA·워터마크 검증, 팩트체크 검색(임시 공개 URL 필요), Wayback 날짜는 하네스에 연결하지 않았습니다.
+   - 그래서 진짜 확인과 AI 생성은 실제 모드에서 거의 판단 불가가 됩니다.
+3. **신뢰 출처 목록 검토.** 각 도메인을 그 조직이 실제로 소유하는지 확인하지 않았습니다. 독자 제보 영역 처리 정책도 정해지지 않았습니다.
+4. **TinEye 약관**(상업 이용·캐싱·표시)과 **한국 언론 이미지 커버리지**를 확인하지 못했습니다.
+5. **Supabase:**
+   - 스키마 변경이 필요합니다: `checks.claimed_date`·`claim_text`·`context_*`, `analyses` run 번호, 새 evidence kind와 `strength`, v2 검증 필드.
+   - RLS 테스트 33개를 Supabase 클라우드 개발 프로젝트에서 다시 돌려야 합니다. 지금까지는 Supabase를 흉내 낸 Postgres 17에서만 통과했습니다.
+6. **앱 기능:** 실제 메일 발송, 공유 링크(S10), 재검사 알림, 결제(범위 밖).
+7. **fixture 표시 흠:** `trusted_edited` 이미지 안 라벨이 "SAMPLE no-source"이고, mock 기사 캡션이 모든 시나리오에서 같은 문장입니다. 판정에는 영향이 없습니다.
+
+## 다음 작업
+
+1. 사용자가 `cases.jsonl`을 채우면 아래 순서로 진행합니다.
+   - `npm run -s eval -- --cases eval/cases.jsonl --validate`
+   - 그다음 `--only <id>`로 한 건을 확인하고 전체를 실행합니다.
+   - 보고서의 **오판 섹션부터** 사례별로 원인을 분류합니다. 분류는 규칙, 비교 임계값, 날짜 메타데이터, 신뢰 출처 목록, 검색 커버리지로 나눕니다.
+2. 오판 원인에 따라 `TRUSTED_RULES` 임계값이나 규칙을 고칩니다. 각 수정에는 그 사례를 재현하는 반례 테스트를 먼저 추가합니다(`web/tests/verdict-v3.test.ts`).
+3. 파일럿에서 신뢰 출처 후보가 0인 사례가 많으면, 목록보다 검색 커버리지 문제입니다. TinEye 비교 또는 Naver 키워드 보조 검색을 검토합니다(`replica/reverse-search-comparison.md`).
+4. 그 뒤 Supabase 스키마 마이그레이션과 RLS 재검증을 진행합니다(미완료 5번).
+
+## 이 서버에서 작업할 때
+
+- **Node 경로:** Node는 `~/.local/node/bin`에 있습니다(시스템 Node는 v16). 명령 앞에 `PATH=$HOME/.local/node/bin:$PATH`를 붙여 주세요.
+- **Docker:** 권한이 없어서 Supabase 로컬을 띄울 수 없습니다.
+- **Postgres:** conda로 스크래치 경로에 설치해서 썼습니다(`replica/tests/rls_test.py` 참고).
+- **curl과 쿠키:** 프로덕션 빌드에서는 세션 쿠키가 `Secure`라서, curl은 http로 쿠키를 저장하지 않습니다. API 확인은 Playwright(브라우저)로 하세요.
+- **vitest 출력:** 통과한 테스트의 `console.log`는 숨겨집니다. 측정값이 필요하면 파일로 쓰거나 일부러 실패시켜 출력하세요(예: `FIXTURE_TABLE_OUT=경로 npx vitest run tests/fixtures-v2-v3.test.ts`).
+- **zsh 구분선:** 명령 안에 `====` 같은 줄을 넣으면 zsh가 명령으로 해석합니다.
+- **커밋 방식:** 작업 단위마다 로컬 커밋하고 push는 하지 않습니다. 작업을 마칠 때 이 파일에 인수인계를 추가합니다.
