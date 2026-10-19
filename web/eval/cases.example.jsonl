@@ -1,11 +1,11 @@
 // Example cases using the committed synthetic fixtures, so the harness can be smoke-tested in --mock mode.
-// Real cases go in eval/cases.jsonl with images under eval/images/ (both images and outputs are git-ignored).
+// Labels are facts only: authentic / ai_generated / edited / miscontextualized. 판단 불가 is never a label.
+// Real cases go in eval/cases.jsonl with images under eval/images/ (images and outputs are git-ignored).
 {"id":"fx-authentic","image":"../public/fixtures/inputs/authentic.png","claim":"","claimedDate":null,"label":"authentic","source":"fixture: mock C2PA camera capture"}
 {"id":"fx-ai","image":"../public/fixtures/inputs/ai_generated.png","claim":"","claimedDate":null,"label":"ai_generated","source":"fixture: mock C2PA ai_generated"}
 {"id":"fx-edited","image":"../public/fixtures/inputs/edited.png","claim":"","claimedDate":null,"label":"edited","source":"fixture: mock C2PA ai_edited"}
-{"id":"fx-context-factcheck","image":"../public/fixtures/inputs/miscontextualized.png","claim":"이 사진은 2026년 서울 홍수 현장이다.","claimedDate":null,"label":"miscontextualized","source":"fixture: fictional fact-check"}
-{"id":"fx-inconclusive","image":"../public/fixtures/inputs/inconclusive.png","claim":"","claimedDate":null,"label":"inconclusive","source":"fixture"}
-{"id":"fx-nosource","image":"../public/fixtures/inputs/no_source.png","claim":"","claimedDate":null,"label":"inconclusive","source":"fixture"}
+{"id":"fx-context-factcheck","image":"../public/fixtures/inputs/miscontextualized.png","claim":"이 사진은 2026년 서울 홍수 현장이다.","claimedDate":"2026-10-01","label":"miscontextualized","source":"fixture: fictional fact-check"}
 {"id":"fx-trusted-edited","image":"../public/fixtures/inputs/trusted_edited.png","claim":"","claimedDate":null,"label":"edited","source":"fixture: fictional trusted wire, local change"}
 {"id":"fx-trusted-context","image":"../public/fixtures/inputs/trusted_context.png","claim":"2026년 10월 공원 집회 사진","claimedDate":"2026-10-01","label":"miscontextualized","source":"fixture: fictional trusted wire, 2018 page"}
-{"id":"fx-trusted-context-nodate","image":"../public/fixtures/inputs/trusted_context.png","claim":"","claimedDate":null,"label":"miscontextualized","source":"fixture: same picture but the user gave no date"}
+{"id":"fx-trusted-context-nodate","image":"../public/fixtures/inputs/trusted_context.png","claim":"","claimedDate":null,"label":"miscontextualized","source":"fixture: same picture, but the post gives no date → expected 판단 불가 (missed)"}
+{"id":"fx-unrelated-as-authentic","image":"../public/fixtures/inputs/no_source.png","claim":"","claimedDate":null,"label":"authentic","source":"fixture: nothing found anywhere → expected 판단 불가 (missed)"}
