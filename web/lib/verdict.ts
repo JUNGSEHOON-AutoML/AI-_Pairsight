@@ -11,11 +11,11 @@ import {
   STRENGTH_RANK,
   type Verdict,
 } from "./domain";
-import { passesLocalEditGuard } from "./verification/edit-locality";
+import { LOCAL_EDIT_LIMITS, passesLocalEditGuard, type EditLocalityLimits } from "./verification/edit-locality";
 import { EMPTY_TRUSTED_LIST, findTrustedSource, type TrustedSource, type TrustedSourceList } from "./verification/trusted-sources";
 
-// Cache schema version: old comparisons have no outside-residual/area/count measurements.
-export const PIPELINE_VERSION = 4;
+// Real-photo calibration revision; do not reuse earlier comparison-policy caches.
+export const PIPELINE_VERSION = 5;
 
 /**
  * v3 thresholds. Experimental, not calibrated on real news photos (replica/eval/ is where they get measured).
@@ -80,15 +80,15 @@ const aligned = (m: SourceMatch) =>
 // "Same picture" needs no differing region at all. A small edit can change under 2% of the grid and still
 // leave a region (the sign/person fixture changes 1.8%), so the fraction alone must not decide sameness.
 // Benign transforms (JPEG, crop, flip, colour) produce no regions (measured in tests/image-comparison.test.ts).
-const sameImage = (m: SourceMatch) =>
-  aligned(m) && passesLocalEditGuard(m.comparison!) && m.comparison!.diffRegions.length === 0 && m.comparison!.changedFraction < TRUSTED_RULES.sameImageMaxChange;
-const localDifference = (m: SourceMatch) =>
-  aligned(m) && passesLocalEditGuard(m.comparison!) && m.comparison!.diffRegions.length > 0 && m.comparison!.changedFraction <= TRUSTED_RULES.maxLocalChange;
+const sameImage = (m: SourceMatch, limits: EditLocalityLimits) =>
+  aligned(m) && passesLocalEditGuard(m.comparison!, limits) && m.comparison!.diffRegions.length === 0 && m.comparison!.changedFraction < TRUSTED_RULES.sameImageMaxChange;
+const localDifference = (m: SourceMatch, limits: EditLocalityLimits) =>
+  aligned(m) && passesLocalEditGuard(m.comparison!, limits) && m.comparison!.diffRegions.length > 0 && m.comparison!.changedFraction <= TRUSTED_RULES.maxLocalChange;
 
 // Keep these candidates visible as ambiguity; do not silently discard them as "no source".
-const possibleDifferentPhoto = (m: SourceMatch) => aligned(m) && !passesLocalEditGuard(m.comparison!);
-const ambiguousComparison = (matches: SourceMatch[]) =>
-  !matches.some(m => sameImage(m) || localDifference(m)) && matches.some(possibleDifferentPhoto);
+const possibleDifferentPhoto = (m: SourceMatch, limits: EditLocalityLimits) => aligned(m) && !passesLocalEditGuard(m.comparison!, limits);
+const ambiguousComparison = (matches: SourceMatch[], limits: EditLocalityLimits) =>
+  !matches.some(m => sameImage(m, limits) || localDifference(m, limits)) && matches.some(m => possibleDifferentPhoto(m, limits));
 
 /** A page publication date or an archive capture, never a search engine's discovery date on its own. */
 function pageDate(m: SourceMatch): { value: string; source: DateSource; imageBound: boolean } | null {
@@ -124,9 +124,9 @@ const DATE_WORD: Record<DateSource, string> = {
   tineye_crawl: "검색 발견",
 };
 
-export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], trusted: TrustedSourceList): HeadlineFinding | null {
-  if (ambiguousComparison(matches)) {
-    const m = matches.filter(possibleDifferentPhoto).sort(closestFirst)[0];
+export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], trusted: TrustedSourceList, limits: EditLocalityLimits = LOCAL_EDIT_LIMITS): HeadlineFinding | null {
+  if (ambiguousComparison(matches, limits)) {
+    const m = matches.filter(m => possibleDifferentPhoto(m, limits)).sort(closestFirst)[0];
     const t = findTrustedSource(m.url, trusted);
     return { kind: "possible_different_photo", text: "같은 장소의 다른 사진일 수 있어요", sourceUrl: m.url,
       sourceName: t?.name ?? hostOf(m.url), trusted: !!t, date: day(m.firstSeenAt), dateSource: m.firstSeenSource };
@@ -152,17 +152,17 @@ export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], tr
   const closest = (pred: (m: SourceMatch, t: TrustedSource | null) => boolean) =>
     matches.filter((m) => pred(m, findTrustedSource(m.url, trusted))).sort(closestFirst)[0];
   // The uploaded picture itself on a trusted page is the strongest single observation.
-  const m2 = pick((m, t) => !!t && sameImage(m));
+  const m2 = pick((m, t) => !!t && sameImage(m, limits));
   if (m2) return build(m2, "trusted_same");
-  const m1 = closest((m, t) => !!t && localDifference(m));
+  const m1 = closest((m, t) => !!t && localDifference(m, limits));
   if (m1) return build(m1, "trusted_difference");
-  const m3 = closest((m) => localDifference(m));
+  const m3 = closest((m) => localDifference(m, limits));
   if (m3) return build(m3, "difference");
-  const m4 = pick((m) => sameImage(m) && !!m.firstSeenAt);
+  const m4 = pick((m) => sameImage(m, limits) && !!m.firstSeenAt);
   if (m4) return build(m4, "same");
   const c2pa = evidence.find((e) => e.kind === "c2pa" && strong(e) && e.details.signatureValid === true);
   if (c2pa) return { kind: "provenance", text: "파일에 서명된 출처 기록(C2PA)이 있어요.", sourceUrl: null, sourceName: null, trusted: false, date: null, dateSource: null };
-  const m5 = pick((m) => sameImage(m));
+  const m5 = pick((m) => sameImage(m, limits));
   if (m5) return build(m5, "same");
   return null;
 }
@@ -178,18 +178,18 @@ const closestFirst = (a: SourceMatch, b: SourceMatch) =>
   b.comparison!.alignmentScore - a.comparison!.alignmentScore;
 
 /** 편집 조작 (v3): a trusted page published earlier shows the same scene with local differences. */
-function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList) {
+function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList, limits: EditLocalityLimits) {
   // If a trusted source publishes the uploaded picture itself, unchanged, a difference to some *other* trusted
   // photo of a similar scene is not evidence of an edit (found with the RSS index: an exact 2021 copy plus a
   // similar 2018 scene was called 편집 조작).
-  if (matches.some((m) => findTrustedSource(m.url, trusted) && sameImage(m))) return null;
+  if (matches.some((m) => findTrustedSource(m.url, trusted) && sameImage(m, limits))) return null;
   // Copies of the uploaded image (same picture) with a page date: if one predates the trusted page,
   // the trusted outlet may have published the altered version later, so the rule must not fire.
   // Any date counts for blocking (even a weak search discovery or a disputed one): blocking is the cautious side.
-  const copies = matches.filter(sameImage);
+  const copies = matches.filter(m => sameImage(m, limits));
   const copyDates = copies.map((m) => day(m.firstSeenAt)).filter((d): d is string => !!d).sort();
   const laterCopy = copies.some((m) => pageDate(m)); // a dated copy that is *later* than the trusted page (checked below)
-  for (const m of matches.filter(localDifference).sort(closestFirst)) {
+  for (const m of matches.filter(m => localDifference(m, limits)).sort(closestFirst)) {
     const t = findTrustedSource(m.url, trusted);
     if (!t) continue;
     const d = pageDate(m);
@@ -201,11 +201,11 @@ function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList) {
 }
 
 /** 맥락 조작 (v3): the trusted page shows this same picture, dated ≥30 days before the claimed date. */
-function trustedContext(matches: SourceMatch[], trusted: TrustedSourceList, claimedDate: string | null) {
+function trustedContext(matches: SourceMatch[], trusted: TrustedSourceList, claimedDate: string | null, limits: EditLocalityLimits) {
   if (!claimedDate) return null;
   for (const m of [...matches].sort((a, b) => (a.firstSeenAt ?? "9999").localeCompare(b.firstSeenAt ?? "9999"))) {
     const t = findTrustedSource(m.url, trusted);
-    if (!t || !sameImage(m)) continue;
+    if (!t || !sameImage(m, limits)) continue;
     const d = pageDate(m);
     if (!d) continue;
     const gap = daysBetween(d.value, claimedDate);
@@ -215,10 +215,11 @@ function trustedContext(matches: SourceMatch[], trusted: TrustedSourceList, clai
   return null;
 }
 
-export function decideVerdict(input: VerdictInput): VerdictResult {
+// Optional limits are for the offline calibration runner; API handlers always use the versioned defaults.
+export function decideVerdict(input: VerdictInput, limits: EditLocalityLimits = LOCAL_EDIT_LIMITS): VerdictResult {
   const { evidence, matches, claimedDate, claimText } = input;
   const trusted = input.trustedSources ?? EMPTY_TRUSTED_LIST;
-  const headline = headlineFinding(evidence, matches, trusted);
+  const headline = headlineFinding(evidence, matches, trusted, limits);
   const done = (verdict: Verdict, reason: string, rule: string, strength: Strength | null, missing: string[] = []): VerdictResult =>
     ({ verdict, reason, missing, rule, strength, headlineFinding: headline });
 
@@ -235,11 +236,11 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
   if (generated) return done("ai_generated", "검증된 출처 기록이나 워터마크가 AI 생성을 가리켜요.", "v2.ai_generated", "strong");
   // Shared by v2 and v3: a scene match is not proof that the file is derived from that photo.
   // A separately qualifying candidate can still establish the edit; a rejected candidate cannot.
-  if (ambiguousComparison(matches)) return done("inconclusive", "차이 영역 밖의 잔차·영역 면적·개수 조건을 충족하지 못해 편집으로 단정할 수 없어요.",
+  if (ambiguousComparison(matches, limits)) return done("inconclusive", "차이 영역 밖의 잔차·영역 면적·개수 조건을 충족하지 못해 편집으로 단정할 수 없어요.",
     "comparison.possible_different_photo", null, ["같은 사진을 편집한 것인지, 같은 장소에서 따로 찍은 사진인지 확인하지 못했어요"]);
   if (edited) return done("edited", "검증된 출처 기록에 AI 편집 이력이 있어요. 차이 영역은 보조 근거예요.", "v2.ai_edited", "strong");
   // Same picture = under 2% changed AND no differing region (a small edit can stay under 2%; see sameImage above).
-  const checked = matches.filter(sameImage);
+  const checked = matches.filter(m => sameImage(m, limits));
   const fact = evidence.find(e => e.kind === "fact_check" && strong(e) && manip(e) &&
     e.details.claimMatched === true && e.details.imageMatched === true && e.details.pageVerified === true && e.details.assessment === "miscontextualized");
   if (fact) return done("miscontextualized", "같은 이미지·같은 주장에 대해, 확인한 팩트체크 원문이 맥락 불일치를 설명해요.", "v2.fact_check", "strong");
@@ -249,7 +250,7 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
   if (dated) return done("miscontextualized", `이 이미지가 ${dated.value.slice(0, 10)}에 이미 있었다는 기록이 있어, 알려준 촬영 날짜와 맞지 않아요. (${DATE_SOURCE_LABEL[dated.source]})`, "v2.image_bound_date", "strong");
 
   // ---- v3: trusted-source rules (only when a trusted list is supplied) ----
-  const te = trusted.sources.length ? trustedEdited(matches, trusted) : null;
+  const te = trusted.sources.length ? trustedEdited(matches, trusted, limits) : null;
   if (te && capture) {
     return done("inconclusive", "서명된 촬영 기록과 신뢰 출처 사진의 차이가 서로 맞지 않아요. 추가 검증이 필요해요.", "v3.capture_vs_trusted_conflict", null,
       ["출처 기록과 신뢰 출처 비교 결과가 충돌해요"]);
@@ -260,7 +261,7 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
       `신뢰 출처 원본과 달라요: ${te.t.name}에 ${te.d.value} ${DATE_WORD[te.d.source]}된 사진과 비교하면 ${describeRegions(te.m.comparison!.diffRegions)}${n > 1 ? ` 등 ${n}군데가` : " 영역이"} 달라요. 누가 왜 바꿨는지는 판단하지 않아요.`,
       "v3.trusted_edited", te.strength);
   }
-  const tc = trusted.sources.length ? trustedContext(matches, trusted, claimedDate) : null;
+  const tc = trusted.sources.length ? trustedContext(matches, trusted, claimedDate, limits) : null;
   if (tc) {
     return done("miscontextualized",
       `신뢰 출처(${tc.t.name}) 페이지에 같은 사진이 ${tc.d.value} ${DATE_WORD[tc.d.source]} 날짜로 있어요. 알려준 날짜(${claimedDate})보다 ${formatGap(tc.gap)} 일러서 맞지 않아요.`,
@@ -281,11 +282,11 @@ export function decideVerdict(input: VerdictInput): VerdictResult {
   if (pixelDifferences) missing.push("차이의 원인과 편집 이력을 확인하지 못했어요");
   // v3 hints: say what would have let a trusted-source rule decide.
   if (trusted.sources.length) {
-    const trustedSame = matches.filter((m) => findTrustedSource(m.url, trusted) && sameImage(m));
+    const trustedSame = matches.filter((m) => findTrustedSource(m.url, trusted) && sameImage(m, limits));
     if (trustedSame.length && !claimedDate) missing.push("알려준 촬영 날짜가 없어 신뢰 출처 게시일과 비교하지 못했어요");
     else if (trustedSame.some((m) => pageDate(m)) && claimedDate) missing.push(`신뢰 출처 게시일이 알려준 날짜보다 ${TRUSTED_RULES.contextMinDays}일 이상 이르지 않아요`);
     if (matches.some((m) => findTrustedSource(m.url, trusted) && (m.dateDisputed || (aligned(m) && !pageDate(m))))) missing.push("신뢰 출처 페이지의 게시일을 확정하지 못했어요");
-    if (trustedSame.length && matches.some((m) => findTrustedSource(m.url, trusted) && localDifference(m))) missing.push("신뢰 출처 두 곳의 사진이 서로 달라요");
+    if (trustedSame.length && matches.some((m) => findTrustedSource(m.url, trusted) && localDifference(m, limits))) missing.push("신뢰 출처 두 곳의 사진이 서로 달라요");
   }
   return done("inconclusive", "결론을 내릴 만큼 강한 근거가 없어요.", "none", null, [...new Set(missing)]);
 }

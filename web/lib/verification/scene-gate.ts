@@ -17,7 +17,8 @@ export const SCENE_MODEL = {
 } as const;
 
 /** Cosine similarity of the CLS embeddings below which a candidate is treated as a different scene.
- * Derived from scripts/measure-scene-gate.ts; see replica/verification-pipeline.md §3-1 for the numbers. */
+ * Synthetic scene calibration plus the real-photo pilot (no evidence to change .76).
+ * See replica/verification-pipeline.md §3-1 and §3-3; real-photo results are scoped, not universal. */
 export const SCENE_MIN_SIMILARITY = 0.76;
 
 export interface SceneGate {

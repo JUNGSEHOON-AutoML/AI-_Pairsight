@@ -1,0 +1,10 @@
+{
+  "minSceneSimilarity": 0.76,
+  "maxOutsideResidual": 0.02,
+  "maxDiffAreaFraction": 0.08,
+  "maxDiffRegionCount": 2,
+  "calibrationSha256": "a9ee168418e907777d0bc09b26d843ba8ac1392986f5594118a299bc3509818e",
+  "protocolSha256": "f7d0223be88a546593e88966c590a13d2d5c023889e1c0fe19ab9ef0a26e2903",
+  "validationUsedForSelection": false,
+  "promotionRule": "Validation: zero false edited verdicts; zero temporal same-photo acceptances; edit misses no greater than baseline; JPEG acceptance no lower than baseline; existing synthetic regressions pass. Otherwise retain baseline, do not retune on this holdout."
+}

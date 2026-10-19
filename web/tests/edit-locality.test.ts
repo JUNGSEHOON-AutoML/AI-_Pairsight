@@ -39,7 +39,7 @@ describe("local edit guard", () => {
     }
   });
   it("accepts boundary values, with ordinary edit evidence still required", () => {
-    const c = synthetic({ outsideResidual: .008, diffAreaFraction: .08, diffRegionCount: 2 });
+    const c = synthetic({ outsideResidual: LOCAL_EDIT_LIMITS.maxOutsideResidual, diffAreaFraction: LOCAL_EDIT_LIMITS.maxDiffAreaFraction, diffRegionCount: LOCAL_EDIT_LIMITS.maxDiffRegionCount });
     expect(passesLocalEditGuard(c)).toBe(true); expect(decide(c).rule).toBe("v3.trusted_edited");
     expect(decide(c, [], EMPTY_TRUSTED_LIST).verdict).toBe("inconclusive");
   });
@@ -51,7 +51,7 @@ describe("local edit guard", () => {
     expect(decide(c).verdict).toBe("inconclusive");
   });
   it("does not call a diffuse change with no boxes the same picture for v2 date rules", () => {
-    const c = synthetic({ diffRegions: [], diffRegionCount: 0, diffAreaFraction: 0, changedFraction: .005, outsideResidual: .02 });
+    const c = synthetic({ diffRegions: [], diffRegionCount: 0, diffAreaFraction: 0, changedFraction: .005, outsideResidual: LOCAL_EDIT_LIMITS.maxOutsideResidual + .01 });
     const m = asMatch(c); m.dates = [{ value: "2020-01-01", source: "wayback_first_capture", sourceUrl: m.url, confidence: "medium", meaning: "page_capture", imageBound: true, imageHash: "reference" }];
     expect(decideVerdict({ matches: [m], evidence: [], trustedSources: EMPTY_TRUSTED_LIST, claimedDate: "2026-01-01" }).verdict).toBe("inconclusive");
   });

@@ -1,0 +1,875 @@
+{
+  "baseline": {
+    "profile": {
+      "minSceneSimilarity": 0.76,
+      "maxOutsideResidual": 0.008,
+      "maxDiffAreaFraction": 0.08,
+      "maxDiffRegionCount": 2
+    },
+    "summary": {
+      "recompressed": {
+        "n": 72,
+        "edited": 0,
+        "inconclusive": 72,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 56,
+        "pixelAligned": 72,
+        "sceneRejected": 0,
+        "localityRejected": 16
+      },
+      "edited": {
+        "n": 54,
+        "edited": 37,
+        "inconclusive": 17,
+        "falseEdits": 0,
+        "misses": 17,
+        "falseEditRate": 0,
+        "missRate": 0.3148148148148148,
+        "samePhotoAccepted": 0,
+        "pixelAligned": 49,
+        "sceneRejected": 0,
+        "localityRejected": 12
+      },
+      "temporal": {
+        "n": 36,
+        "edited": 0,
+        "inconclusive": 36,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 0,
+        "pixelAligned": 12,
+        "sceneRejected": 2,
+        "localityRejected": 10
+      },
+      "unrelated": {
+        "n": 30,
+        "edited": 0,
+        "inconclusive": 30,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 0,
+        "pixelAligned": 0,
+        "sceneRejected": 0,
+        "localityRejected": 0
+      }
+    }
+  },
+  "chosen": {
+    "profile": {
+      "minSceneSimilarity": 0.76,
+      "maxOutsideResidual": 0.02,
+      "maxDiffAreaFraction": 0.08,
+      "maxDiffRegionCount": 2
+    },
+    "summary": {
+      "recompressed": {
+        "n": 72,
+        "edited": 0,
+        "inconclusive": 72,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 72,
+        "pixelAligned": 72,
+        "sceneRejected": 0,
+        "localityRejected": 0
+      },
+      "edited": {
+        "n": 54,
+        "edited": 46,
+        "inconclusive": 8,
+        "falseEdits": 0,
+        "misses": 8,
+        "falseEditRate": 0,
+        "missRate": 0.14814814814814814,
+        "samePhotoAccepted": 2,
+        "pixelAligned": 49,
+        "sceneRejected": 0,
+        "localityRejected": 1
+      },
+      "temporal": {
+        "n": 36,
+        "edited": 0,
+        "inconclusive": 36,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 0,
+        "pixelAligned": 12,
+        "sceneRejected": 2,
+        "localityRejected": 10
+      },
+      "unrelated": {
+        "n": 30,
+        "edited": 0,
+        "inconclusive": 30,
+        "falseEdits": 0,
+        "misses": 0,
+        "falseEditRate": 0,
+        "missRate": null,
+        "samePhotoAccepted": 0,
+        "pixelAligned": 0,
+        "sceneRejected": 0,
+        "localityRejected": 0
+      }
+    }
+  },
+  "feasibleProfiles": 400,
+  "topProfiles": [
+    {
+      "profile": {
+        "minSceneSimilarity": 0.76,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 2
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.74,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 2
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 0,
+          "localityRejected": 12
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.78,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 2
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.8,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 2
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 4,
+          "localityRejected": 8
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.76,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 3
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.74,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 3
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 0,
+          "localityRejected": 12
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.78,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 3
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.8,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 3
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 4,
+          "localityRejected": 8
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.76,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 4
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.74,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 4
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 0,
+          "localityRejected": 12
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.78,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 4
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 2,
+          "localityRejected": 10
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    },
+    {
+      "profile": {
+        "minSceneSimilarity": 0.8,
+        "maxOutsideResidual": 0.02,
+        "maxDiffAreaFraction": 0.08,
+        "maxDiffRegionCount": 4
+      },
+      "summary": {
+        "recompressed": {
+          "n": 72,
+          "edited": 0,
+          "inconclusive": 72,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 72,
+          "pixelAligned": 72,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        },
+        "edited": {
+          "n": 54,
+          "edited": 46,
+          "inconclusive": 8,
+          "falseEdits": 0,
+          "misses": 8,
+          "falseEditRate": 0,
+          "missRate": 0.14814814814814814,
+          "samePhotoAccepted": 2,
+          "pixelAligned": 49,
+          "sceneRejected": 0,
+          "localityRejected": 1
+        },
+        "temporal": {
+          "n": 36,
+          "edited": 0,
+          "inconclusive": 36,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 12,
+          "sceneRejected": 4,
+          "localityRejected": 8
+        },
+        "unrelated": {
+          "n": 30,
+          "edited": 0,
+          "inconclusive": 30,
+          "falseEdits": 0,
+          "misses": 0,
+          "falseEditRate": 0,
+          "missRate": null,
+          "samePhotoAccepted": 0,
+          "pixelAligned": 0,
+          "sceneRejected": 0,
+          "localityRejected": 0
+        }
+      }
+    }
+  ],
+  "calibrationSha256": "a9ee168418e907777d0bc09b26d843ba8ac1392986f5594118a299bc3509818e",
+  "protocolSha256": "f7d0223be88a546593e88966c590a13d2d5c023889e1c0fe19ab9ef0a26e2903"
+}

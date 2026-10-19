@@ -12,10 +12,10 @@ const rows = [];
 const mutations = [
   ['baseline', original],
   ['all guards disabled', original.replace('  return typeof residual', '  return true;\n  return typeof residual')],
-  ['residual guard disabled', original.replace('residual <= LOCAL_EDIT_LIMITS.maxOutsideResidual', 'true')],
-  ['area guard disabled', original.replace('area <= LOCAL_EDIT_LIMITS.maxDiffAreaFraction', 'true')],
-  ['count guard disabled', original.replace('count <= LOCAL_EDIT_LIMITS.maxDiffRegionCount', 'true')],
-  ['v2 ambiguity veto removed', original, verdict.replace('if (ambiguousComparison(matches)) return done', 'if (false) return done')],
+  ['residual guard disabled', original.replace('residual <= limits.maxOutsideResidual', 'true')],
+  ['area guard disabled', original.replace('area <= limits.maxDiffAreaFraction', 'true')],
+  ['count guard disabled', original.replace('count <= limits.maxDiffRegionCount', 'true')],
+  ['v2 ambiguity veto removed', original, verdict.replace('if (ambiguousComparison(matches, limits)) return done', 'if (false) return done')],
 ];
 try {
   for (const p of ['lib', 'config', 'tests/fixtures', 'public/fixtures']) await cp(join(root, p), join(scratch, p), { recursive: true });
