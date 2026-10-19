@@ -55,7 +55,6 @@ export function IntakeForm() {
       <Field title="카테고리"><select name="topic" className={fieldClass}><option value="">자동 분류</option>{TOPICS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}</select></Field></div>
     <fieldset><legend className="mb-2 text-sm font-semibold">제보된 유포 경로</legend><div className="flex flex-wrap gap-4">{CHANNELS.map(c => <label key={c.id}><input type="checkbox" name="channels" value={c.id} /> {c.label}</label>)}</div></fieldset>
     <fieldset className="grid gap-2"><legend className="mb-2 text-sm font-semibold">추가 검토 사항</legend>{[["sexual_content","성적 콘텐츠 (이미지를 보관하거나 표시하지 않음)"],["minor","미성년자 관련"],["private_person","사생활·사인 관련"],["graphic_violence","잔혹한 장면"],["election_period","선거 기간 관련"]].map(([v,l]) => <label key={v}><input type="checkbox" name="flags" value={v} /> {l}</label>)}</fieldset>
-    <label><input type="checkbox" name="externalSearch" value="yes" /> 512px 썸네일을 SerpApi·Google Lens에 보내 후보 검색 허용 (검색 자료 31일 보관 가능)</label>
     <label><input type="checkbox" name="rights" value="yes" /> 이미지의 공개 이용 권한을 확인했어요.</label>
     {error && <p role="alert">{error}</p>}<Button loading={busy} type="submit">사건 접수하고 확인 시작</Button>
   </form>;

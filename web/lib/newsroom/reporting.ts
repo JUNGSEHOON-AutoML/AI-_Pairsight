@@ -26,6 +26,8 @@ export function deskFacts(c:CaseRecord,desk:Desk):ReportFact[] {
  if(desk==="research"){
   const o=c.sections.osint?.data as OsintData|undefined,a=c.sections.ai_data?.data as AnalysisData|undefined;
   add("작업 결과",`조회한 후보 페이지 ${o?.candidates?.length??0}개. 이미지 선택 상태: ${o?.selection??"none"}. 페이지 지시문 신호 ${o?.signals?.length??0}개.`);
+  if(o?.scope)add("자기 검증",o.scope);
+  for(const d of o?.discovery??[])add("작업 결과",`${d.provider}: 후보 ${d.found}개. ${d.warning??"발견 결과는 판정 근거가 아닙니다."}`);
   for(const [i,e] of (a?.collected?.evidence??[]).entries())add("작업 결과",e.summary,[`E${i+1}`]);
   for(const w of a?.warnings??[])add("자기 검증",w);
  }

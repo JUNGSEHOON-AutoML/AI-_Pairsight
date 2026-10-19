@@ -1,3 +1,5 @@
+> 2026-10-20 갱신: SerpApi 실행 코드는 제거하고 Provider 타입만 남겼습니다. 아래 SerpApi 안내는 이전 구현 기록입니다. 현재 후보 경로와 Gemini 약관 제한은 [candidate-discovery.md](candidate-discovery.md)를 따릅니다.
+
 # 편집국 5개 데스크 인수인계 — 2026-10-20
 
 ## 실행·화면

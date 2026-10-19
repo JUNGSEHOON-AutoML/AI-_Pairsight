@@ -22,14 +22,14 @@ export class NormalizingInputProvider implements InputProvider {
 
 export class OnDemandCandidateVerifier implements CandidateVerificationProvider {
   readonly name = "bounded-candidate-verifier";
-  constructor(private pages: PageFetchProvider, private archive: ArchiveDateProvider) {}
+  constructor(private pages: PageFetchProvider, private archive: ArchiveDateProvider, private imageLimit = 2) {}
   async verify(candidate: Candidate, signal: AbortSignal) {
     const article = await this.pages.page(candidate.url, signal);
     const archiveDate = await this.archive.firstCapture(article.url, signal).catch(() => { signal.throwIfAborted(); return null; });
     const dates = [...article.dates, ...(archiveDate ? [archiveDate] : [])];
     if (candidate.discoveredAt) dates.push({ value: candidate.discoveredAt, source: "search_discovered", confidence: "weak",
       sourceUrl: candidate.url, meaning: "image_discovery", imageBound: false });
-    const selected = [...article.images].sort((a, b) => Number(b.url === candidate.imageUrl) - Number(a.url === candidate.imageUrl)).slice(0, 2);
+    const selected = [...article.images].sort((a, b) => Number(b.url === candidate.imageUrl) - Number(a.url === candidate.imageUrl)).slice(0, Math.max(1, Math.min(12, this.imageLimit)));
     const images = [];
     for (const item of selected) {
       try { images.push({ url: item.url, ...await this.pages.image(item.url, signal) }); }

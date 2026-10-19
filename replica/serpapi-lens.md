@@ -1,3 +1,5 @@
+> 2026-10-20 갱신: SerpApi 실행 코드는 제거하고 Provider 타입만 남겼습니다. 아래 SerpApi 안내는 이전 구현 기록입니다. 현재 후보 경로와 Gemini 약관 제한은 [candidate-discovery.md](candidate-discovery.md)를 따릅니다.
+
 # SerpApi Google Lens 후보 발견 (공식 문서 확인 2026-10-20)
 
 [공식 가격표](https://serpapi.com/pricing): 무료 월 250회, 시간당 처리량 50회. 성공 검색만 월 사용량에 포함하고 캐시·오류·실패 검색은 제외한다고 명시한다. 결제와 업그레이드를 구현하지 않는다. [Account API](https://serpapi.com/account-api)는 무료이며 검색 한도를 소모하지 않는다. 검색 전 무료 플랜 이름·가격 0·남은 plan_searches_left를 확인하고 확인 불가나 유료 계정이면 중단한다.

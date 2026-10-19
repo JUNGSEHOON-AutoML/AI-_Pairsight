@@ -1,4 +1,4 @@
-import { SerpApiLensProvider } from "./serpapi";
+import { FactCheckArticleDiscovery, GeminiSearchDiscovery, type CandidateDiscoveryProvider } from "./candidate-discovery";
 import type { ReverseSearchProvider } from "../providers/types";
 import { collectEvidence, type Collected } from "../verification/engine";
 import { OnDemandCandidateVerifier, NormalizingInputProvider, LocalMetadataProvider } from "../verification/adapters";
@@ -22,6 +22,7 @@ export interface OsintData {
   inputImage: SavedImage | null;
   selection: "operator" | "representative_unconfirmed" | "none";
   inputExcerpt: string;
+  discovery?: { provider: string; found: number; warning?: string }[];
   candidates: { url: string; provider?: string; excerpt: string; dates: Article["dates"]; images: SavedImage[] }[];
   signals: string[];
   scope: string;
@@ -62,11 +63,11 @@ export function legalWarnings(c: Readonly<CaseRecord>, osint: OsintData): string
 
 /** Code workers call existing providers. No live worker uses fixture discovery, mock LLM or an image index. */
 export function createNewsroomWorkers(repo: CaseRepository, options: {
-  pages?: PageFetchProvider; images?: ImageComparisonProvider; llm?: LLMProvider; allowTestProviders?: boolean; reverseSearch?: ReverseSearchProvider;
+  pages?: PageFetchProvider; images?: ImageComparisonProvider; llm?: LLMProvider; allowTestProviders?: boolean; reverseSearch?: ReverseSearchProvider; discovery?: CandidateDiscoveryProvider;
 } = {}): Workers {
   const pages = options.pages ?? new OnDemandPageProvider(new PolicyFetch(guardedTransport, 1000));
   const images = options.images ?? new LocalImageComparisonProvider();
-  const verifier = new OnDemandCandidateVerifier(pages, { name: "archive-not-connected", firstCapture: async () => null });
+  const verifier = new OnDemandCandidateVerifier(pages, { name: "archive-not-connected", firstCapture: async () => null }, 6);
   const make = <D extends keyof Workers>(department: D, run: Workers[D]["run"]) => ({ department, run });
   return {
     monitoring: make("monitoring", async c => {
@@ -89,20 +90,37 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
           out.selection = c.input.imageUrl ? "operator" : "representative_unconfirmed";
         }
       }
-      const urls = [...new Set([...c.input.candidateUrls, ...(c.input.feedReview ? [c.input.feedReview.url] : [])])];
-      let discovered: import("../verification/types").Candidate[] = urls.map(url=>({url,provider:"operator-selected"}));
-      if(!discovered.length&&out.inputImage&&(options.reverseSearch||!options.allowTestProviders)){
-        const provider=options.reverseSearch??new SerpApiLensProvider(repo,{allowUpload:c.input.externalSearchAllowed===true});
-        const found=await provider.search({bytes:bytes(out.inputImage.thumbnail),mime:"image/png",sha256:out.inputImage.hash,publicUrl:out.inputImage.url||null},signal);
+      const feedName = "Google Fact Check claims:search";
+      const discoveries: NonNullable<OsintData["discovery"]> = [];
+      let discovered: import("../verification/types").Candidate[] = [
+        ...(c.input.feedReview ? [{url:c.input.feedReview.url,provider:feedName}] : []),
+        ...c.input.candidateUrls.map(url=>({url,provider:"operator-selected"})),
+      ];
+      // Feed imports already carry their review URL. Other submissions can query the same
+      // bounded Korean monitoring feed; no publisher assessment enters this projection.
+      const finder=options.discovery??(!options.allowTestProviders&&process.env.GOOGLE_FACTCHECK_API_KEY&&!c.input.feedReview?new FactCheckArticleDiscovery(repo):null);
+      if(finder&&out.inputImage){
+        try { const found=await finder.discover({claim:c.input.claim},signal);discovered.push(...found);discoveries.push({provider:finder.name,found:found.length}); }
+        catch { signal.throwIfAborted();discoveries.push({provider:finder.name,found:0,warning:"팩트체크 후보 검색을 완료하지 못했어요. 키·한도를 확인하거나 후보 링크를 보충해 주세요."}); }
+      }
+      // Compatibility seam for test/independently licensed reverse-search providers.
+      if(!discovered.length&&out.inputImage&&options.reverseSearch){
+        const found=await options.reverseSearch.search({bytes:bytes(out.inputImage.thumbnail),mime:"image/png",sha256:out.inputImage.hash,publicUrl:out.inputImage.url||null},signal);
         discovered=found.candidates;
-        out.scope="외부 API로 발견한 후보만 요청 시점에 robots 준수 검증. 발견 결과 자체는 근거가 아님";
-        if(!discovered.length)throw new CaseError("candidate_required","자동 검색에서 검증할 후보를 찾지 못했어요. 원본 후보 페이지 링크를 보충해 주세요.");
+      }
+      discovered=[...new Map(discovered.map(c=>[c.url,c])).values()];
+      if(discovered.length>5)discoveries.push({provider:"request-limit",found:discovered.length,warning:"요청당 후보 페이지 5개까지만 확인했어요."});
+      discovered=discovered.slice(0,5);
+      out.discovery=discoveries;
+      out.scope="수동·팩트체크 기사 후보를 요청 시점에 robots 준수 검증. Gemini 검색 자동 수집은 약관상 비활성. 다른 기관의 판정은 근거에서 제외";
+      if(!discovered.length&&out.inputImage&&!options.allowTestProviders){
+        await new GeminiSearchDiscovery(repo).discover({claim:c.input.claim},signal);
       }
       for (const candidate of discovered) {
         const v = await verifier.verify(candidate, signal);
-        if (v.images.length < Math.min(2, v.article.images.length)) throw new CaseError("candidate_image_failed", "후보 이미지 일부를 가져오지 못했어요. OSINT에서 멈췄어요.");
+        if (v.images.length < Math.min(6, v.article.images.length)) throw new CaseError("candidate_image_failed", "후보 이미지 일부를 가져오지 못했어요. OSINT에서 멈췄어요.");
         out.signals.push(...v.article.securitySignals ?? []);
-        out.candidates.push({ url: v.article.url, provider: candidate.provider, excerpt: retainedExcerpt(c,v.article.url,v.article.excerpt), dates: v.dates,
+        out.candidates.push({ url: v.article.url, provider: candidate.provider, excerpt: candidate.provider===feedName || v.article.review ? "" : retainedExcerpt(c,v.article.url,v.article.excerpt), dates: v.dates,
           images: await Promise.all(v.images.map(i => imageData(i.url, i.bytes))) });
       }
       out.signals = [...new Set(out.signals)];
@@ -114,7 +132,9 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         return { data: { collected: { matches: [], evidence: [], searchedProviders: [], verification: { sources: [], factChecks: [], warnings: ["비교할 이미지 없음"], discoveryComplete: false, verificationComplete: false } },
           imageMissing: true, thumbnailOnly: true, warnings: ["기사에 비교할 이미지가 없어요. 이미지 진위는 판단할 수 없어요."] } satisfies AnalysisData };
       }
-      const candidates: VerifiedCandidate[] = source.candidates.map(v => ({ candidate: { url: v.url, provider: v.provider??"operator-selected" },
+      const independent = source.candidates.filter(v => !(source.selection === "representative_unconfirmed" && v.url === c.input.pageUrl));
+      const circularExcluded = independent.length < source.candidates.length;
+      const candidates: VerifiedCandidate[] = independent.map(v => ({ candidate: { url: v.url, provider: v.provider??"operator-selected" },
         article: { url: v.url, title: "", excerpt: v.excerpt, dates: v.dates, images: [] },
         dates: v.dates.map(d => ({ ...d, imageBound: false })), images: v.images.map(i => ({ url: i.url, bytes: bytes(i.thumbnail), mime: "image/png" })) }));
       if (candidates.some(v => !v.images.length)) throw new CaseError("candidate_without_image", "원본 후보 페이지에 비교할 이미지가 없어요.");
@@ -133,12 +153,8 @@ export function createNewsroomWorkers(repo: CaseRepository, options: {
         thumbnail: { bytes: b, mime: "image/png" }, article: null, thumbnailOnly: true }, p, signal);
       if (!collected.verification.verificationComplete) throw new CaseError("comparison_incomplete", "후보 비교를 완료하지 못했어요. 이 단계에서 멈췄어요.");
       collected.evidence.push(...c.input.provenance);
-      if (c.input.feedReview) collected.evidence.push({ kind: "fact_check", strength: "medium", outcome: "neutral", score: null,
-        sourceUrl: c.input.feedReview.url, provider: "Google Fact Check claims:search",
-        summary: "기존 팩트체크 링크가 있어요. 유포 이미지·주장의 동일성을 확인하기 전에는 판정 근거로 사용하지 않아요.",
-        details: { claimMatched: false, imageMatched: false, pageVerified: false } });
       collected.verification.discoveryComplete = false; // manual search never proves that no original exists on the web
-      return { data: { collected, imageMissing: false, thumbnailOnly: true, warnings: ["512px 이하 썸네일 비교. 미세 편집·원본 출처 검증에는 한계가 있어요.", "유한한 후보 검색으로 웹 전체에 원본이 없음을 증명하지 못해요. Fact Check 이미지 검색은 미연결"] } satisfies AnalysisData };
+      return { data: { collected, imageMissing: false, thumbnailOnly: true, warnings: [...(circularExcluded ? ["유포 사진을 지정하지 않은 기사 대표 이미지의 자기 비교는 근거에서 제외했어요."] : []),...(source.discovery??[]).flatMap(d=>d.warning?[d.warning]:[]),...collected.verification.warnings,"512px 이하 썸네일 비교. 미세 편집·원본 출처 검증에는 한계가 있어요.", "유한한 후보 검색으로 웹 전체에 원본이 없음을 증명하지 못해요. Fact Check 이미지 검색은 미연결"] } satisfies AnalysisData };
     }),
     security: make("security", async c => {
       // Intake can inspect submissions before OSINT. Research adds page signals after fetching.

@@ -6,7 +6,8 @@ export function cachedFeed(repo:CaseRepository,query:string) {
   const row=repo.db.prepare("SELECT record,created FROM feed_cache WHERE query=?").get(query) as {record:string;created:number}|undefined;
   return row?{items:JSON.parse(row.record) as FeedClaim[],created:row.created}:null;
 }
-export async function searchFeed(repo:CaseRepository,query:string) {
+export async function searchFeed(repo:CaseRepository,query:string,signal:AbortSignal=AbortSignal.timeout(15_000)) {
+  signal.throwIfAborted();
   const cache=cachedFeed(repo,query);
   if(cache&&Date.now()-cache.created<900_000)return {items:cache.items,cached:true};
   repo.db.exec("BEGIN IMMEDIATE");
@@ -16,7 +17,7 @@ export async function searchFeed(repo:CaseRepository,query:string) {
     repo.db.prepare("INSERT INTO feed_requests(at) VALUES(?)").run(Date.now());
     repo.db.exec("COMMIT");
   }catch(e){repo.db.exec("ROLLBACK");throw e;}
-  const items=await new GoogleFactCheckFeed().search(query,AbortSignal.timeout(15_000));
+  const items=await new GoogleFactCheckFeed().search(query,AbortSignal.any([signal,AbortSignal.timeout(15_000)]));
   repo.db.prepare("INSERT OR REPLACE INTO feed_cache(query,record,created) VALUES(?,?,?)").run(query,JSON.stringify(items),Date.now());
   return {items,cached:false};
 }

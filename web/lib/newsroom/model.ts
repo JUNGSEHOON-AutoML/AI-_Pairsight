@@ -28,6 +28,7 @@ export interface CaseInput {
   topic: Topic | null;
   contentFlags: ContentFlag[];
   rightsConfirmed: boolean;
+  /** Legacy SerpApi consent, ignored; does not authorize image egress. */
   externalSearchAllowed?: boolean;
   reportedBy: string;
   feedReview?: { url: string; publisher: string; rating: string; reviewedAt: string | null };

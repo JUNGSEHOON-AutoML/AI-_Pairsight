@@ -12,7 +12,7 @@ export interface OperatorTask {caseId:string;label:string;reason:string}
 export const operatorTasks=(cases:CaseRecord[]):OperatorTask[]=>cases.flatMap(c=>{
  const reason=Object.values(c.desks??{}).find(d=>d.error)?.error??Object.values(c.sections).find(s=>s.error)?.error?.message??"";
  if(c.status==="awaiting_approval")return [{caseId:c.id,label:"검토 보고서를 읽고 승인 또는 반려",reason:`사람 승인 ${c.approvals.length}/${c.sections.trust_safety?.data.requiredReviews??1}명`}];
- if(c.status==="failed")return [{caseId:c.id,label:/후보|링크|SerpApi/.test(reason)?"후보 링크 보충 후 재시도":"중단 이유 확인 후 재시도",reason}];
+ if(c.status==="failed")return [{caseId:c.id,label:/후보|링크|Gemini/.test(reason)?"후보 링크 보충 후 재시도":"중단 이유 확인 후 재시도",reason}];
  if(c.status==="rejected"||c.status==="withdrawn")return [{caseId:c.id,label:"반려·철회 기록 확인",reason:"자동 재개하거나 공개하지 않습니다."}];return [];
 });
 const schema=(repo:CaseRepository)=>repo.db.exec("CREATE TABLE IF NOT EXISTS newsroom_briefings(key TEXT PRIMARY KEY,at TEXT NOT NULL,state TEXT NOT NULL,path TEXT NOT NULL,hash TEXT,expires INTEGER NOT NULL)");
