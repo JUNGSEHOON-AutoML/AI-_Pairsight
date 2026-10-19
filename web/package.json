@@ -12,7 +12,8 @@
     "test": "vitest run",
     "fixtures": "python3 scripts/make-fixtures.py && node scripts/make-comparison-fixtures.mjs && python3 scripts/make-temporal-fixtures.py",
     "eval": "tsx eval/run.ts",
-    "index:collect": "tsx scripts/index-collect.ts"
+    "index:collect": "tsx scripts/index-collect.ts",
+    "controlroom": "node scripts/controlroom-claw3d.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",
@@ -24,13 +25,15 @@
     "react-dom": "19.3.0",
     "robots-parser": "3.0.1",
     "sharp": "0.35.5",
-    "undici": "^8.12.2"
+    "undici": "^8.12.2",
+    "ws": "8.18.3"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "8.18.1",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",

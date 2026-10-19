@@ -1,11 +1,16 @@
-// Replays one mock hearing, start to finish, through the read-only Claw3D control-room adapter.
-//   PAIRSIGHT_CONTROLROOM_TOKEN=<24+ chars> npx tsx scripts/controlroom-demo.ts [--step-ms 4000] [--loop] [--once]
-// Then in Claw3D (separate app, see replica/controlroom.md): Custom runtime → URL printed below.
+// Replays one mock hearing, start to finish, through the read-only Claw3D control-room adapters:
+//   WebSocket gateway (3411, Claw3D "Demo backend" protocol: the office animates each seat) and
+//   custom HTTP runtime (3410, seat list only).
+//   PAIRSIGHT_CONTROLROOM_TOKEN=<24+ chars> npx tsx scripts/controlroom-demo.ts [--step-ms 4000] [--frame-gap-ms 1000] [--loop] [--once]
+// Claw3D setup: replica/controlroom.md §3.
 // The case is the fictional trusted_edited fixture through the real pipeline (mock transport) and rules v3;
 // only the agents are scripted. Nothing here can change a verdict: the adapter only reads court events.
 import { readFile } from "node:fs/promises";
+import { createInterface } from "node:readline/promises";
+import { pathToFileURL } from "node:url";
 import { runCourt } from "../lib/court/court";
 import { applyEvent, emptyState, type ControlRoomState } from "../lib/controlroom/state";
+import { startGateway, type Gateway } from "../lib/controlroom/gateway";
 import { checkToken, startControlRoom } from "../lib/controlroom/server";
 import { MockLLMProvider } from "../lib/llm/mock";
 import type { LLMProvider, LLMRequest } from "../lib/llm/types";
@@ -46,7 +51,7 @@ const paced = (inner: LLMProvider, ms: number): LLMProvider => ({
   generate: async (req, signal) => { await new Promise((r) => setTimeout(r, ms)); return inner.generate(req, signal); },
 });
 
-async function hearing(onState: (s: ControlRoomState) => void) {
+export async function hearing(onState: (s: ControlRoomState) => void, gateway: Gateway, stepMs = STEP_MS) {
   const signal = AbortSignal.timeout(10 * 60_000);
   const p = {
     ...createFreeProviders(mockTransport, "/nonexistent/index.jsonl"),
@@ -57,10 +62,11 @@ async function hearing(onState: (s: ControlRoomState) => void) {
   const verdict = decideVerdict({ evidence: c.evidence, matches: c.matches, claimedDate: null, trustedSources: loadTrustedSources({ includeMock: true }) });
   let state: ControlRoomState = { ...emptyState(scripted.name), caseId: "demo-trusted-edited" };
   onState(state);
-  const record = await runCourt({ verdict, evidence: c.evidence, matches: c.matches }, paced(scripted, STEP_MS), signal, {
+  const record = await runCourt({ verdict, evidence: c.evidence, matches: c.matches }, paced(scripted, stepMs), signal, {
     onEvent: (e) => {
       state = applyEvent(state, e);
       onState(state);
+      gateway.push(e);
       console.log(`[${e.seq}] ${e.seat} ${e.status}${e.summary ? ` — ${e.summary}` : ""}${e.cite.length ? ` [${e.cite.join(",")}]` : ""}${e.rejected ? ` (폐기 ${e.rejected})` : ""}`);
     },
   });
@@ -71,13 +77,22 @@ async function main() {
   const token = checkToken(process.env.PAIRSIGHT_CONTROLROOM_TOKEN);
   let current = emptyState("mock-llm");
   const { server, baseUrl } = await startControlRoom({ token, getState: () => current });
-  console.log(`관제실 어댑터: ${baseUrl.replace(token, "<token>")} (127.0.0.1 전용, 보기 전용)`);
-  console.log("Claw3D: Custom runtime URL에 http://127.0.0.1:<port>/$PAIRSIGHT_CONTROLROOM_TOKEN 을 넣으세요.\n");
+  const gateway = await startGateway({ token, getState: () => current, frameGapMs: Number(arg("--frame-gap-ms") ?? 1000) });
+  console.log(`관제실 WebSocket 게이트웨이: ${gateway.url} (Claw3D Demo backend, 토큰은 CLAW3D_GATEWAY_TOKEN)`);
+  console.log(`관제실 HTTP 런타임: ${baseUrl.replace(token, "<token>")} (Custom backend, 좌석 명단만)`);
+  console.log("둘 다 127.0.0.1 전용, 보기 전용.\n");
+  if (process.argv.includes("--wait-for-enter")) {
+    const prompt = createInterface({ input: process.stdin, output: process.stdout });
+    await prompt.question("Claw3D에 좌석 7개가 보이면 Enter를 눌러 재생하세요. ");
+    prompt.close();
+  }
   do {
-    await hearing((s) => { current = s; });
+    gateway.reset();
+    await hearing((s) => { current = s; }, gateway);
+    await gateway.finishHearing(); // Drain speech, then reconcile the completed transcript in the office.
     if (process.argv.includes("--loop")) await new Promise((r) => setTimeout(r, STEP_MS * 3));
   } while (process.argv.includes("--loop"));
-  if (process.argv.includes("--once")) server.close();
+  if (process.argv.includes("--once")) { server.close(); await gateway.close(); }
   else console.log("\n재생이 끝났어요. 마지막 상태를 계속 보여줘요. 끝내려면 Ctrl+C.");
 }
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) void main();
