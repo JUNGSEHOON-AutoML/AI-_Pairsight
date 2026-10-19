@@ -279,3 +279,16 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 1. 사용자 결정: 미완료 1의 (a) 또는 (b)
 2. 파일럿을 실행할 때, 관문에 걸려 제외된 후보를 결과 경고 문구로 집계합니다. 원래 맞는 원본이 제외된 사례가 있으면 임계값을 조정합니다. 이때 반례 테스트를 먼저 추가합니다.
 3. 실제 사진 쌍(같은 장면 편집본, 같은 장소 다른 사진)을 `scripts/measure-scene-gate.ts`에 추가해 분포를 다시 측정합니다.
+
+## 추가 — ai_generated fixture 다시 그림 (같은 날)
+
+- **커밋:** `5808e6c`
+- **변경:** `ai_generated.png`를 거리 템플릿과 겹치지 않는 고유 장면으로 다시 그렸습니다(고리 행성, 분홍 사구, 떠 있는 등불). `scripts/make-fixtures.py`를 다시 실행해도 바뀌는 파일은 이 하나뿐입니다.
+- **확인**
+  - 입력, 원본, 장면 fixture 24장 모두와 비교했습니다. 픽셀 정렬을 통과한 것이 없고, 장면 유사도는 최대 0.591입니다.
+  - RSS 색인 검색 결과는 후보 0개입니다.
+  - 모의 모드: AI 생성(모의 C2PA)과 원본 없음이 그대로 나옵니다.
+  - 모의 free 모드: 편집 조작이 아니라 판단 불가 + 원본 없음 + 색인 한계 문구가 나옵니다.
+  - 테스트 176개, `tsc`, `eslint`, `next build` 통과. 예시 하네스는 `--mock`과 `--mock --index` 모두 오판 0입니다.
+- **캡처:** `replica/clone-screens/stage1/S03-ai_generated-*`(모의), `stage5-free/S03-ai_generated-*`(free)
+- **미완료 1번은 해결됐습니다.** 남은 한계는 "같은 장소를 다른 때 찍은 사진"은 관문으로 걸러지지 않는다는 점입니다. 기존 같은 틀 fixture끼리 0.86–0.956으로, 파이프라인 문서 §3-1에 적었습니다. 나머지 미완료와 다음 작업은 위와 같습니다.
