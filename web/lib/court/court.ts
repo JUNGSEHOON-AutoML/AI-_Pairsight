@@ -6,6 +6,7 @@
 //   - a 판단 불가 from the judge opens no hearing (no LLM calls).
 import { VERDICT_LABEL, type Evidence, type SourceMatch, type Verdict } from "../domain";
 import type { AgentRole, LLMProvider } from "../llm/types";
+import { LLMUnavailable, maskLLMSecrets, type LLMFailure } from "../llm/errors";
 import type { VerdictResult } from "../verdict";
 import { LOCAL_EDIT_LIMITS } from "../verification/edit-locality";
 import { buildDocket, renderCaseFile, type Card, type Docket } from "./docket";
@@ -47,6 +48,8 @@ export interface CourtRecord {
   judgment: Judgment;
   llmCalls: number;
   llmMs: number;
+  reviewStatus: "complete" | "skipped" | "unavailable";
+  failureCode: LLMFailure | null;
 }
 
 /** Which doubts can lower which verdict. Anything else is not a reasonable doubt about that verdict. */
@@ -90,7 +93,7 @@ const MAX_TEXT = 300;
 /** Agent text is shown to people: no control characters, no links (cards carry the only URLs), bounded length. */
 export function sanitize(text: unknown): string {
   if (typeof text !== "string") return "";
-  return text
+  return maskLLMSecrets(text)
     .replace(/[\u0000-\u001f\u007f​-‏‪-‮]/g, " ")
     .replace(/\b(?:https?:\/\/|www\.)\S+/gi, "[링크 삭제]")
     .replace(/\s+/g, " ")
@@ -156,6 +159,7 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
   const record: CourtRecord = {
     opened: judge !== "inconclusive", skipReason: null, judgeVerdict: judge, finalVerdict: judge, downgraded: false, docket,
     prosecution: [], defense: [], jurors: [], rejected: [], incomplete: [], judgment: null as unknown as Judgment, llmCalls: 0, llmMs: 0,
+    reviewStatus: judge === "inconclusive" ? "skipped" : "complete", failureCode: null,
   };
   emit("judge", "speaking", `규칙 v3 판정: ${VERDICT_LABEL[judge]}. ${sanitize(input.verdict.reason)}`, [], 0);
   if (judge === "inconclusive") {
@@ -166,15 +170,35 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
   }
   emit("judge", "idle");
 
+  const unavailable = (seat: Seat): CourtRecord => {
+    record.reviewStatus = "unavailable";
+    record.finalVerdict = "inconclusive";
+    record.downgraded = true;
+    record.skipReason = "맥락·법정 확인 못 함";
+    record.judgment = writeJudgment(record, null);
+    emit(seat, "idle", record.skipReason);
+    emit("judge", "speaking", record.skipReason);
+    emit("judge", "idle");
+    return record;
+  };
+
   const ask = async (role: AgentRole, system: string, extra: Record<string, unknown> = {}): Promise<Record<string, unknown> | null> => {
     record.llmCalls++;
+    const started = performance.now();
     try {
       const res = await llm.generate({ role, system, prompt: renderCaseFile(docket, extra), schema: SCHEMA[role] }, signal);
-      record.llmMs += res.stats.totalMs;
       const parsed = JSON.parse(res.text);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed as Record<string, unknown>;
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        record.llmMs += res.stats.totalMs;
+        return parsed as Record<string, unknown>;
+      }
       throw new Error("not an object");
-    } catch {
+    } catch (e) {
+      if (e instanceof LLMUnavailable) {
+        record.failureCode = e.code;
+        if (!e.requestSent) record.llmCalls--;
+      } else if (llm.name.startsWith("gemini:")) record.failureCode = "invalid_response";
+      record.llmMs += Math.round(performance.now() - started);
       signal.throwIfAborted();
       record.incomplete.push(role);
       return null;
@@ -184,6 +208,7 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
   // Prosecutor: the case for "fake", from cards only.
   emit("prosecutor", "working");
   const p = await ask("prosecutor", SYSTEM.prosecutor);
+  if (record.failureCode) return unavailable("prosecutor");
   const rejectedBefore = () => record.rejected.length;
   let mark = rejectedBefore();
   for (const raw of (Array.isArray(p?.claims) ? p.claims : []).slice(0, 4)) {
@@ -199,6 +224,7 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
   emit("defense", "working");
   mark = rejectedBefore();
   const d = await ask("defense", SYSTEM.defense);
+  if (record.failureCode) return unavailable("defense");
   for (const raw of (Array.isArray(d?.alternatives) ? d.alternatives : []).slice(0, 4)) {
     const kind = (raw as { kind?: unknown })?.kind as DefenseKind;
     const c = checkStatement(raw, docket);
@@ -226,6 +252,7 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
     mark = rejectedBefore();
     try {
     const j = await ask("juror", `${SYSTEM.juror}\n${perspective}`, { arguments: { prosecution: record.prosecution, defense: record.defense } });
+    if (record.failureCode) return unavailable(seat);
     const result: JurorResult = { juror: i + 1, perspective, decision: "uphold", doubt: null };
     record.jurors.push(result);
     if (!j) continue;
@@ -269,6 +296,7 @@ export async function runCourt(input: CourtInput, llm: LLMProvider, signal: Abor
     arguments: { prosecution: record.prosecution, defense: record.defense },
     jurorDoubts: record.jurors.flatMap((j) => (j.doubt ? [j.doubt] : [])),
   });
+  if (record.failureCode) return unavailable("clerk");
   mark = rejectedBefore();
   record.judgment = writeJudgment(record, k);
   emit("clerk", "speaking", record.judgment.headline, record.judgment.keyEvidence, rejectedBefore() - mark);
@@ -293,7 +321,9 @@ function writeJudgment(record: CourtRecord, clerk: Record<string, unknown> | nul
     ...record.defense.filter((a) => !record.jurors.some((j) => j.doubt?.adopts === a.id)).map((a) => ({ text: `${DOUBT_LABEL[a.kind]}: ${a.text}`, cite: a.cite })),
   ];
   const decisive = docket.cards.filter((c) => c.kind === "source_page" || ((c.outcome === "supports_manipulated" || c.outcome === "supports_real") && c.strength !== "weak"));
-  const headline = !record.opened
+  const headline = record.reviewStatus === "unavailable"
+    ? "맥락·법정 확인 못 함. 재판을 완료하지 못해 최종 판단을 보류했어요."
+    : !record.opened
     ? `판정: ${VERDICT_LABEL[judgeVerdict]}. 판사(규칙 v3)가 결론을 내리지 않아 공방을 열지 않았어요.`
     : record.downgraded
       ? `판정: ${VERDICT_LABEL[finalVerdict]}. 판사(규칙 v3)는 ${euro(`'${VERDICT_LABEL[judgeVerdict]}'`)} 판단했지만, 배심원이 근거 카드로 합리적 의심을 제기해 판단 불가로 낮췄어요.`

@@ -1,6 +1,7 @@
 // Local Ollama server. Only loopback addresses are accepted: case files never leave the machine,
 // and a misconfigured URL cannot turn this into a request to an arbitrary host.
 import type { LLMProvider, LLMRequest, LLMResponse } from "./types";
+import { maskLLMSecrets } from "./errors";
 
 const LOOPBACK = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
 
@@ -43,7 +44,7 @@ export class OllamaProvider implements LLMProvider {
         options: { temperature: 0, num_predict: req.maxTokens ?? 700, num_ctx: this.opts.numCtx ?? 8192, ...(threads ? { num_thread: threads } : {}) },
       }),
     });
-    if (!res.ok) throw new Error(`ollama ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    if (!res.ok) throw new Error(`ollama ${res.status}: details redacted`);
     const body = (await res.json()) as {
       message?: { content?: string };
       prompt_eval_count?: number;
@@ -51,7 +52,7 @@ export class OllamaProvider implements LLMProvider {
       load_duration?: number;
     };
     return {
-      text: body.message?.content ?? "",
+      text: maskLLMSecrets(body.message?.content ?? ""),
       stats: {
         promptTokens: body.prompt_eval_count ?? null,
         outputTokens: body.eval_count ?? null,

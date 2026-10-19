@@ -4,8 +4,7 @@
 //   npx tsx scripts/court-run.ts --model qwen2.5:7b [--url http://127.0.0.1:11434] [--threads 8] [--json out.json]
 import { readFile, writeFile } from "node:fs/promises";
 import { runCourt } from "../lib/court/court";
-import { MockLLMProvider } from "../lib/llm/mock";
-import { OllamaProvider } from "../lib/llm/ollama";
+import { createLLMProvider } from "../lib/llm";
 import { createFreeProviders } from "../lib/providers";
 import { decideVerdict } from "../lib/verdict";
 import { collectEvidence } from "../lib/verification/engine";
@@ -23,9 +22,8 @@ async function main() {
   const input = await p.input.normalize({ bytes: new Uint8Array(await readFile("public/fixtures/inputs/trusted_edited.png")), mime: "image/png", pageUrl: null, publicImageUrl: null }, signal);
   const c = await collectEvidence(input, p, signal);
   const verdict = decideVerdict({ evidence: c.evidence, matches: c.matches, claimedDate: null, trustedSources: loadTrustedSources({ includeMock: true }) });
-  const llm = process.argv.includes("--mock")
-    ? new MockLLMProvider()
-    : new OllamaProvider({ baseUrl: arg("--url"), model: arg("--model"), numThread: arg("--threads") ? Number(arg("--threads")) : undefined });
+  const llm = createLLMProvider(process.argv.includes("--mock") ? "mock" : arg("--model") ? "ollama" : undefined,
+    { baseUrl: arg("--url"), model: arg("--model"), numThread: arg("--threads") ? Number(arg("--threads")) : undefined });
   const started = performance.now();
   const r = await runCourt({ verdict, evidence: c.evidence, matches: c.matches }, llm, signal);
   const wallMs = Math.round(performance.now() - started);
@@ -34,6 +32,7 @@ async function main() {
     calls: r.llmCalls, wallMs, perCallMs: r.llmCalls ? Math.round(wallMs / r.llmCalls) : 0,
     kept: { prosecution: r.prosecution.length, defense: r.defense.length, jurorDoubts: r.jurors.filter((j) => j.doubt).length },
     rejected: r.rejected.length, incomplete: r.incomplete, clerkWritten: r.judgment.clerkWritten,
+    reviewStatus: r.reviewStatus, failureCode: r.failureCode,
   };
   console.log(JSON.stringify(summary, null, 2));
   console.log("\n" + r.judgment.headline);
@@ -44,4 +43,4 @@ async function main() {
   const out = arg("--json");
   if (out) await writeFile(out, JSON.stringify({ summary, record: r }, null, 2));
 }
-main();
+main().catch(() => { console.error("Court benchmark failed; details redacted"); process.exitCode = 1; });
