@@ -12,16 +12,19 @@ if(new Set([3000,appPort,uiPort,adapterPort]).size!==4)throw Error("Use distinct
 const token=process.env.PAIRSIGHT_CONTROLROOM_TOKEN??randomBytes(32).toString("base64url");
 const dev=process.argv.includes("--dev"),children=[];
 let stopping=false;
-function stop(){if(stopping)return;stopping=true;for(const c of children)c.kill("SIGTERM");}
+function stop(){if(stopping)return;stopping=true;for(const c of children)c.kill("SIGTERM");
+  // A browser may still hold an SSE connection; never leave owned child servers behind.
+  const timer=setTimeout(()=>{for(const c of children)if(c.exitCode===null&&c.signalCode===null)c.kill("SIGKILL");},5000);timer.unref();
+}
 function watch(child){children.push(child);child.once("error",()=>{console.error("구성 요소 실행 실패");stop();process.exitCode=1;});child.once("exit",code=>{if(!stopping){stop();process.exitCode=code??1;}});}
 function start(args,cwd,env={}){watch(spawn(process.execPath,args,{cwd,env:{...process.env,...env},stdio:["ignore","inherit","inherit"]}));}
 for(const signal of ["SIGINT","SIGTERM"])process.once(signal,stop);
-start(["node_modules/next/dist/bin/next",dev?"dev":"start","--hostname","127.0.0.1","--port",String(appPort)],web);
+start(["node_modules/next/dist/bin/next",dev?"dev":"start","--hostname","127.0.0.1","--port",String(appPort)],web,{PAIRSIGHT_CLAW3D_PORT:String(uiPort)});
 start(["--import","tsx","scripts/newsroom-worker.ts"],web);
 start(["--import","tsx","scripts/newsroom-controlroom.ts"],web,{PAIRSIGHT_CONTROLROOM_TOKEN:token,PAIRSIGHT_CONTROLROOM_PORT:String(adapterPort)});
 // No Google/Gemini keys or other server secrets are forwarded to Claw3D.
 watch(spawn(process.execPath,["server/newsroom.js",...(dev?["--dev"]:[])],{cwd:claw,env:{
-  PATH:process.env.PATH,HOME:process.env.HOME,NODE_ENV:dev?"development":"production",PORT:String(uiPort),
+  PATH:process.env.PATH,HOME:process.env.HOME,NODE_ENV:dev?"development":"production",PORT:String(uiPort),CLAW3D_NEWSROOM_MODE:"1",
   PAIRSIGHT_CONTROLROOM_TOKEN:token,PAIRSIGHT_NEWSROOM_URL:"http://127.0.0.1:"+adapterPort
 },stdio:["ignore","inherit","inherit"]}));
-console.log("편집국: http://127.0.0.1:"+appPort+"/newsroom · 3D: http://127.0.0.1:"+uiPort+"/newsroom");
+console.log("통합 편집국: http://127.0.0.1:"+appPort+"/newsroom · 대시보드와 3D 관제실을 한 화면에서 확인하세요.");
