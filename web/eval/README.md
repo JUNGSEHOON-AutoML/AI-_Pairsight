@@ -37,6 +37,8 @@ Google Vision 어댑터 코드도 남아 있지만, 이 프로젝트는 지금 �
 cd ~/ai-verify/web && cp eval/cases.template.jsonl eval/cases.jsonl && mkdir -p eval/images
 ```
 
+처음 실행할 때 같은 장면 관문 모델(DINOv2-small, 24 MB)을 Hugging Face에서 `web/.cache/models`로 내려받습니다(약 3초, 키 불필요). 내려받지 못하면 해당 후보 비교는 실패로 기록되고 "원본 확인 미완료"가 됩니다.
+
 템플릿에는 권장 구성대로 30줄이 주석(`//`)으로 들어 있습니다.
 
 | 정답 라벨 | 건수 | id |
