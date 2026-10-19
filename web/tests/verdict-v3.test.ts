@@ -53,6 +53,15 @@ describe("v3 편집 조작: trusted earlier original with local differences", ()
     expect(r.reason).not.toMatch(/조작했|위조|가짜/);
   });
 
+  it("cites the closest trusted match, not the oldest similar scene", () => {
+    const similarOld = match("https://wire.example.test/2018/07/other", { firstSeenAt: "2018-07-21" }, { changedFraction: 0.046, diffRegions: [{ x: 0.1, y: 0.1, w: 0.2, h: 0.2, note: "" }, { x: 0.5, y: 0.5, w: 0.1, h: 0.1, note: "" }, { x: 0.7, y: 0.7, w: 0.1, h: 0.1, note: "" }] });
+    const original = match(TRUSTED, { firstSeenAt: "2021-04-12" }, { changedFraction: 0.028 });
+    const r = run([similarOld, original]);
+    expect(r).toMatchObject({ verdict: "edited", rule: "v3.trusted_edited" });
+    expect(r.reason).toContain("2021-04-12");
+    expect(r.headlineFinding?.sourceUrl).toBe(TRUSTED);
+  });
+
   it("is strong when a copy of the uploaded image is dated later than the trusted page", () => {
     const copy = match(OTHER, { firstSeenAt: "2024-01-01" }, same);
     expect(run([match(TRUSTED), copy])).toMatchObject({ verdict: "edited", strength: "strong" });

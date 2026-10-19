@@ -136,11 +136,13 @@ export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], tr
       : `${when}${name} 페이지에 같은 사진이 있어요.`;
     return { kind, text, sourceUrl: m.url, sourceName: name, trusted: !!t, date, dateSource: date ? m.firstSeenSource : null };
   };
-  const m1 = pick((m, t) => !!t && localDifference(m));
+  const closest = (pred: (m: SourceMatch, t: TrustedSource | null) => boolean) =>
+    matches.filter((m) => pred(m, findTrustedSource(m.url, trusted))).sort(closestFirst)[0];
+  const m1 = closest((m, t) => !!t && localDifference(m));
   if (m1) return build(m1, "trusted_difference");
   const m2 = pick((m, t) => !!t && sameImage(m));
   if (m2) return build(m2, "trusted_same");
-  const m3 = pick((m) => localDifference(m));
+  const m3 = closest((m) => localDifference(m));
   if (m3) return build(m3, "difference");
   const m4 = pick((m) => sameImage(m) && !!m.firstSeenAt);
   if (m4) return build(m4, "same");
@@ -151,6 +153,16 @@ export function headlineFinding(evidence: Evidence[], matches: SourceMatch[], tr
   return null;
 }
 
+/**
+ * Closest match first: fewest changed cells, then fewest regions, then best alignment. When several trusted
+ * pages show a similar scene, the one that actually is the source is the closest, not the oldest
+ * (found with the RSS index: a similar 2018 scene was cited instead of the 2021 original).
+ */
+const closestFirst = (a: SourceMatch, b: SourceMatch) =>
+  a.comparison!.changedFraction - b.comparison!.changedFraction ||
+  a.comparison!.diffRegions.length - b.comparison!.diffRegions.length ||
+  b.comparison!.alignmentScore - a.comparison!.alignmentScore;
+
 /** 편집 조작 (v3): a trusted page published earlier shows the same scene with local differences. */
 function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList) {
   // Copies of the uploaded image (same picture) with a page date: if one predates the trusted page,
@@ -159,9 +171,9 @@ function trustedEdited(matches: SourceMatch[], trusted: TrustedSourceList) {
   const copies = matches.filter(sameImage);
   const copyDates = copies.map((m) => day(m.firstSeenAt)).filter((d): d is string => !!d).sort();
   const laterCopy = copies.some((m) => pageDate(m)); // a dated copy that is *later* than the trusted page (checked below)
-  for (const m of [...matches].sort((a, b) => (a.firstSeenAt ?? "9999").localeCompare(b.firstSeenAt ?? "9999"))) {
+  for (const m of matches.filter(localDifference).sort(closestFirst)) {
     const t = findTrustedSource(m.url, trusted);
-    if (!t || !localDifference(m)) continue;
+    if (!t) continue;
     const d = pageDate(m);
     if (!d) continue;
     if (copyDates.length && copyDates[0] <= d.value) continue;
