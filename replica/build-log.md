@@ -422,3 +422,14 @@ Limitations: fixture success is not real-world detector accuracy; current alignm
 1. 3D 재생 방식을 결정합니다(미완료 1).
 2. 운영자 승인 화면(2인 승인 흐름)을 만들고 Supabase를 연결합니다.
 3. 카테고리 정책 다음 작업 1–4번
+
+
+# 인수인계 — 2026-10-19 WebSocket 관제실 완료
+
+- 사용자 후속 승인(데모 게이트웨이 WS 프로토콜)에 따라 두 번째 어댑터를 완성했습니다. 이전 절의 “3D 진행 재생 결정 필요”는 해결됐습니다.
+- Pairsight `401cfe2`, 별도 Claw3D `220b072`·`1e1b456`. 문서·호환 패치·성공 캡처는 별도 커밋입니다. push 없음.
+- 실제 mock 법정 20개 이벤트/7명/최종 발언 7개 → 3D 0 working / 7 idle, 브라우저 오류 0건.
+- 원인: React updater 재실행 때 Date.now()로 과거 이벤트의 활동 기한을 새로 만들었습니다. 도착 시각 고정 + 완료 기록 갱신으로 해결했습니다. 회귀 테스트와 뮤테이션 검사 통과.
+- Pairsight 241개 테스트·타입·린트·빌드, Claw3D 관련 17개 테스트·빌드 통과.
+- 실행: web에서 `npm run controlroom`, 화면에 7명이 보이면 터미널 Enter. 토큰은 환경 전용, 임시 설정 사용, localhost·읽기 전용.
+- 상세 실행/검증/남은 범위: [handoff-controlroom.md](handoff-controlroom.md), [controlroom.md](controlroom.md).

@@ -1,0 +1,247 @@
+diff --git a/next.config.ts b/next.config.ts
+index 15b59ba..6d7b6b3 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -16,7 +16,8 @@ const securityHeaders = [
+       // In production it is dropped — React and Three.js do not need eval.
+       ...(process.env.NODE_ENV !== "production"
+         ? ["script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:"]
+-        : ["script-src 'self' 'unsafe-inline' blob:"]),
++        // Three.js text rendering initializes WebAssembly. Keep JavaScript eval disallowed.
++        : ["script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:"]),
+       // connect-src is intentionally broad: gateway URLs are user-configured
+       // at runtime and cannot be enumerated at build time.
+       // Restrict further when a fixed deployment target is known.
+diff --git a/server/studio-settings.js b/server/studio-settings.js
+index 7de379b..5a32b9b 100644
+--- a/server/studio-settings.js
++++ b/server/studio-settings.js
+@@ -84,6 +84,16 @@ const readOpenclawGatewayDefaults = (env = process.env) => {
+ 
+ const loadUpstreamGatewaySettings = (env = process.env) => {
+   const settingsPath = resolveStudioSettingsPath(env);
++  // Managed viewers keep their fixed connection and credential in the process environment.
++  if (env.CLAW3D_GATEWAY_ENV_ONLY === "1") {
++    if (!env.CLAW3D_GATEWAY_URL?.trim() || !env.CLAW3D_GATEWAY_TOKEN?.trim()) {
++      throw new Error("Environment-only gateway requires URL and token.");
++    }
++    return {
++      url: env.CLAW3D_GATEWAY_URL.trim(), token: env.CLAW3D_GATEWAY_TOKEN.trim(),
++      adapterType: env.CLAW3D_GATEWAY_ADAPTER_TYPE?.trim() || "demo", settingsPath,
++    };
++  }
+   const parsed = readJsonFile(settingsPath);
+   const gateway = parsed && typeof parsed === "object" ? parsed.gateway : null;
+   const url = typeof gateway?.url === "string" ? gateway.url.trim() : "";
+diff --git a/src/features/office/screens/OfficeScreen.tsx b/src/features/office/screens/OfficeScreen.tsx
+index 21cf77e..be3fc94 100644
+--- a/src/features/office/screens/OfficeScreen.tsx
++++ b/src/features/office/screens/OfficeScreen.tsx
+@@ -194,6 +194,7 @@ import {
+   clearOfficeAnimationTriggerHold,
+   createOfficeAnimationTriggerState,
+   reconcileOfficeAnimationTriggerState,
++  createOfficeAnimationEventUpdate,
+   reduceOfficeAnimationTriggerEvent,
+   type OfficePhoneCallRequest,
+   type OfficeTextMessageRequest,
+@@ -1890,12 +1891,12 @@ export function OfficeScreen({
+     loadAgentsInFlightRef.current = task;
+     return task;
+   }, [
+-    client,
+     debugEnabled,
+     dispatch,
+     gatewayUrl,
+     hydrateAgents,
+     loadStudioSettings,
++    provider,
+     setError,
+     setLoading,
+     status,
+@@ -2728,9 +2729,11 @@ export function OfficeScreen({
+   );
+ 
+   useEffect(() => {
+-    if (status !== "connected" || agentsLoaded) return;
++    // A disconnected demo seeds a local "main" agent and marks it loaded. Always replace that
++    // placeholder with the authenticated gateway roster when the connection becomes available.
++    if (status !== "connected") return;
+     void loadAgents({ forceSettings: true });
+-  }, [agentsLoaded, loadAgents, status]);
++  }, [loadAgents, status]);
+ 
+   useEffect(() => {
+     if (status !== "connected") return;
+@@ -2885,10 +2888,13 @@ export function OfficeScreen({
+     // Run reconciliation before subscribing to events so dedup keys are
+     // populated in the trigger state. This prevents stale gateway event
+     // replays from setting timed room holds on page load.
++    const bootstrapAgents = stateRef.current.agents;
++    const bootstrapAt = Date.now();
+     setOfficeTriggerState((previous) =>
+       reconcileOfficeAnimationTriggerState({
+         state: previous,
+-        agents: stateRef.current.agents,
++        agents: bootstrapAgents,
++        nowMs: bootstrapAt,
+       }),
+     );
+     const unsubscribeEvent = client.onEvent((event) => {
+@@ -2898,9 +2904,8 @@ export function OfficeScreen({
+         return next.slice(-MAX_OPENCLAW_LOG_ENTRIES);
+       });
+       refreshRecentTransportSessionHistory(event);
+-      setOfficeTriggerState((previous) =>
+-        reduceOfficeAnimationTriggerEvent({
+-          state: previous,
++      setOfficeTriggerState(
++        createOfficeAnimationEventUpdate({
+           event,
+           agents: stateRef.current.agents,
+         }),
+@@ -2987,10 +2992,12 @@ export function OfficeScreen({
+   }, [agentsLoaded, loadAgents, status]);
+ 
+   useEffect(() => {
++    const reconciledAt = Date.now();
+     setOfficeTriggerState((previous) =>
+       reconcileOfficeAnimationTriggerState({
+         state: previous,
+         agents: state.agents,
++        nowMs: reconciledAt,
+       }),
+     );
+   }, [state.agents]);
+diff --git a/src/lib/office/eventTriggers.ts b/src/lib/office/eventTriggers.ts
+index fe34320..8b20460 100644
+--- a/src/lib/office/eventTriggers.ts
++++ b/src/lib/office/eventTriggers.ts
+@@ -1071,6 +1071,17 @@ export const reduceOfficeAnimationTriggerEvent = (params: {
+   return next;
+ };
+ 
++// React may replay a functional state updater while rendering. Capture arrival time and the
++// agent snapshot before creating the updater, so retries cannot renew an expired activity latch.
++export const createOfficeAnimationEventUpdate = (params: {
++  agents: AgentState[];
++  event: EventFrame;
++  nowMs?: number;
++}) => {
++  const nowMs = params.nowMs ?? Date.now();
++  return (state: OfficeAnimationTriggerState) => reduceOfficeAnimationTriggerEvent({ ...params, nowMs, state });
++};
++
+ export const reconcileOfficeAnimationTriggerState = (params: {
+   agents: AgentState[];
+   nowMs?: number;
+diff --git a/src/lib/studio/settings-store.ts b/src/lib/studio/settings-store.ts
+index b602126..38264fd 100644
+--- a/src/lib/studio/settings-store.ts
++++ b/src/lib/studio/settings-store.ts
+@@ -168,6 +168,14 @@ export const loadLocalGatewayDefaults = (): StudioGatewaySettings | null => {
+ 
+ export const loadStudioSettings = (): StudioSettings => {
+   const settingsPath = resolveStudioSettingsPath();
++  if (process.env.CLAW3D_GATEWAY_ENV_ONLY === "1") {
++    const gateway = buildEnvGatewayDefaults();
++    if (!gateway?.url || !gateway.token) throw new Error("Environment-only gateway requires URL and token.");
++    const settings = fs.existsSync(settingsPath)
++      ? normalizeStudioSettings(JSON.parse(fs.readFileSync(settingsPath, "utf8")))
++      : defaultStudioSettings();
++    return { ...settings, gateway };
++  }
+   if (!fs.existsSync(settingsPath)) {
+     const defaults = defaultStudioSettings();
+     const gateway = loadLocalGatewayDefaults();
+@@ -200,7 +208,12 @@ export const saveStudioSettings = (next: StudioSettings) => {
+   if (!fs.existsSync(dir)) {
+     fs.mkdirSync(dir, { recursive: true });
+   }
+-  fs.writeFileSync(settingsPath, JSON.stringify(next, null, 2), "utf8");
++  const envOnly = process.env.CLAW3D_GATEWAY_ENV_ONLY === "1";
++  const token = process.env.CLAW3D_GATEWAY_TOKEN?.trim();
++  // No environment credential in the active profile, saved profiles, or floor preferences.
++  const serialized = JSON.stringify(next, (key, value) =>
++    envOnly && (key === "token" || (token && value === token)) ? "" : value, 2);
++  fs.writeFileSync(settingsPath, serialized, { encoding: "utf8", mode: 0o600 });
+ };
+ 
+ export const applyStudioSettingsPatch = (patch: StudioSettingsPatch): StudioSettings => {
+diff --git a/tests/unit/environmentOnlyGateway.test.ts b/tests/unit/environmentOnlyGateway.test.ts
+new file mode 100644
+index 0000000..df8157b
+--- /dev/null
++++ b/tests/unit/environmentOnlyGateway.test.ts
+@@ -0,0 +1,30 @@
++// @vitest-environment node
++import { afterEach, expect, it, vi } from 'vitest';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { createRequire } from 'node:module';
++const require = createRequire(import.meta.url);
++const dirs: string[] = [];
++afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); for (const dir of dirs.splice(0)) fs.rmSync(dir, { recursive: true, force: true }); });
++it('keeps the gateway fixed to env and never persists its token', async () => {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'studio-env-only-')); dirs.push(dir);
++  vi.stubEnv('OPENCLAW_STATE_DIR', dir);
++  vi.stubEnv('CLAW3D_GATEWAY_ENV_ONLY', '1');
++  vi.stubEnv('CLAW3D_GATEWAY_URL', 'ws://127.0.0.1:3451');
++  vi.stubEnv('CLAW3D_GATEWAY_TOKEN', 'new-test-credential-not-a-real-secret');
++  vi.stubEnv('CLAW3D_GATEWAY_ADAPTER_TYPE', 'demo');
++  const { loadStudioSettings, saveStudioSettings, applyStudioSettingsPatch } = await import('../../src/lib/studio/settings-store');
++  const settings = loadStudioSettings();
++  saveStudioSettings(settings);
++  const raw = fs.readFileSync(path.join(dir, 'claw3d/settings.json'), 'utf8');
++  expect(raw).not.toContain(process.env.CLAW3D_GATEWAY_TOKEN);
++  expect(loadStudioSettings().gateway?.token).toBe(process.env.CLAW3D_GATEWAY_TOKEN);
++  applyStudioSettingsPatch({ gateway: { url: 'ws://untrusted.example:1', token: 'ignored', adapterType: 'demo' } });
++  expect(loadStudioSettings().gateway?.url).toBe('ws://127.0.0.1:3451');
++  const server = require('../../server/studio-settings.js');
++  expect(server.loadUpstreamGatewaySettings(process.env)).toMatchObject({ url: 'ws://127.0.0.1:3451', token: process.env.CLAW3D_GATEWAY_TOKEN, adapterType: 'demo' });
++  vi.stubEnv('CLAW3D_GATEWAY_TOKEN', '');
++  expect(() => loadStudioSettings()).toThrow(/requires URL and token/);
++  expect(() => server.loadUpstreamGatewaySettings(process.env)).toThrow(/requires URL and token/);
++});
+diff --git a/tests/unit/officeEventArrivalTime.test.ts b/tests/unit/officeEventArrivalTime.test.ts
+new file mode 100644
+index 0000000..c5b20cc
+--- /dev/null
++++ b/tests/unit/officeEventArrivalTime.test.ts
+@@ -0,0 +1,18 @@
++import { afterEach, expect, it, vi } from 'vitest';
++import type { AgentState } from '@/features/agents/state/store';
++import { buildOfficeAnimationState, createOfficeAnimationEventUpdate, createOfficeAnimationTriggerState } from '@/lib/office/eventTriggers';
++afterEach(() => vi.useRealTimers());
++it('a React updater retry cannot renew working or streaming latches for an old event', () => {
++  vi.useFakeTimers();
++  vi.setSystemTime(100_000);
++  const agents = [{ agentId: 'judge', sessionKey: 'agent:judge:main', status: 'idle', runId: null, outputLines: [], transcriptEntries: [] }] as unknown as AgentState[];
++  const update = createOfficeAnimationEventUpdate({ agents, event: { type: 'event', event: 'chat', payload: { sessionKey: 'agent:judge:main', runId: 'run-1', state: 'final', message: { role: 'assistant', content: 'completed' } } } });
++  const previous = createOfficeAnimationTriggerState();
++  const first = update(previous);
++  vi.setSystemTime(200_000);
++  const retried = update(previous);
++  expect(retried).toEqual(first);
++  const projection = buildOfficeAnimationState({ state: retried, agents, nowMs: Date.now() });
++  expect(projection.streamingByAgentId).toEqual({});
++  expect(Object.values(projection.workingUntilByAgentId).every(until => until < Date.now())).toBe(true);
++});
+diff --git a/tests/unit/productionWasmCsp.test.ts b/tests/unit/productionWasmCsp.test.ts
+new file mode 100644
+index 0000000..2f5ed4b
+--- /dev/null
++++ b/tests/unit/productionWasmCsp.test.ts
+@@ -0,0 +1,11 @@
++// @vitest-environment node
++import { afterEach, expect, it, vi } from 'vitest';
++afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); });
++it('permits the Three.js WebAssembly text renderer without enabling JavaScript eval', async () => {
++  vi.stubEnv('NODE_ENV', 'production');
++  const { default: config } = await import('../../next.config');
++  const routes = await config.headers!();
++  const csp = routes[0].headers.find(h => h.key === 'Content-Security-Policy')!.value;
++  expect(csp).toContain("'wasm-unsafe-eval'");
++  expect(csp).not.toContain("'unsafe-eval'");
++});
