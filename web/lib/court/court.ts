@@ -1,6 +1,7 @@
 // "Fact-check court" on top of the verdict rules (replica/newsroom-court.md).
 // Judge = decideVerdict (code). Agents only argue, and code enforces the rules on every answer:
 //   - a statement without a valid evidence-card citation is discarded;
+//   - accepted speech is rendered from the cited cards, never from model-authored factual prose;
 //   - jurors can only uphold, or lower the verdict to 판단 불가 with a cited, relevant doubt;
 //   - nobody can raise or change the verdict; the final verdict is the judge's or 판단 불가;
 //   - a 판단 불가 from the judge opens no hearing (no LLM calls).
@@ -12,6 +13,7 @@ import { LOCAL_EDIT_LIMITS } from "../verification/edit-locality";
 import { buildDocket, renderCaseFile, type Card, type Docket } from "./docket";
 import { DEFENSE_KINDS, DOUBT_KINDS, DOUBT_LABEL, JUROR_PERSPECTIVES, SCHEMA, SYSTEM, type DefenseKind, type DoubtKind } from "./prompts";
 
+/** Display text is a code-owned projection of existing cards, not an accepted model assertion. */
 export interface Statement { text: string; cite: string[] }
 export interface Argument extends Statement { id: string }
 export interface Alternative extends Argument { kind: DefenseKind }
@@ -110,7 +112,18 @@ function checkStatement(raw: unknown, docket: Docket): Checked {
   if (!cite.length) return { ok: false, reason: "근거 카드 인용 없음" };
   const unknown = cite.filter((id) => !docket.cards.some((c) => c.id === id));
   if (unknown.length) return { ok: false, reason: `없는 근거 카드 인용: ${unknown.join(", ")}` };
-  return { ok: true, value: { text, cite } };
+  if (cite.length > 4) return { ok: false, reason: "한 주장에 근거 카드는 최대 4개" };
+  // An existing ID does not prove the model's sentence. Treat its prose as an untrusted draft and discard it.
+  // The model selects cards (and a structured doubt kind); only existing card summaries/dates are spoken.
+  // Page excerpts and arbitrary facts strings are never used to reconstruct accepted speech.
+  const perCard = Math.floor((MAX_TEXT - cite.length * 12) / cite.length);
+  const grounded = cite.map((id) => {
+    const card = docket.cards.find((c) => c.id === id)!;
+    const date = card.date && /^\d{4}-\d{2}-\d{2}$/.test(card.date) ? `${card.date} 기록 · ` : "";
+    const summary = sanitize(card.summary) || "요약 정보 없음";
+    return `[${id}] ${(`${date}${summary}`).slice(0, perCard)}`;
+  }).join(" / ");
+  return { ok: true, value: { text: grounded, cite } };
 }
 
 const relevant = (kind: DefenseKind, cite: string[], docket: Docket) =>
@@ -313,13 +326,23 @@ function writeJudgment(record: CourtRecord, clerk: Record<string, unknown> | nul
     return c.value;
   };
   const summary = clerk ? statement(clerk.summary, "서기") : null;
-  const prosecution = (clerk && statement(clerk.prosecution, "서기")) || record.prosecution[0] || null;
-  const defense = (clerk && statement(clerk.defense, "서기")) || record.defense[0] || null;
-  const clerkDoubts = clerk && Array.isArray(clerk.remainingDoubts) ? clerk.remainingDoubts.slice(0, 4).map((r) => statement(r, "서기")).filter((s): s is Statement => !!s) : [];
+  // The clerk may select a previously accepted argument, not invent another one using a valid card ID.
+  const selectAccepted = (raw: unknown, accepted: Statement[]) => {
+    const selected = statement(raw, "서기");
+    if (!selected) return null;
+    const match = accepted.find((a) => a.cite.length === selected.cite.length && a.cite.every((id) => selected.cite.includes(id)));
+    if (!match) record.rejected.push({ role: "서기", text: "", reason: "공방에서 검증되지 않은 주장·의심 요약" });
+    return match ? { text: match.text, cite: [...match.cite] } : null;
+  };
+  const prosecution = (clerk && selectAccepted(clerk.prosecution, record.prosecution)) || record.prosecution[0] || null;
+  const defense = (clerk && selectAccepted(clerk.defense, record.defense)) || record.defense[0] || null;
   const codeDoubts: Statement[] = [
     ...record.jurors.flatMap((j) => (j.doubt ? [{ text: `${DOUBT_LABEL[j.doubt.kind]}: ${j.doubt.text}`, cite: j.doubt.cite }] : [])),
     ...record.defense.filter((a) => !record.jurors.some((j) => j.doubt?.adopts === a.id)).map((a) => ({ text: `${DOUBT_LABEL[a.kind]}: ${a.text}`, cite: a.cite })),
   ];
+  const clerkDoubts = clerk && Array.isArray(clerk.remainingDoubts)
+    ? clerk.remainingDoubts.slice(0, 4).map((raw) => selectAccepted(raw, codeDoubts)).filter((s): s is Statement => !!s)
+    : [];
   const decisive = docket.cards.filter((c) => c.kind === "source_page" || ((c.outcome === "supports_manipulated" || c.outcome === "supports_real") && c.strength !== "weak"));
   const headline = record.reviewStatus === "unavailable"
     ? "맥락·법정 확인 못 함. 재판을 완료하지 못해 최종 판단을 보류했어요."

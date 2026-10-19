@@ -41,6 +41,8 @@ export function buildDocket(verdict: VerdictResult, evidence: Evidence[], matche
     summary: e.summary, sourceUrl: e.sourceUrl, date: null, facts: scalars(e.details), untrustedPageText: null,
   }));
   matches.forEach((m, j) => {
+    // Discovery results that have not passed candidate verification cannot become courtroom evidence.
+    if (m.verified !== true) return;
     const c = m.comparison;
     cards.push({
       id: `S${j + 1}`, kind: "source_page", label: "확인한 후보 페이지", outcome: null, strength: null,

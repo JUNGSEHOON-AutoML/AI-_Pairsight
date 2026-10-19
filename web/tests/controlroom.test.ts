@@ -27,7 +27,7 @@ describe("court events → control room state", () => {
   it("each seat goes working → speaking → idle in hearing order, with only validated speech and cited cards", async () => {
     const { events, state } = await hearing();
     expect(events.filter((e) => e.status === "speaking").map((e) => e.seat)).toEqual(["judge", "prosecutor", "defense", "juror-1", "juror-2", "juror-3", "clerk"]);
-    expect(state.seats.prosecutor).toMatchObject({ status: "idle", summary: "P1 차이 영역이 남아요.", cite: ["E1"], rejected: 1 });
+    expect(state.seats.prosecutor).toMatchObject({ status: "idle", summary: "P1 [E1] 차이 영역", cite: ["E1"], rejected: 1 });
     expect(state.seats["juror-1"]).toMatchObject({ summary: "판정 유지", rejected: 1 }); // tried "authentic": rejected
     expect(state.phase).toBe("done");
     expect(JSON.stringify(state)).not.toContain("인용 없는 주장");

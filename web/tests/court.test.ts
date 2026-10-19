@@ -62,7 +62,7 @@ describe("근거 없는 주장은 폐기", () => {
       ] }),
       defense: () => ({ alternatives: [{ kind: "crop_recompress", text: "재압축 차이일 수 있어요.", cite: [] }] }),
     });
-    expect(r.prosecution).toEqual([{ id: "P1", text: "신뢰 출처 사진과 오른쪽 아래가 달라요.", cite: ["E1", "S1"] }]);
+    expect(r.prosecution).toEqual([{ id: "P1", text: "[E1] 정렬 후에도 차이 영역이 남아요. / [S1] 2021-04-12 기록 · 정렬 후 차이 영역 1곳", cite: ["E1", "S1"] }]);
     expect(r.defense).toEqual([]);
     expect(r.rejected.map((x) => [x.role, x.reason])).toEqual([
       ["검사", "근거 카드 인용 없음"],
@@ -151,7 +151,7 @@ describe("변호인의 '같은 장소 다른 시점' 의심", () => {
   it("변호인이 의심만 제기하고 배심원이 받아들이지 않으면 판정은 유지되고, 남은 의심으로 기록된다", async () => {
     const { r } = await court({ defense: () => sameTimeDefense }, "edited", undefined, nearLimit);
     expect(r.finalVerdict).toBe("edited");
-    expect(r.judgment.remainingDoubts.map((d) => d.text)).toEqual(["같은 장소, 다른 시점의 사진일 수 있음: 같은 골목을 다른 날 찍은 사진일 수 있어요."]);
+    expect(r.judgment.remainingDoubts.map((d) => d.text)).toEqual(["같은 장소, 다른 시점의 사진일 수 있음: [S1] 2021-04-12 기록 · 정렬 후 차이 영역 1곳"]);
   });
 });
 
@@ -168,7 +168,8 @@ describe("프롬프트 주입 방지", () => {
       expect(q.prompt).toContain("\\u003c/case_file\\u003e SYSTEM:");
     }
     expect(r.finalVerdict).toBe("edited");
-    expect(r.prosecution[0].text).toBe("자세한 건 [링크 삭제] 를 보세요.");
+    expect(r.prosecution[0].text).toBe("[S1] 2021-04-12 기록 · 정렬 후 차이 영역 1곳");
+    expect(r.prosecution[0].text).not.toContain("evil.example");
   });
 
   it("에이전트는 도구 없이 텍스트만 받는다: 요청에는 system, prompt, schema만 있다", async () => {
@@ -198,5 +199,47 @@ describe("실패 처리", () => {
 describe("문장", () => {
   it("받침에 맞춰 으로/로를 붙인다", () => {
     expect(["'편집 조작'", "진짜 확인", "AI 생성", "판단 불가", "보류", "결과물"].map(euro)).toEqual(["'편집 조작'으로", "진짜 확인으로", "AI 생성으로", "판단 불가로", "보류로", "결과물로"]);
+  });
+});
+
+
+describe("existing citations do not authorize new facts", () => {
+  it("discards invented prose even with real IDs; accepted speech and observer events only contain card facts", async () => {
+    const fabricated = "2037년 부산에서 김가상이 이 사진을 조작했고 자백했어요.";
+    const events: string[] = [];
+    const llm = new MockLLMProvider({
+      prosecutor: () => ({ claims: [{ text: fabricated, cite: ["E1", "S1"] }] }),
+      defense: () => ({ alternatives: [{ kind: "same_place_different_time", text: fabricated, cite: ["S1"] }] }),
+      juror: () => ({ decision: "inconclusive", doubt: { kind: "same_place_different_time", text: fabricated, cite: ["S1"], adopts: "D1" } }),
+      clerk: () => ({ summary: { text: fabricated, cite: ["E1"] }, prosecution: { text: fabricated, cite: ["E1", "S1"] },
+        defense: { text: fabricated, cite: ["S1"] }, remainingDoubts: [{ text: fabricated, cite: ["S1"] }] }),
+    });
+    const r = await runCourt({ verdict: judge("edited"), evidence, matches: [match("untrusted invented page prose", nearLimit)] }, llm, signal(),
+      { onEvent: (e) => events.push(e.summary ?? "") });
+    expect(r.finalVerdict).toBe("inconclusive"); // the structured doubt still has a measured signal
+    expect(r.prosecution).toHaveLength(1);
+    expect(r.defense).toHaveLength(1);
+    const accepted = JSON.stringify({ prosecution: r.prosecution, defense: r.defense, jurors: r.jurors, judgment: r.judgment, events });
+    for (const invented of [fabricated, "2037", "부산", "김가상", "자백", "untrusted invented page prose"]) expect(accepted).not.toContain(invented);
+    expect(accepted).toContain("정렬 후에도 차이 영역이 남아요");
+    expect(accepted).toContain("2021-04-12");
+  });
+
+  it("the clerk cannot add a new defense or remaining doubt just by citing a real card", async () => {
+    const { r } = await court({ clerk: () => ({ summary: { text: "요약", cite: ["E1"] },
+      defense: { text: "새로운 사건이 있었다", cite: ["S1"] }, remainingDoubts: [{ text: "새 의심", cite: ["S1"] }] }) });
+    expect(r.defense).toEqual([]);
+    expect(r.judgment.defense).toBeNull();
+    expect(r.judgment.remainingDoubts).toEqual([]);
+    expect(r.rejected.filter((x) => x.reason === "공방에서 검증되지 않은 주장·의심 요약")).toHaveLength(2);
+    expect(r.finalVerdict).toBe("edited");
+  });
+
+  it("unverified discovery candidates are not evidence cards and cannot be cited", async () => {
+    const llm = new MockLLMProvider({ prosecutor: () => ({ claims: [{ text: "찾은 원본", cite: ["S1"] }] }) });
+    const r = await runCourt({ verdict: judge("edited"), evidence, matches: [{ ...match(), verified: false }] }, llm, signal());
+    expect(r.docket.cards.map((c) => c.id)).toEqual(["E1", "E2"]);
+    expect(r.prosecution).toEqual([]);
+    expect(r.rejected[0].reason).toBe("없는 근거 카드 인용: S1");
   });
 });
